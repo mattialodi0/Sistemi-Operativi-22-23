@@ -3,7 +3,7 @@ Progetto di sistemi operativi 22/23
 
 ## Divisione dei compiti:
 
-PCB 1-13  -Gianluca
+PCB 1-13  -Gianluca e Jacopo
 
 Hash Table 14-18   -Mattia
 
