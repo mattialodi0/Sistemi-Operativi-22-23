@@ -12,26 +12,26 @@
  * 
  * This method has to be called only once in the initialization of the data structure
  */
-void initASH() 
+static void initASH() 
 {
     //inizializza semdFree_h(lista) con tutti i semafori in semdTable(array)
-    /*
-        LIST_HEAD_INIT(semdFree_h);
-    */
+
+        LIST_HEAD(semdFree_h);
+
     //ciclo sugli elementi di semdTable,
     //e per ogni elemento aggiunge un campo a semdFree
-    /*
-        list_head *t;
+
+        struct list_head *t;
         list_for_each(t, semdTable);
         list_add_tail(t, semdFree_h);
-    */
+
 }
 
 /*
 * insertBloked - insert the PCB pointed by p in the queue inside semd_table[&semAdd]
 * return false unless it is impossible to allocate a new SEMD because the semdFree_h is empty 
 */
-int insertBlocked(int *semAdd,pcb_t *p) {
+static int insertBlocked(int *semAdd,pcb_t *p) {
     //controlla se il SEMD con chiave semAdd esiste
     //se esiste gli aggiunge il processo p
     //altrimenti:
@@ -45,7 +45,7 @@ int insertBlocked(int *semAdd,pcb_t *p) {
 * removeBlocked - return the first PCB blocked in the SEMD inside semd_table[&semAdd]
 * return NULL if there is no SEMD in semd_table[&semAdd]
 */
-pcb_t* removeBlocked(int *semAdd) {
+static pcb_t* removeBlocked(int *semAdd) {
     //verifica che il SEMD esista altrimenti ritorna NULL
     //rimuove il primo PCB bloccato
     //verifica se ora il SEMD è vuoto, se lo è lo rimuove e lo mette in semdFree_h
@@ -57,7 +57,7 @@ pcb_t* removeBlocked(int *semAdd) {
 * outBlocked - return the PCB p from the queue of the SEMD inside semd_table[p->p_semAdd]
 * return NULL if there is no such PCB in semd_table[p->p_semAdd]
 */
-pcb_t* outBlocked(pcb_t *p) {
+static pcb_t* outBlocked(pcb_t *p) {
     //verifica che p compaia in semd_table[p->p_semAdd], altrimenti ritorna NULL
     //lo rimuove 
     //verifica se ora il SEMD è vuoto, se lo è lo rimuove e lo mette in semdFree_h
@@ -69,7 +69,7 @@ pcb_t* outBlocked(pcb_t *p) {
 * headBlocked - return the first PCB blocked in the SEMD inside semd_table[&semAdd] without removing it
 * return NULL if there is no SEMD in semd_table[p->p_semAdd] or if it is empty
 */
-pcb_t* headBlocked(int *semAdd) {
+static pcb_t* headBlocked(int *semAdd) {
     //verifica che il SEMD in semd_table[&semAdd] esista e non si vuoto
     //altrimenti ritorna NULL
     
