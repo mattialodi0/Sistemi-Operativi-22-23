@@ -6,6 +6,13 @@
 #include "log2.h"
 #include "hashtable.h"
 
+struct list_head* semd_table[MAXPROC];
+
+LIST_HEAD(s);
+struct list_head* semdFree_h = &s;
+
+DEFINE_HASHTABLE(semd_h);    
+
 /**
  * initASH - initialize the list of semdFree so that it contains all of the elements of semdTable 
  * 
@@ -13,15 +20,15 @@
  */
 static void initASH() 
 {
-    //inizializza semdFree_h(lista) con tutti i semafori in semdTable(array)
+    //inizializza semdFree_h(lista) con tutti i semafori in semd_table(array)
 
-        LIST_HEAD(semdFree_h);
+        
 
-    //ciclo sugli elementi di semdTable,
+    //ciclo sugli elementi di semd_table,
     //e per ogni elemento aggiunge un campo a semdFree
 
-        struct list_head *t;
-        list_for_each(t, semdTable);
+        struct list_head *t = semdFree_h;
+        list_for_each(t, *semd_table);
         list_add_tail(t, semdFree_h);
 
 }
