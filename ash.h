@@ -39,12 +39,24 @@ static void initASH()
 */
 static int insertBlocked(int *semAdd,pcb_t *p) {
     //controlla se il SEMD con chiave semAdd esiste
-    //se esiste gli aggiunge il processo p
-    //altrimenti:
-    //se la lista dei semdFree è vuota ritorna true
-    //se no ne prende uno, lo setta e lo aggiunge a semd_table
-
-    //ritorna false
+    if(list_empty(semd_table[*semAdd])) {
+        //se la lista dei semdFree è vuota ritorna true
+        if(list_empty(semdFree_h))
+            return true;
+        //se no ne prende uno, lo setta e lo aggiunge a semd_table
+        else {
+            struct list_head *new_free = semdFree_h;
+            semdFree_h->prev->next = semdFree_h->next;
+            semdFree_h->next->prev = semdFree_h->prev;
+            semdFree_h = semdFree_h->next;
+            semd_table[*semAdd] = new_free; //non va bene bisogna usare hash add
+        }
+    }
+    else {
+        //aggiunge p a semd_table[semAdd]
+        list_add_tail(p, semd_table[*semAdd]);
+        return false;
+    }
 }
 
 /*
@@ -53,10 +65,20 @@ static int insertBlocked(int *semAdd,pcb_t *p) {
 */
 static pcb_t* removeBlocked(int *semAdd) {
     //verifica che il SEMD esista altrimenti ritorna NULL
-    //rimuove il primo PCB bloccato
-    //verifica se ora il SEMD è vuoto, se lo è lo rimuove e lo mette in semdFree_h
-
-    //ritonra il PCB
+    if(list_empty(semd_table[*semAdd]))
+        return NULL;
+    else {
+        //rimuove il primo PCB bloccato
+        struct list_head *deletd = semd_table[*semAdd];
+        deleted->prev->next = deleted->next;
+        deleted->next->prev = deleted->prev;
+        semd_table[*semAdd] = deleted->next;
+        //verifica se ora il SEMD è vuoto, se lo è lo rimuove e lo mette in semdFree_h
+        if(list_empty(semd_table[*semAdd]))
+            hash_del(semAdd);
+        //ritonra il PCB
+        return deleted;
+    }
 }
 
 /*
