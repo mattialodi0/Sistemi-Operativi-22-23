@@ -49,7 +49,7 @@ static int insertBlocked(int *semAdd,pcb_t *p) {
             semdFree_h->prev->next = semdFree_h->next;
             semdFree_h->next->prev = semdFree_h->prev;
             semdFree_h = semdFree_h->next;
-            semd_table[*semAdd] = new_free; //non va bene bisogna usare hash add
+            hash_add(semd_table, new_free, *semAdd);
         }
     }
     else {
@@ -99,9 +99,12 @@ static pcb_t* outBlocked(pcb_t *p) {
 */
 static pcb_t* headBlocked(int *semAdd) {
     //verifica che il SEMD in semd_table[&semAdd] esista e non si vuoto
-    //altrimenti ritorna NULL
-    
-    //ritorna il primo PCB il semd_table[&semAdd]
+    if()
+    else if(list_empty(semd_table[&semAdd])) 
+        return NULL;
+    //ritorna il primo primo PCB in quella lista
+    else 
+        return semd_table[&semAdd];     //forse serve has_for_each_possible
 }
 
 
