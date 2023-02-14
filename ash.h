@@ -87,10 +87,29 @@ static pcb_t* removeBlocked(int *semAdd) {
 */
 static pcb_t* outBlocked(pcb_t *p) {
     //verifica che p compaia in semd_table[p->p_semAdd], altrimenti ritorna NULL
-    //lo rimuove 
-    //verifica se ora il SEMD è vuoto, se lo è lo rimuove e lo mette in semdFree_h
+    struct list_head item;
+    pcb_t out;
+    int found = 0;
+    //ciclo sugli elementi idella lista
+    hash_for_each_possible(semd_table, item, field, p->p_semAdd);
+    out = container_of(item, pcb_t, boh);   //probabilmente non va bene
+    if(out == p) {
+        out = p;
+        //lo rimuove 
+        item->prec->next = item->next;
+        item->next->prec = item->prec;
+        list_del(item);
+    }
 
-    //ritonra il PCB
+    if(found) {
+        //verifica se ora il SEMD è vuoto, se lo è lo rimuove e lo mette in semdFree_h
+        if(list_empty(semd_table[p->p_semAdd]))
+            hash_del(p->p_semAdd);
+        //ritonra il PCB
+        return item;
+    }
+    else 
+        return NULL;
 }
 
 /*
@@ -104,7 +123,7 @@ static pcb_t* headBlocked(int *semAdd) {
         return NULL;
     //ritorna il primo primo PCB in quella lista
     else 
-        return semd_table[&semAdd];     //forse serve has_for_each_possible
+        return semd_table[&semAdd];     //forse serve hash_for_each_possible
 }
 
 
