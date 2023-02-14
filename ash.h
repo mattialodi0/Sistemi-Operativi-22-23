@@ -21,16 +21,11 @@ DEFINE_HASHTABLE(semd_h);
 static void initASH() 
 {
     //inizializza semdFree_h(lista) con tutti i semafori in semd_table(array)
-
-        
-
-    //ciclo sugli elementi di semd_table,
-    //e per ogni elemento aggiunge un campo a semdFree
-
+    for(int i=0; i<MAXPROC; i++) {
         struct list_head *t = semdFree_h;
         list_for_each(t, *semd_table);
         list_add_tail(t, semdFree_h);
-
+    }
 }
 
 /*
