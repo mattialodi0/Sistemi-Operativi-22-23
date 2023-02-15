@@ -6,7 +6,7 @@
 #include "log2.h"
 #include "hashtable.h"
 
-struct list_head* semd_table[MAXPROC];
+struct pcb_t* semd_table[MAXPROC];
 
 LIST_HEAD(s);
 struct list_head* semdFree_h = &s;
@@ -20,12 +20,17 @@ DEFINE_HASHTABLE(semd_h);
  */
 static void initASH() 
 {
+    struct list_head *sentinel;
+    sentinel->next = semd_table[0];
+    struct list_head *t;
     //inizializza semdFree_h(lista) con tutti i semafori in semd_table(array)
-    for(int i=0; i<MAXPROC; i++) {
-        struct list_head *t = semdFree_h;
+    for(int i=0; i<MAXPROC; i++) {      //non so se va bene così
+        t = semdFree_h;
         list_for_each(t, *semd_table);
         list_add_tail(t, semdFree_h);
     }
+    t->next = sentinel;
+    sentinel->prev = t;
 }
 
 /*
@@ -64,7 +69,7 @@ static pcb_t* removeBlocked(int *semAdd) {
         return NULL;
     else {
         //rimuove il primo PCB bloccato
-        struct list_head *deletd = semd_table[*semAdd];
+        struct list_head *deleted = semd_table[*semAdd];
         deleted->prev->next = deleted->next;
         deleted->next->prev = deleted->prev;
         semd_table[*semAdd] = deleted->next;
@@ -113,7 +118,12 @@ static pcb_t* outBlocked(pcb_t *p) {
 */
 static pcb_t* headBlocked(int *semAdd) {
     //verifica che il SEMD in semd_table[&semAdd] esista e non si vuoto
-    if()
+    int f = 0;
+    int index;
+    hash_for_each(semd_h, index, item, field);
+    if(index = &semAdd)
+        f = 1;
+    if(f)
     else if(list_empty(semd_table[&semAdd])) 
         return NULL;
     //ritorna il primo primo PCB in quella lista
