@@ -128,7 +128,7 @@ void adderrbuf(char *strp) {
 
 int main(void) {
     int i;
-while(0){
+
     initPcbs();
     addokbuf("Initialized process control blocks   \n");
 
@@ -251,7 +251,7 @@ while(0){
 
     for (i = 0; i < 10; i++)
         freePcb(procp[i]);
-}
+
 
     /* check ASH */
     initASH();
