@@ -117,30 +117,36 @@ int emptyChild(pcb_t *p){
 
 /*Funzione 11       funziona*/
 void insertChild(pcb_t *prnt, pcb_t *p){
-    list_add_tail(&p->p_list, &prnt->p_child);
+    p->p_parent = prnt;
+    list_add_tail(&p->p_sib, &prnt->p_child);
 }
 
 
-/*Funzione 12       aggiustare*/
+/*Funzione 12       funziona*/
 pcb_t *removeChild(pcb_t *p){
-    if(list_empty(&p->p_child) == 1){
+    if (list_empty(&p->p_child) == 1){
         return NULL;
     }
     else{
-        pcb_t *tmp = list_first_entry(p->p_child.next, pcb_t, p_sib);
-        list_del(&p->p_sib);
-        p->p_parent = NULL;
+        pcb_t *tmp = container_of(list_next(&p->p_child), pcb_t, p_sib);
+        list_del(&tmp->p_sib);
+        tmp->p_parent = NULL;
         return tmp;
+        //return outChild(container_of(list_next(&p->p_child), pcb_t, p_sib));
     }
 }
 
 
 
-/*Funzione 13      aggiustare*/
+/*Funzione 13      funziona*/
 pcb_t *outChild(pcb_t *p){
-    if (p == NULL || p->p_parent == NULL || list_empty(&p->p_parent->p_child)){
-        return NULL;
+    if(p->p_parent == NULL){
+        return  NULL;
     }
-    return p;
+    else{
+        list_del(&p->p_sib);
+        p->p_parent = NULL;
+        return p;
+    }
 }
 
