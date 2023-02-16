@@ -74,13 +74,7 @@ pcb_t *headProcQ(struct list_head *head){
 pcb_t *removeProcQ(struct list_head *head){
     if(list_empty(head) == 1){
         return NULL;
-    }/*
-    else if(head->next == NULL){
-        pcb_t *tmp = container_of(head->next, pcb_t, p_list);
-        list_del(head->next);
-        return tmp;
     }
-    */
     else{
         pcb_t *tmp = container_of(head->next, pcb_t, p_list);
         list_del(head->next);
@@ -132,7 +126,6 @@ pcb_t *removeChild(pcb_t *p){
         list_del(&tmp->p_sib);
         tmp->p_parent = NULL;
         return tmp;
-        //return outChild(container_of(list_next(&p->p_child), pcb_t, p_sib));
     }
 }
 
