@@ -4,7 +4,6 @@
 #include "pcb.h"
 #include "list.h"
 #include "hash.h"
-//#include "log2.h"
 #include "hashtable.h"
 #include <pandos_types.h>
 #include <pandos_const.h>
