@@ -66,7 +66,7 @@ pcb_t *headProcQ(struct list_head *head){
         return NULL;
     }
     else{
-        pcb_t *tmp = container_of(head->next, pcb_t, p_list);    /*Se head non è vuota ne estraggo l'elemento di testa e lo restituisco*/
+        pcb_t *tmp = container_of(head->next, pcb_t, p_list);    /*Se head non è vuota ne estraggo l'elemento di testa senza rimuoverlo e lo restituisco*/
         return tmp;
     } 
 }
@@ -93,13 +93,13 @@ pcb_t *outProcQ(struct list_head *head, pcb_t *p){
         struct list_head *tmp = head->next;                 /*Creo una lista temporanea da scorrere*/
         while(tmp != head){                                 /*Con il ciclo while scorro la lista temporanea creata precedentemente*/
             pcb_t *t = container_of(tmp, pcb_t, p_list);    /*Salvo in t l'elemento corrente della lista*/
-            if(t == p){                                     /*Verifico se l'elemento corrente è p, ovvero l'elemento da rimuovere, se è così lo rimuovo*/
+            if(t == p){                                     /*Verifico se l'elemento corrente è il pcb puntato da p, ovvero l'elemento da rimuovere, se è così lo rimuovo*/
                 list_del(tmp);
                 return t;
             }
             tmp = tmp->next;  
         }
-        return NULL;                                        /*Se p non è stato trovato precedentemente (e quindi non è presente nella coda) restituisco NULL*/
+        return NULL;                                        /*Se il pcb puntato da p non è stato trovato precedentemente (e quindi non è presente nella coda) restituisco NULL*/
     }
 }
 
