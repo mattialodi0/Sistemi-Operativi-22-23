@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "hashtable.h": "c",
+        "*.tcc": "c",
+        "functional": "c",
+        "fstream": "c",
+        "istream": "c",
+        "streambuf": "c"
+    }
+}
