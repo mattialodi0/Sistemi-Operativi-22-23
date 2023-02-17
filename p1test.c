@@ -18,7 +18,7 @@
 
 #include <umps3/umps/libumps.h>
 #include "pcb.h"
-#include "ash.h"
+#include "include/ash.h"
 #include "ns.h"
 
 
@@ -121,7 +121,7 @@ void adderrbuf(char *strp) {
 
     termprint(tstrp, 0);
 
-    //PANIC();
+    PANIC();
 }
 
 

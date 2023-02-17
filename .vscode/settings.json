@@ -5,6 +5,11 @@
         "functional": "c",
         "fstream": "c",
         "istream": "c",
-        "streambuf": "c"
+        "streambuf": "c",
+        "hash.h": "c",
+        "libumps.h": "c",
+        "ns.h": "c",
+        "pandos_const.h": "c",
+        "pcb.h": "c"
     }
 }
