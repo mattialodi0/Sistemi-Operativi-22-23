@@ -8,7 +8,7 @@
  ****************************************************************************/
 
 #include <umps3/umps/types.h>
-#include <pandos_const.h>
+#include "pandos_const.h"
 #include <list.h>
 
 
@@ -33,13 +33,11 @@ typedef struct nsd_t {
 typedef struct pcb_t {
     /* process queue  */
     struct list_head p_list;
-    struct pcb_t *next;
-    struct pcb_t *prev;
 
     /* process tree fields */
-    struct pcb_t        *p_parent; /* ptr to parent	*/
-    struct pcb_t        *p_child;  /* children list */
-    struct list_head    *p_sib;    /* sibling list  */
+    struct pcb_t    *p_parent; /* ptr to parent	*/
+    struct list_head p_child;  /* children list */
+    struct list_head p_sib;    /* sibling list  */
 
     /* process status information */
     state_t p_s;    /* processor state */
