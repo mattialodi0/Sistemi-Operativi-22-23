@@ -17,5 +17,4 @@ process tree module ok
 Initialized active semaphore hash   
 insertBlocked test #1 started  
 insertBlocked test #2 started  
-fatto insertB  
 removeBlocked: fails to return to free list   
