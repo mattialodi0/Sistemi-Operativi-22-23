@@ -14,24 +14,24 @@ int insertBlocked(int *semAdd, pcb_t *p)
     int empty = hlist_empty(&semd_h[key]);
     if (!empty)
     {
-        semd_t *tmp = container_of(semd_h[key].first, semd_t, s_link);
+        semd_t *t = container_of(semd_h[key].first, semd_t, s_link);
         p->p_semAdd = semAdd;
-        insertProcQ(&(tmp->s_procq), p);
+        insertProcQ(&(t->s_procq), p);
         return false;
     }
     else if (&semdFree_h->s_freelink != NULL)
     {
-        semd_t *tmp = semdFree_h;
+        semd_t *t = semdFree_h;
         semdFree_h = container_of(semdFree_h->s_freelink.next, semd_t, s_freelink);
-        //list_del(tmp);
+        //list_del(&t->s_freelink);
 
-        tmp->s_freelink.next = NULL;
-        tmp->s_key = semAdd;
-        mkEmptyProcQ(&(tmp->s_procq));
+        t->s_freelink.next = NULL;
+        t->s_key = semAdd;
+        mkEmptyProcQ(&(t->s_procq));
         p->p_semAdd = semAdd;
-        insertProcQ(&(tmp->s_procq), p);
+        insertProcQ(&(t->s_procq), p);
 
-        hlist_add_head(&tmp->s_link, &semd_h[key]);
+        hlist_add_head(&t->s_link, &semd_h[key]);
         return false;
     }
     else
@@ -100,16 +100,4 @@ void initASH()
         t->s_freelink.next = NULL;
         p = p->next;
     }
-    /*
-    semdFree_h = &semd_table[0];
-    semdFree_h->s_freelink.next = NULL;
-    semdFree_h->s_freelink.prev = NULL;
-    semd_t *tmp = semdFree_h;
-    for (int i = 1; i < MAXPROC; i++)
-    {
-        tmp->s_freelink.next = &(semd_table[i].s_freelink);
-        tmp = container_of(tmp->s_freelink.next, semd_t, s_freelink);
-        tmp->s_freelink.prev = NULL;
-        tmp->s_freelink.next = NULL;
-    }*/
 }
