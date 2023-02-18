@@ -252,7 +252,6 @@ int main(void) {
     for (i = 0; i < 10; i++)
         freePcb(procp[i]);
 
-
     /* check ASH */
     initASH();
     addokbuf("Initialized active semaphore hash   \n");

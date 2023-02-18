@@ -14,5 +14,4 @@ outChild ok
 Removing...   
 insertChild, removeChild and emptyChild ok   
 process tree module ok      
-Initialized active semaphore hash   
-insertBlocked test #1 started  
+kernel panic()
