@@ -105,57 +105,10 @@ DEFINE_HASHTABLE(semd_h,4);
 }
 
  void initASH() 
-{/*
-    semdFree_h = semd_table[0];
-    semdFree_h->s_freelink.next = NULL;
-    semdFree_h->s_freelink.prev = NULL;
-    semd_t *tmp = semdFree_h;
-
-    for (int i = 1; i < MAXPROC; i++)
-    {
-        tmp->s_freelink.next = &(semd_table[i]->s_freelink);
-        // lista monodirezionale
-        tmp = semd_table[i];//container_of(tmp->s_freelink.next, semd_t, s_freelink);
-        tmp->s_freelink.prev = NULL;
-        tmp->s_freelink.next = NULL;
-    }
-*/
+{
     INIT_LIST_HEAD(&semdFree_h);
     for(int i=0; i<MAXPROC; i++) {
         INIT_LIST_HEAD(&semd_table[i].s_freelink);
         list_add(&semd_table[i].s_freelink, &semdFree_h);
     }
-/*
-    semdFree_h = semd_table[0];
-    struct semd_t *t = semdFree_h;
-    for(int i=0; i<MAXPROC; i++) {
-        INIT_LIST_HEAD(&semd_table[i]->s_freelink);
-    }
-    for(int i=1; i<MAXPROC; i++) {
-        list_add(&semd_table[i]->s_freelink, &semd_table[i-1]->s_freelink);
-    }
-
-    struct semd_t *t = semdFree_h;
-    t = semd_table[0];
-    for(int i=1; i<MAXPROC; i++) {
-        t->s_freelink.next = &semd_table[i]->s_freelink;
-        t->s_freelink.next->prev = &t->s_freelink;
-        t = semd_table[i];
-        t->s_freelink.next = NULL;
-    }
-    t->s_freelink.next = semdFree_h;
-    semdFree_h->s_freelink.prev = &t->s_freelink;
-
-    struct list_head *sentinel;
-    sentinel->next = semd_table[0];
-    struct list_head *t;
-    //inizializza semdFree_h(lista) con tutti i semafori in semd_table(array)
-    for(int i=0; i<MAXPROC; i++) {      //non so se va bene così
-        t = semdFree_h;
-        semd_table[i];
-        list_add_tail(t, semdFree_h);
-    }
-    t->next = sentinel;
-    sentinel->prev = t;
-*/
 }
