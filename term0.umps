@@ -17,4 +17,8 @@ process tree module ok
 Initialized active semaphore hash   
 insertBlocked test #1 started  
 insertBlocked test #2 started  
-removeBlocked: fails to return to free list   
+removeBlocked test started   
+insertBlocked and removeBlocked ok   
+headBlocked and outBlocked ok   
+ASH module ok   
+So Long and Thanks for All the Fish

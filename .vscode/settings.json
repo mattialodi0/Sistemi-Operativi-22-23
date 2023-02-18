@@ -11,6 +11,10 @@
         "ns.h": "c",
         "pandos_const.h": "c",
         "pcb.h": "c",
-        "pandos_types.h": "c"
+        "pandos_types.h": "c",
+        "||": "c",
+        "array": "c",
+        "string_view": "c",
+        "type_traits": "c"
     }
 }

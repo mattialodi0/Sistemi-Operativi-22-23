@@ -270,7 +270,7 @@ int main(void) {
             adderrbuf("insertBlocked(2): unexpected TRUE   ");
     }
 
-    /* check if semaphore descriptors are returned to free list */  
+    /* check if semaphore descriptors are returned to free list */
     p = removeBlocked(&sem[11]);
     if (insertBlocked(&sem[11], p))
         adderrbuf("removeBlocked: fails to return to free list   ");
