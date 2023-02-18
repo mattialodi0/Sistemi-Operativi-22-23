@@ -6,23 +6,38 @@ static struct semd_t semd_table[MAXPROC];
 struct list_head semdFree_h;
 //static struct semd_t *semdFree_h;
 
-DEFINE_HASHTABLE(semd_h,4);    
+DEFINE_HASHTABLE(semd_h,5);    
 
 
 
- int insertBlocked(int *semAdd,pcb_t *p) {
- /* //controlla se il SEMD con chiave semAdd esiste
+int insertBlocked(int *semAdd,pcb_t *p) {
+  //controlla se il SEMD con chiave semAdd esiste
     if(hlist_empty(&semd_h[*semAdd])) {
         //se la lista dei semdFree è vuota ritorna true
-        if(list_empty(semdFree_h))
+        if(list_empty(&semdFree_h))
             return true;
-        //se no ne prende uno, lo setta e lo aggiunge a semd_table
+        //se no ne prende uno, lo rimuove, lo setta e lo aggiunge a semd_table
         else {
-            struct list_head *new_free = semdFree_h;
-            semdFree_h->prev->next = semdFree_h->next;
-            semdFree_h->next->prev = semdFree_h->prev;
-            semdFree_h = semdFree_h->next;
-            hash_add(semd_table, new_free, *semAdd);        //manca la rimozione da quelli liberi
+    //        struct list_head *new_free_l = semdFree_h.prev;
+  //          list_del(new_free_l);
+//            struct semd_t *new_free = container_of(new_free_l, semd_t, s_freelink);
+
+    //        struct list_head *new_sFh = semdFree_h.next;
+  //          struct semd_t *new_free = container_of(&semdFree_h, semd_t, s_freelink);
+//            list_del(&semdFree_h);
+//            semdFree_h = *new_sFh;
+
+            struct list_head *new_free_l = semdFree_h.prev;
+            struct semd_t *new_free = container_of(new_free_l, semd_t, s_freelink);
+            list_del(new_free_l);
+
+            new_free->s_key = semAdd;
+            new_free->s_freelink.next = NULL;
+            mkEmptyProcQ(&new_free->s_procq);
+            p->p_semAdd = semAdd;
+            insertProcQ(&new_free->s_procq, p);
+
+            //hash_add(semd_h, &new_free->s_link, *semAdd);       //*******
             return false;
         }
     }
@@ -32,7 +47,7 @@ DEFINE_HASHTABLE(semd_h,4);
         p->p_semAdd = semAdd;
         insertProcQ(&sem->s_procq, p);
         return false;    
-    }*/return 1;
+    }
 }
 
  pcb_t* removeBlocked(int *semAdd) {
@@ -104,7 +119,7 @@ DEFINE_HASHTABLE(semd_h,4);
    return NULL;
 }
 
- void initASH() 
+void initASH() 
 {
     INIT_LIST_HEAD(&semdFree_h);
     for(int i=0; i<MAXPROC; i++) {
