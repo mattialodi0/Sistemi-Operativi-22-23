@@ -320,7 +320,7 @@ int main(void) {
 
     addokbuf("headBlocked and outBlocked ok   \n");
     addokbuf("ASH module ok   \n");
-while(0){
+
     /* check Namespaces */
     initNamespaces();
     addokbuf("Initialized Namespaces\n");
@@ -370,7 +370,7 @@ while(0){
     if (getNamespace(procp[3], NS_PID) != pid_ns)
             adderrbuf("Other process namespace changed!");
 
-    addokbuf("Namespace module ok\n");}
+    addokbuf("Namespace module ok\n");
     addokbuf("So Long and Thanks for All the Fish\n");
     return 0;
 }

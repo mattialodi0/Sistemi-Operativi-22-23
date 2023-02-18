@@ -3,41 +3,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#define MAXPROC 20
 #define MAXSEM  MAXPROC
 #define MAXNS   MAXPROC
-
-typedef struct list_head {
-    struct list_head* next;
-    struct list_head* prev;
-} list_head;
-
-
-/* namespace descriptor data structure*/
-typedef struct nsd_t {
-    int n_type;
-    struct list_head n_link;
-} nsd_t;
-
-
-typedef struct pcb_t {
-    /* process queue */
-    struct list_head p_next;
-
-    /* process tree fields */
-    struct pcb_t *p_parent; /* ptr to parent */
-    struct list_head p_child; /* children list */
-    struct list_head p_sib; /* sibling list */
-
-    /* process status information */
-    //state_t p_s; /* processor state */
-    //cpu_t p_time; /* cpu time used by proc */
-    int *p_semAdd; /* ptr to semaphore on which proc is blocked*/
-    nsd_t *p_namespaces[MAXSEM]; /* ACTIVE namespace for each type */
-} pcb_t, *pcb_PTR;
-
-
-
 
 
 nsd_t pid_nsFree_h; //lista dei NSD di tipo pid liberi o inutilizzati
