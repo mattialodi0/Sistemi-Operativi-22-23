@@ -1,22 +1,16 @@
 #include "include/ash.h"
 
 
-static void initASH() 
-{
-    struct list_head *sentinel;
-    sentinel->next = semd_table[0];
-    struct list_head *t;
-    //inizializza semdFree_h(lista) con tutti i semafori in semd_table(array)
-    for(int i=0; i<MAXPROC; i++) {      //non so se va bene così
-        t = semdFree_h;
-        semd_table[i];
-        list_add_tail(t, semdFree_h);
-    }
-    t->next = sentinel;
-    sentinel->prev = t;
-}
+struct semd_t* semd_table[MAXPROC];
 
-static int insertBlocked(int *semAdd,pcb_t *p) {
+LIST_HEAD(s);
+struct list_head* semdFree_h = &s;
+
+DEFINE_HASHTABLE(semd_h,4);    
+
+
+
+ int insertBlocked(int *semAdd,pcb_t *p) {
     //controlla se il SEMD con chiave semAdd esiste
     if(list_empty(semd_table[*semAdd])) {
         //se la lista dei semdFree è vuota ritorna true
@@ -39,7 +33,7 @@ static int insertBlocked(int *semAdd,pcb_t *p) {
     }
 }
 
-static pcb_t* removeBlocked(int *semAdd) {
+ pcb_t* removeBlocked(int *semAdd) {
     //verifica che il SEMD esista altrimenti ritorna NULL
     if(list_empty(semd_table[*semAdd]))
         return NULL;
@@ -57,14 +51,14 @@ static pcb_t* removeBlocked(int *semAdd) {
     }
 }
 
-static pcb_t* outBlocked(pcb_t *p) {
+ pcb_t* outBlocked(pcb_t *p) {
     //verifica che p compaia in semd_table[p->p_semAdd], altrimenti ritorna NULL
-    semd_t item;
+/*  semd_t item;
     pcb_t *out;
     int found = 0;
     int field = 4;
     //ciclo sugli elementi idella lista
-/*    hash_for_each_possible(semd_h, item, field, p->p_semAdd);
+    hash_for_each_possible(semd_h, item, field, p->p_semAdd);
     out = container_of(&item, pcb_t, p_list);   //probabilmente non va bene
     struct list_head item_list = item.s_procq;
     if(out == p) {
@@ -86,11 +80,7 @@ static pcb_t* outBlocked(pcb_t *p) {
         return NULL;
 }
 
-/*
-* headBlocked - return the first PCB blocked in the SEMD inside semd_table[&semAdd] without removing it
-* return NULL if there is no SEMD in semd_table[p->p_semAdd] or if it is empty
-*/
-static pcb_t* headBlocked(int *semAdd) {
+ pcb_t* headBlocked(int *semAdd) {
 /*    //verifica che il SEMD in semd_table[&semAdd] esista e non si vuoto
     int f = 0;
     int index;
@@ -110,3 +100,17 @@ static pcb_t* headBlocked(int *semAdd) {
     return container_of(&semd_table[*semAdd]->s_procq, pcb_t, p_list);
 }
 
+ void initASH() 
+{
+    struct list_head *sentinel;
+    sentinel->next = semd_table[0];
+    struct list_head *t;
+    //inizializza semdFree_h(lista) con tutti i semafori in semd_table(array)
+    for(int i=0; i<MAXPROC; i++) {      //non so se va bene così
+        t = semdFree_h;
+        semd_table[i];
+        list_add_tail(t, semdFree_h);
+    }
+    t->next = sentinel;
+    sentinel->prev = t;
+}

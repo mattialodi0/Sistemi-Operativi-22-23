@@ -10,6 +10,7 @@
         "libumps.h": "c",
         "ns.h": "c",
         "pandos_const.h": "c",
-        "pcb.h": "c"
+        "pcb.h": "c",
+        "pandos_types.h": "c"
     }
 }
