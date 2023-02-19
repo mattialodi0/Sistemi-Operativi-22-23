@@ -9,24 +9,24 @@
 #include <pandos_const.h>
 
 
-/* insertBloked - insert the PCB pointed by p in the queue inside semd_table[&semAdd]
-* return false unless it is impossible to allocate a new SEMD because the semdFree_h is empty */
+/* insertBloked - inserisce il PCB puntato da p nella coda dei processi bloccati del semafori con chiave semAdd
+*   ritorna vero solo se il semaforo cercato non esiste e non è possibile allocarne uno nuovo */
  int insertBlocked(int *semAdd,pcb_t *p);
 
-/* removeBlocked - return the first PCB blocked in the SEMD inside semd_table[&semAdd]
-* return NULL if there is no SEMD in semd_table[&semAdd] */
+/* removeBlocked - ritorna il primo PCB bloccato nella coda del semaforo con chiave semAdd rimuovendolo
+*   ritorna NULL se non esiste un SEMD con quella chiave nella ASH */
  pcb_t* removeBlocked(int *semAdd);
 
-/* outBlocked - return the PCB p from the queue of the SEMD inside semd_table[p->p_semAdd]
-* return NULL if there is no such PCB in semd_table[p->p_semAdd] */
+/* outBlocked - ritorna il PCB p rimuovendolo dalla coda sel SEMD su cui è bloccato
+*   ritorna NULL se non esiste un PCB p in tale coda */
  pcb_t* outBlocked(pcb_t *p);
 
-/* headBlocked - return the first PCB blocked in the SEMD inside semd_table[&semAdd] without removing it
-* return NULL if there is no SEMD in semd_table[p->p_semAdd] or if it is empty */
+/* headBlocked - ritorna il primo PCB bloccato sul SEMD con chiave semAdd senza rimuoverlo
+*   ritorna NULL se non è presente un SEMD con quella chiave o se la sua coda dei processi bloccati è vuota */
  pcb_t* headBlocked(int *semAdd);
 
-/* initASH - initialize the list of semdFree so that it contains all of the elements of semdTable 
- * This method has to be called only once in the initialization of the data structure */
+/* initASH - inizializza la lista dei semdFree in modi che contengano tutti gli elementi di semdTable
+*            questo metodo viene chiamato una volta sola per inizalizzare questa struttura */
  void initASH();
 
 
