@@ -2,7 +2,7 @@
 
 static semd_t semd_table[MAXPROC];
 
-static semd_t *semdFree_h;
+static struct list_head *semdFree_h;
 
 DEFINE_HASHTABLE(semd_h, 5);
 
@@ -19,10 +19,10 @@ int insertBlocked(int *semAdd, pcb_t *p)
         insertProcQ(&(t->s_procq), p);
         return false;
     }
-    else if (&semdFree_h->s_freelink != NULL)
+    else if (semdFree_h != NULL)
     {
-        semd_t *t = semdFree_h;
-        semdFree_h = container_of(semdFree_h->s_freelink.next, semd_t, s_freelink);
+        struct semd_t *t = container_of(semdFree_h, semd_t, s_freelink);
+        semdFree_h = semdFree_h->next;
         //list_del(&t->s_freelink);
 
         t->s_freelink.next = NULL;
@@ -39,19 +39,20 @@ int insertBlocked(int *semAdd, pcb_t *p)
 }
 
 pcb_t *removeBlocked(int *semAdd)
-{
+{   
     semd_t *t;
     hash_for_each_possible(semd_h, t, s_link, (int)semAdd)
     {
         if (t != NULL)
         {
             pcb_t *p = removeProcQ(&(t->s_procq));
-            //se il SEMD ora è vuoto lo rimuove
+            //se il SEMD ora è vuoto lo rimuove e lo riaggiunge alla lista dei liberi
             if (emptyProcQ(&(t->s_procq)))
             {
                 hash_del(&(t->s_link));
-                t->s_freelink.next = &(semdFree_h->s_freelink);
-                semdFree_h = t;
+                t->s_freelink.next = semdFree_h;
+                //semdFree_h->prev = &t->s_freelink;
+                semdFree_h = &t->s_freelink;
             }
             return p;
         }
@@ -60,17 +61,18 @@ pcb_t *removeBlocked(int *semAdd)
 }
 
 pcb_t *outBlocked(pcb_t *p)
-{
+{   
     semd_t *t;
     hash_for_each_possible(semd_h, t, s_link, (int)p->p_semAdd)
     {
         pcb_t *out  = outProcQ(&t->s_procq, p);
-        //se il SEMD ora è vuoto lo rimuove
+        //se il SEMD ora è vuoto lo rimuove e lo riaggiunge alla lista dei liberi
         if (emptyProcQ(&(t->s_procq)))
             {
                 hash_del(&(t->s_link));
-                t->s_freelink.next = &(semdFree_h->s_freelink);
-                semdFree_h = t;
+                t->s_freelink.next = semdFree_h;
+                //semdFree_h->prev = &t->s_freelink;
+                semdFree_h = &t->s_freelink;
             }
         return out;
     }
@@ -78,7 +80,7 @@ pcb_t *outBlocked(pcb_t *p)
 }
 
 pcb_t *headBlocked(int *semAdd)
-{
+{   
     semd_t *t;
     hash_for_each_possible(semd_h, t, s_link, (int)semAdd) {
         return headProcQ(&t->s_procq);
@@ -88,16 +90,18 @@ pcb_t *headBlocked(int *semAdd)
 
 void initASH()
 {
-    semdFree_h = &semd_table[0];
-    INIT_LIST_HEAD(&semdFree_h->s_freelink);
-    semd_t *t = semdFree_h;
-    struct list_head *p = t->s_freelink.prev;
-    for (int i = 1; i < MAXPROC; i++)
+    semdFree_h = &semd_table[0].s_freelink;
+    struct list_head *t = semdFree_h;
+    t->next = NULL;
+    t->prev = NULL;
+    struct list_head *p = t;
+    p->next = t;
+    for(int i = 1; i < MAXPROC; i++) 
     {
-        t->s_freelink.next = &semd_table[i].s_freelink;
-        t = container_of(t->s_freelink.next, semd_t, s_freelink);
-        t->s_freelink.prev = p;
-        t->s_freelink.next = NULL;
+        t->next = &semd_table[i].s_freelink;
+        t = t->next;
         p = p->next;
+        t->next = NULL;
+        t->prev = p;
     }
 }

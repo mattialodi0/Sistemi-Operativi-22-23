@@ -14,26 +14,24 @@ int insertBlocked(int *semAdd, pcb_t *p)
     int empty = hlist_empty(&semd_h[key]);
     if (!empty)
     {
-        semd_t *tmp = container_of(semd_h[key].first, semd_t, s_link);
+        semd_t *t = container_of(semd_h[key].first, semd_t, s_link);
         p->p_semAdd = semAdd;
-        insertProcQ(&(tmp->s_procq), p);
+        insertProcQ(&(t->s_procq), p);
         return false;
     }
-    else if (!list_empty(&semdFree_h->s_freelink))
+    else if (&semdFree_h->s_freelink != NULL)
     {
-        /*semd_t *tmp = semdFree_h;
+        semd_t *t = semdFree_h;
         semdFree_h = container_of(semdFree_h->s_freelink.next, semd_t, s_freelink);
-        list_del(&tmp->s_freelink);*/
-        struct semd_t *tmp = container_of(semdFree_h->s_freelink.prev, semd_t, s_freelink);
-        list_del(semdFree_h->s_freelink.prev);
+        //list_del(&t->s_freelink);
 
-        tmp->s_freelink.next = NULL;
-        tmp->s_key = semAdd;
-        mkEmptyProcQ(&(tmp->s_procq));
+        t->s_freelink.next = NULL;
+        t->s_key = semAdd;
+        mkEmptyProcQ(&(t->s_procq));
         p->p_semAdd = semAdd;
-        insertProcQ(&(tmp->s_procq), p);
+        insertProcQ(&(t->s_procq), p);
 
-        hlist_add_head(&tmp->s_link, &semd_h[key]);
+        hlist_add_head(&t->s_link, &semd_h[key]);
         return false;
     }
     else
@@ -92,19 +90,14 @@ void initASH()
 {
     semdFree_h = &semd_table[0];
     INIT_LIST_HEAD(&semdFree_h->s_freelink);
-    //semd_t *t = semdFree_h;
-    //struct list_head *p = t->s_freelink.prev;
+    semd_t *t = semdFree_h;
+    struct list_head *p = t->s_freelink.prev;
     for (int i = 1; i < MAXPROC; i++)
     {
-        /*t->s_freelink.next = &semd_table[i].s_freelink;
+        t->s_freelink.next = &semd_table[i].s_freelink;
         t = container_of(t->s_freelink.next, semd_t, s_freelink);
         t->s_freelink.prev = p;
         t->s_freelink.next = NULL;
-        p = p->next;*/
-
-        INIT_LIST_HEAD(&semd_table[i].s_freelink);
-        list_add_tail(&semd_table[i].s_freelink, &semdFree_h->s_freelink);        
+        p = p->next;
     }
-    //t->s_freelink.next = &semdFree_h->s_freelink;
-    //semdFree_h->s_freelink.prev = &t->s_freelink;
 }
