@@ -1,0 +1,14 @@
+Scelte progettuali 
+
+PCB:
+
+
+SEMD:
+Per la lista dei SEMD liberi è stato usato il tipo list_head per creare una lista concatenata semplice, in modo
+da facilitare l'inizializazione, per l'accesso agli elementi della lista si usa la macro container_of.
+Per la fuzione insertBlocked sono state usata come condizioni per distinguere i casi: hlist_empty, per verificare che il SEMD 
+richiesto sia presente nella ASH, e semdFree_h != NULL, per verificare che la lista dei SEMD liberi non sia vuota.
+Per le funzioni che ritornano i pcb, per accedere a questi all'interno della ASH è stata usata la macro hash_for_each_possible,
+per avere un semplice accesso agli elementi.
+
+NAMESPACES:
