@@ -20,3 +20,12 @@ Per le funzioni che ritornano i pcb, per accedere a questi all'interno della ASH
 per avere un semplice accesso agli elementi.
 
 NAMESPACES:
+Le liste dei vari tipi (in questa fase un solo tipo: PID) di namespace liberi e utilizzati sono state implementate con due array di puntatori:
+nsFree_h[MAXTYPES] 	<-- ogni cella di questo vettore contiene la testa della lista dei namespace di tipo i (0 <= i < MAXTYPES) liberi o inutilizzati
+nsList_h[MAXTYPES] 	<-- ogni cella di questo vettore contiene la testa della lista dei namespace di tipo i (0 <= i < MAXTYPES) utilizzati
+Per ogni tipo, inoltre, la lista 'complessiva' dei namespace è rappresentata dall'array type_nsdTable[MAXPROC] (in questa fase solo pid_nsdTable[MAXPROC]);
+La funzione initNamespaces(), al momento, lavora 'dando per buono' che ci sia un solo tipo;
+In generale, per l'accesso agli elementi di ogni lista, è stata utilizzata la macro container_of;
+Nella funzione addNamespace è stata utilizzata la macro list_for_each in 'modo esplicito', visto che, altrimenti, dava un errore rimasto incompreso.
+
+Saluti
