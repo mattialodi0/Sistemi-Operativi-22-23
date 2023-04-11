@@ -9,6 +9,10 @@
 #include "scheduler.h"
 
 #define DISPNUM 49
+#define timescale 1     //il valore può essere letto dal registro 0x1000.0024 ma per ora assumiamo sia 1
+
+extern void test();
+
 
 int main(void) {
     //processi vivi
@@ -42,13 +46,26 @@ int main(void) {
 
 
     //iniz. interval timer 100ms
-    //registro:  0x1000.0020
-    //LDIT(T) aggiorna l'interval timer con T per la timescale del processore
+    //unsigned int timescale = 0x1000.0024;     //per leggere il valore della timescale
+    LDIT(100/timescale); // carica nell'interval timer  T * la timescale del processore
 
-    //creazione di un processo
+    //creazione di un processo      cap. 2.2 della documentazione
+    pcb_t *first_proc = allocPcb();
+
+    first_proc->p_s.s_entryHI = 0;      //pid
+    first_proc->p_s.s_cause;
+    first_proc->p_s.s_status = 10001000000000001111111100000100;   //KUp = 0 per la kernel-mode, IEp = 1 e IM = 1 per abilitare gli interrupt, TE = 1 per l'interval timer
+    first_proc->p_s.s_pc = (memaddr) test;
+    first_proc->p_s.s_sp = RAMTOP;
+    
+    first_proc->p_parent = NULL;      
+    first_proc->p_child = NULL;
+    first_proc->p_sib = NULL;
+    first_proc->p_time = 0;
 
     //chiamata allo scheduler
     scheduler();
 }
 
 //non so se sia corretto il pass upo vector, è un po strano il modo in cui sono usati gli ind. come puntatori
+//non so se i bit di status di cui non si parla nelle specifiche siano corretti (tipo BEV)
