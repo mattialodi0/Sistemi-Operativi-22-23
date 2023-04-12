@@ -54,7 +54,7 @@ int main(void) {
 
     first_proc->p_s.s_entryHI = 0;      //pid
     first_proc->p_s.s_cause;
-    first_proc->p_s.s_status = 10001000000000001111111100000100;   //KUp = 0 per la kernel-mode, IEp = 1 e IM = 1 per abilitare gli interrupt, TE = 1 per l'interval timer
+    first_proc->p_s.s_status = setStatus(10001000000000001111111100000100);   //KUp = 0 per la kernel-mode, IEp = 1 e IM = 1 per abilitare gli interrupt, TE = 1 per l'interval timer
     first_proc->p_s.s_pc = (memaddr) test;
     first_proc->p_s.s_sp = RAMTOP;
     
