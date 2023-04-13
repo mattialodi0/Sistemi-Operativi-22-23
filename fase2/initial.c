@@ -12,6 +12,7 @@
 #define timescale 1     //il valore può essere letto dal registro 0x1000.0024 ma per ora assumiamo sia 1
 
 extern void test();
+extern void uTLB_RefillHandler();       //non so se ci va 
 
 
 int main(void) {
@@ -35,8 +36,8 @@ int main(void) {
 
     //iniz. strutture fase 1
     initPcbs();
-    initSemd();
-    initNS();
+    initASH();
+    initNamespaces();
 
     //pass up vector, for processor 0 at 0x0FFF.F900
     0x0FFF.F900->tlb_refll_handler = (memaddr) uTLB_RefillHandler;    // set the Nucleus TLB-Refill event handler address
@@ -53,10 +54,9 @@ int main(void) {
     pcb_t *first_proc = allocPcb();
 
     first_proc->p_s.s_entryHI = 0;      //pid
-    first_proc->p_s.s_cause;
     first_proc->p_s.s_status = setStatus(10001000000000001111111100000100);   //KUp = 0 per la kernel-mode, IEp = 1 e IM = 1 per abilitare gli interrupt, TE = 1 per l'interval timer
     first_proc->p_s.s_pc = (memaddr) test;
-    first_proc->p_s.s_sp = RAMTOP;
+    RAMTOP(first_proc->p_s.s_sp);   //first_proc->p_s.s_sp = RAMTOP;
     
     first_proc->p_parent = NULL;      
     first_proc->p_child = NULL;
@@ -65,6 +65,8 @@ int main(void) {
 
     //chiamata allo scheduler
     scheduler();
+
+    return 0;
 }
 
 //non so se sia corretto il pass upo vector, è un po strano il modo in cui sono usati gli ind. come puntatori
