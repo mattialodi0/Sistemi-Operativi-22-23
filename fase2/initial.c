@@ -1,4 +1,4 @@
-#include ``/usr/include/umps3/umps/libumps.h''
+//#include ``/usr/include/umps3/umps/libumps.h''
 #include <pandos_const.h>
 #include <pandos_types.h>
 
@@ -14,25 +14,27 @@
 extern void test();
 extern void uTLB_RefillHandler();       //non so se ci va 
 
+//variabili globali, non so se vadano qua o nel main
+//processi vivi
+int process_count = 0;
+
+//processi bloccati
+int soft_blocked_count = 0;
+
+//processi ready
+struct list_head *ready_queue; 
+mkEmptyProcQ(ready_queue);
+
+//puntatore al proc attivo
+pcb_t *active_process = NULL;   
+
+//array di semafori, uno per dispositivo, poi si possono anche separare in più array
+int sem_disp[DISPNUM];
 
 int main(void) {
-    //processi vivi
-    int process_count = 0;
-
-    //processi bloccati
-    int soft_blocked_count = 0;
-    
-    //processi ready
-    struct list_head *ready_queue; 
-    mkEmptyProcQ(ready_queue);
-
-    //puntatore al proc attivo
-    pcb_t *active_process = NULL;   
-
-    //array di semafori, uno per dispositivo
-    int sem_disp[DISPNUM];
+    //semafori settati a 0
     for(int i=0; i<49; i++) 
-        sem_disp[i] = 0;
+    sem_disp[i] = 0;
 
     //iniz. strutture fase 1
     initPcbs();
@@ -50,15 +52,17 @@ int main(void) {
     //unsigned int timescale = 0x1000.0024;     //per leggere il valore della timescale
     LDIT(100/timescale); // carica nell'interval timer  T * la timescale del processore
 
+
     //creazione di un processo      cap. 2.2 della documentazione
     pcb_t *first_proc = allocPcb();
 
-    first_proc->p_s.s_entryHI = 0;      //pid
-    first_proc->p_s.s_status = setStatus(10001000000000001111111100000100);   //KUp = 0 per la kernel-mode, IEp = 1 e IM = 1 per abilitare gli interrupt, TE = 1 per l'interval timer
+    setENTRYHI(0);      //pid
+    setSTATUS(10001000000000001111111100000100);    //KUp = 0 per la kernel-mode, IEp = 1 e IM = 1 per abilitare gli interrupt, TE = 1 per l'interval timer
     first_proc->p_s.s_pc = (memaddr) test;
     RAMTOP(first_proc->p_s.s_sp);   //first_proc->p_s.s_sp = RAMTOP;
-    
-    first_proc->p_parent = NULL;      
+
+
+    first_proc->p_parent = NULL;    //vanno cambiati  
     first_proc->p_child = NULL;
     first_proc->p_sib = NULL;
     first_proc->p_time = 0;
