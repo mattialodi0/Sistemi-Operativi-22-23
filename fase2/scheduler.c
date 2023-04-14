@@ -22,16 +22,16 @@ void scheduler() {
     //load state
 
     if(process_count == 0) {
-        //halt 
+        HALT();     //probabilmente anche qui servono gli interrupt
     }
     else if(process_count > 0) {
         if(soft_blocked_count > 0) {
-            //abilita gli interrupt
+            //abilita gli interrupt, disabilita PLT
             //WAIT
         }
         else if(soft_blocked_count == 0) {
             //deadlock detection
-            //WAIT
+            PANIC();
         }
     }
 }
