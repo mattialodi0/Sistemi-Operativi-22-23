@@ -14,27 +14,39 @@
 extern void test();
 extern void uTLB_RefillHandler();       //non so se ci va 
 
-//variabili globali, non so se vadano qua o nel main
-//processi vivi
-int process_count = 0;
-
-//processi bloccati
-int soft_blocked_count = 0;
-
-//processi ready
-struct list_head *ready_queue; 
-mkEmptyProcQ(ready_queue);
-
-//puntatore al proc attivo
-pcb_t *active_process = NULL;   
-
-//array di semafori, uno per dispositivo, poi si possono anche separare in più array
-int sem_disp[DISPNUM];
-
 int main(void) {
-    //semafori settati a 0
-    for(int i=0; i<49; i++) 
-    sem_disp[i] = 0;
+    //variabili globali, non so se vadano qua o nel main
+    //processi vivi
+    int process_count = 0;
+
+    //processi bloccati
+    int soft_blocked_count = 0;
+
+    //processi ready
+    struct list_head *ready_queue; 
+    mkEmptyProcQ(ready_queue);
+
+    //puntatore al proc attivo
+    pcb_t *active_process = NULL;   
+
+    //array di semafori, uno per dispositivo
+    //int sem_disp[DISPNUM];  un unico array
+    int sem_dev_disk[8];
+    int sem_dev_flash[8];
+    int sem_dev_net[8];
+    int sem_dev_printer[8];
+    int sem_dev_terminal_r[8];
+    int sem_dev_terminal_w[8];
+
+    //setta i semafori a 0
+    for(int i=0; i<8; i++) {
+        sem_dev_disk[i] = 0;
+        sem_dev_flash[i] = 0;
+        sem_dev_net[i] = 0;
+        sem_dev_printer[i] = 0;
+        sem_dev_terminal_r[i] = 0;
+        sem_dev_terminal_w[i] = 0;
+    }
 
     //iniz. strutture fase 1
     initPcbs();
@@ -63,9 +75,10 @@ int main(void) {
 
 
     first_proc->p_parent = NULL;    //vanno cambiati  
-    first_proc->p_child = NULL;
-    first_proc->p_sib = NULL;
+    INIT_LIST_HEAD(&first_proc->p_child);
+    INIT_LIST_HEAD(&first_proc->p_sib);
     first_proc->p_time = 0;
+    first_proc->p_semAdd = NULL;
 
     //chiamata allo scheduler
     scheduler();
