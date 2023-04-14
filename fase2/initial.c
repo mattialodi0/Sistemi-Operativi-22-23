@@ -57,7 +57,7 @@ int main(void) {
     passupvector_t* puv = (passupvector_t*) PASSUPVECTOR;
     puv->tlb_refill_handler = (memaddr) uTLB_RefillHandler;
     puv->tlb_refill_stackPtr = 0x20001000;
-    puv->exception_handler = (memaddr) fooBar;
+    puv->exception_handler = (memaddr) 0x20001000;//fooBar; per ora ci mettiamo un ind a caso
     puv->exception_stackPtr = 0x20001000;
 
 
@@ -68,11 +68,14 @@ int main(void) {
 
     //creazione di un processo      cap. 2.2 della documentazione
     pcb_t *first_proc = allocPcb();
+    process_count++;
+    insertProcQ(ready_queue, first_proc);
 
-    setENTRYHI(0);      //pid
-    setSTATUS(10001000000000001111111100000100);    //KUp = 0 per la kernel-mode, IEp = 1 e IM = 1 per abilitare gli interrupt, TE = 1 per l'interval timer
-    first_proc->p_s.s_pc = (memaddr) test;
-    RAMTOP(first_proc->p_s.s_sp);   //first_proc->p_s.s_sp = RAMTOP;
+    first_proc->p_s.entry_hi = 0;      //pid
+    first_proc->p_s.cause;
+    first_proc->p_s.status = first_proc->p_s.status | 17826302;   //KUp = 0 per la kernel-mode, IEp = 1 e IM = 1 per abilitare gli interrupt, TE = 1 per l'interval timer
+    first_proc->p_s.pc_epc = (memaddr) test;
+    RAMTOP(first_proc->p_s.reg_sp);   //first_proc->p_s.s_sp = RAMTOP;
 
 
     first_proc->p_parent = NULL;    //vanno cambiati  
