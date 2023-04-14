@@ -54,10 +54,11 @@ int main(void) {
     initNamespaces();
 
     //pass up vector, for processor 0 at 0x0FFF.F900
-    0x0FFF.F900->tlb_refll_handler = (memaddr) uTLB_RefillHandler;    // set the Nucleus TLB-Refill event handler address
-    (0x0FFF.F900 + 0x04)* = 0x2000.1000;    // set the Stack Pointer for the Nucleus TLB-Refill event handler to the top of the Nucleus stack page: 0x2000.1000
-    (0x0FFF.F900 + 0x08)->exception_handler = (memaddr) fooBar;   // set the Nucleus exception handler address to the address of your Level 3 Nucleus function that is to be the entry point for exception handling 
-    (0x0FFF.F900 + 0x0c)* = 0x2000.1000;    // set the Stack pointer for the Nucleus exception handler to the top of the Nucleus stack page: 0x2000.1000
+    passupvector_t* puv = (passupvector_t*) PASSUPVECTOR;
+    puv->tlb_refill_handler = (memaddr) uTLB_RefillHandler;
+    puv->tlb_refill_stackPtr = 0x20001000;
+    puv->exception_handler = (memaddr) fooBar;
+    puv->exception_stackPtr = 0x20001000;
 
 
     //iniz. interval timer 100ms
