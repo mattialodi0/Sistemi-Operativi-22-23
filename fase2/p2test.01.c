@@ -147,7 +147,7 @@ void uTLB_RefillHandler() {
 /*                 p1 -- the root process                            */
 /*                                                                   */
 void test() {
-
+}
 //     SYSCALL(VERHOGEN, (int)&sem_testsem, 0, 0); /* V(sem_testsem)   */
 
 //     print("p1 v(sem_testsem)\n");
@@ -334,7 +334,8 @@ void test() {
 //     /* should not reach this point, since p1 just got a program trap */
 //     print("error: p1 still alive after progtrap & no trap vector\n");
 //     PANIC(); /* PANIC !!!     */
-}
+
+//}
 
 
 // /* p2 -- semaphore and cputime-SYS test process */

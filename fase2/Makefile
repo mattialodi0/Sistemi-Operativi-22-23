@@ -32,7 +32,7 @@ all : kernel.core.umps
 kernel.core.umps : kernel
 	umps3-elf2umps -k $<
 	
-kernel : ash.o ns.o pcb.o initial.o p2test.01.o crtso.o libumps.o
+kernel : ash.o ns.o pcb.o initial.o scheduler.o p2test.01.o crtso.o libumps.o 	#qua ci vanno aggiunti i .c da compilare
 	$(LD) -o $@ $^ $(LDFLAGS)
 	
 clean :

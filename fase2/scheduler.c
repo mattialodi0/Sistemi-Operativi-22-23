@@ -9,25 +9,27 @@
 //se il process count è > 0 e il Soft-Block Count > 0 va in Wait State 
 //controllo se process count > 0 e Soft-Block Count == 0 => deadlock. ???. Richiamare PANIC BIOS.
 
-extern struct list_head *ready_queue; 
-extern pcb_t *active_process = NULL;   
-extern int process_count;
-extern int soft_blocked_count;
 
 void scheduler() {
     active_process = removeProcQ(ready_queue);
     
-    //load PLT
+    //load 5 ms in PLT
+    setTIMER(5);
 
     //load state
+    LDST(&active_process->p_s);
 
     if(process_count == 0) {
-        HALT();     //probabilmente anche qui servono gli interrupt
+        HALT();
     }
     else if(process_count > 0) {
         if(soft_blocked_count > 0) {
+            unsigned int mask = 0;
+            mask |= 1;
+            mask |= 65280;
             //abilita gli interrupt, disabilita PLT
-            //WAIT
+            LDCXT(active_process->p_s.reg_sp, mask, active_process->p_s.pc_epc);    //il valore che ci interessa settare è il secondo
+            WAIT();
         }
         else if(soft_blocked_count == 0) {
             //deadlock detection
