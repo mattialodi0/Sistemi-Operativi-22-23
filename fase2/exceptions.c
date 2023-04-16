@@ -2,6 +2,12 @@
 #include "include/types.h"
 #include "scheduler.h"
 
+
+// ALLA FINE DELLE SYSCALL CHE NON BLOCCANO O TERMINANO IL PROCESSO:
+// deve essere restituito il controllo al processo aumentando il suo pc di 4
+
+
+
 int Create_Process(state_t *statep, support_t *supportp, nsd_t *ns){
     pcb_t *new_proc = allocPcb();
     if(new_proc != NULL){
@@ -25,12 +31,23 @@ void Terminate_Process(int pid){
 
 }
 
+//decrementa il semaforo all'ind semaddr, se diventa < 0 il processo viene bloccato e si chiama lo scheduler
 void Passeren(int *semaddr){
-
+    semaddr--;      //non so se sia un intero o proprio una struttura per un semaforo
+    
+    if(semaddr <= 0) {
+        soft_blocked_count++;
+        //blocco del processo: si salva lo stato, lo si rimuove dalla coda ready e lo si mette ad aspettare
+    }
 }
 
+//incrementa il semaforo all'ind semaddr, se diventa > 0 il processo viene messo nella coda ready
 void Verhogen(int *semaddr){
-
+    semaddr++;
+    if(semaddr > 0) {
+        soft_blocked_count--;
+        //sblocco del processo, aggiunta alla coda ready
+    }
 }
 
 int DO_IO(int *cmdAddr, int *cmdValues){
