@@ -41,21 +41,43 @@ int Get_CPU_Time(){
     return active_process->p_time;
     //al momento torna 0, bisogna fare un calcolo tra inizio di quando viene chiamato 
     //per la prima volta il processo e quando viene chiamata la funzione
+
+    //in realtà credo di no
 }
 
 int Wait_For_Clock(){
 
 }
 
+// ritorna un puntatore alla struttura di supporto del chiamante
 support_t* Get_Support_Data(){
-
+    return active_process->p_supportStruct;
 }
 
+// ritorna il pid del chiamante
 int Get_Process_Id(int parent){
-
+    return active_process->p_pid;
 }
 
+// cerca i primi size figli con lo stesso NS del chiamante e li ritorna nell'array children
+// e ritorna il numero di figli del processo
 int Get_Children(int *children, int size){
+    struct list_head *pos;
+    struct list_head *member;
+    int n = 0;
+    list_for_each_entry(pos, active_process->p_child, member) {
+        if(active_process->namespaces == container_of(member, pid_t, p_child)->namespaces)    
+            n++;
+    }
+    int i = 0;
+    list_for_each_entry(pos, active_process->p_child, member) {
+        if(active_process->namespaces == container_of(member, pid_t, p_child)->namespaces) {
+            children[i] = container_of(member, pid_t, p_child)->p_pid; i++;
+        }            
+        if(i >= size) break;
+    }
 
-}
+    return n;
+}   
+//qualcosa non torna 
 
