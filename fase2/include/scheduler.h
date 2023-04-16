@@ -18,4 +18,6 @@ int soft_blocked_count;
 //processi ready
 struct list_head *ready_queue; 
 //puntatore al proc attivo
-pcb_t *active_process;   
+pcb_t *active_process;
+//contatore di pid usato in exeptions.c
+int pid_count;
