@@ -33,20 +33,39 @@ void Terminate_Process(int pid){
 
 //decrementa il semaforo all'ind semaddr, se diventa < 0 il processo viene bloccato e si chiama lo scheduler
 void Passeren(int *semaddr){
-    semaddr--;      //non so se sia un intero o proprio una struttura per un semaforo
-    
-    if(semaddr <= 0) {
+    if(*semaddr == 0) {
         soft_blocked_count++;
-        //blocco del processo: si salva lo stato, lo si rimuove dalla coda ready e lo si mette ad aspettare
+        //salvataggio dello stato
+        //...
+        insertBlocked(semaddr, active_process);
+    }
+    else {
+        pcb_t *waked_proc = removeBlocked(semaddr);
+        if(waked_proc != NULL) {
+            //wakeup proc
+            //...
+        }
+        else 
+            *semaddr--;
     }
 }
 
 //incrementa il semaforo all'ind semaddr, se diventa > 0 il processo viene messo nella coda ready
 void Verhogen(int *semaddr){
-    semaddr++;
-    if(semaddr > 0) {
-        soft_blocked_count--;
-        //sblocco del processo, aggiunta alla coda ready
+    if(*semaddr == 1) {
+        soft_blocked_count++;
+        //salvataggio dello stato
+        //...
+        insertBlocked(semaddr, active_process);
+    }
+    else {
+        pcb_t *waked_proc = removeBlocked(semaddr);
+        if(waked_proc != NULL) {
+            //wakeup proc
+            //...
+        }
+        else 
+            *semaddr++;
     }
 }
 
@@ -98,3 +117,44 @@ int Get_Children(int *children, int size){
 }   
 //qualcosa non torna 
 
+
+void syscallHandler() {
+    int v0, v1, v2, v3;
+    //vanno presi dai registri e castati
+
+    switch (v0)
+    {
+    case 1:
+        Create_Process(v1, v2, v3);
+        break;
+    case 2:
+        Terminate_Process(v1);
+        break;
+    case 3:
+        Passeren(v1);
+        break;
+    case 4:
+        Verhogen(v1);
+        break;
+    case 5:
+        DO_IO(v1, v2);
+        break;
+    case 6:
+        Get_CPU_Time();
+        break;
+    case 7:
+        Wait_For_Clock();
+        break;
+    case 8:
+        Get_Support_Data();
+        break;    
+    case 9:
+        Get_Process_Id(v1);
+        break;
+    case 10:
+        Get_Children(v1, v2);
+        break;
+    default:
+        break;
+    }
+}
