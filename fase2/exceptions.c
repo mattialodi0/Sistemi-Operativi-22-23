@@ -3,13 +3,40 @@
 #include "syscalls.h"
 
 
+void exeptionHandler() {
+    int cause_reg, exc_code;
 
+    cause_reg = getCAUSE();
+    exc_code = cause_reg & 124;    //in binario: 1111100, la maschera per excCode
 
-
-
-
-
-
+    switch (exc_code)
+    {
+    case 0:
+        //interrupt handler
+        break;
+    case 1:
+    case 2:
+    case 3:
+        //TLB exception handler
+        break;
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 9:
+    case 10:
+    case 11:
+    case 12:
+        //Program Trap exception handler
+        break;
+    case 8:
+        syscallHandler();
+        break;
+    
+    default:
+        break;
+    }
+}
 
 
 

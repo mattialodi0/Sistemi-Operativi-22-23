@@ -6,7 +6,7 @@
 #include <pcb.h>
 #include <ash.h>
 #include <ns.h>
-#include <scheduler.h>
+#include <exeptions.h>
 
 #define DISPNUM 49
 #define timescale 1     //il valore può essere letto dal registro 0x1000.0024 ma per ora assumiamo sia 1
@@ -17,6 +17,7 @@ extern struct list_head *ready_queue;
 extern pcb_t *active_process;   
 extern int process_count;
 extern int soft_blocked_count;
+extern void exeptionHandler();
 
 int main(void) {
     //processi vivi
@@ -60,7 +61,7 @@ int main(void) {
     passupvector_t* puv = (passupvector_t*) PASSUPVECTOR;
     puv->tlb_refill_handler = (memaddr) uTLB_RefillHandler;
     puv->tlb_refill_stackPtr = 0x20001000;
-    puv->exception_handler = (memaddr) 0x20001000;  //fooBar ancora da implementare; per ora ci mettiamo un ind a caso
+    puv->exception_handler = (memaddr) exeptionHandler;  //fooBar ancora da implementare; per ora ci mettiamo un ind a caso
     puv->exception_stackPtr = 0x20001000;
 
 
