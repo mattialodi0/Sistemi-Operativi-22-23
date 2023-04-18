@@ -5,7 +5,7 @@
 
 // ALLA FINE DELLE SYSCALL CHE NON BLOCCANO O TERMINANO IL PROCESSO:
 // deve essere restituito il controllo al processo aumentando il suo pc di 4
-
+ 
 
 
 int Create_Process(state_t *statep, support_t *supportp, nsd_t *ns){
@@ -44,6 +44,7 @@ void Passeren(int *semaddr){
         if(waked_proc != NULL) {
             //wakeup proc
             //...
+            soft_blocked_count++;
         }
         else 
             *semaddr--;
@@ -63,6 +64,7 @@ void Verhogen(int *semaddr){
         if(waked_proc != NULL) {
             //wakeup proc
             //...
+            soft_blocked_count++;
         }
         else 
             *semaddr++;
@@ -99,23 +101,36 @@ int Get_Process_Id(int parent){
 // e ritorna il numero di figli del processo
 int Get_Children(int *children, int size){
     struct list_head *pos;
-    struct list_head *member;
     int n = 0;
-    list_for_each_entry(pos, active_process->p_child, member) {
-        if(active_process->namespaces == container_of(member, pid_t, p_child)->namespaces)    
+    pcb_t *child = container_of(active_process->p_child, pid_t, p_child);
+    pcb_t *child_sib = container_of(child->p_sib, pid_t, p_sib);
+
+    if(eqNS(child->namespaces, active_process->namespaces)) n++;
+    list_for_each_entry(pos, child_sib, p_sib) {
+        if(eqNS(container_of(pos, pid_t, p_sib)->namespaces, active_process->namespaces))    
             n++;
     }
+
     int i = 0;
-    list_for_each_entry(pos, active_process->p_child, member) {
-        if(active_process->namespaces == container_of(member, pid_t, p_child)->namespaces) {
-            children[i] = container_of(member, pid_t, p_child)->p_pid; i++;
-        }            
+    if(eqNS(child->namespaces, active_process->namespaces)) {
+        children[i] = child->p_pid;
+        i++;
+    }
+    list_for_each_entry(pos, child_sib, p_sib) {
         if(i >= size) break;
+        if(eqNS(container_of(pos, pid_t, p_sib)->namespaces, active_process->namespaces))    
+            children[i] = container_of(pos, pid_t, p_sib)->p_pid;
+            i++;
     }
 
     return n;
 }   
 //qualcosa non torna 
+
+//confronta i namespaces, un campo alla volta, da implementare
+bool eqNS(nsd_t *a[], nsd_t *b[]) {
+    return false;
+}
 
 
 void syscallHandler() {
