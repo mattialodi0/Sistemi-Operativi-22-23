@@ -84,7 +84,17 @@ void interruptHandler() {
 
 }
 
+//è scaduto il quanto di tempo a disposizione del processo corrente e questo va messo da running a ready
 void PLTInterrupt() {
+    //caricare un nuovo valore nel PLT
+    setTIMER(5);   //non è specificato quanto mettere ma credo 5
+
+    //copiare lo stato del processore (all'inizio della BIOS data page) nel pcb del processo corrente
+    active_process->p_s = *(state_t *)0x0FFFF000;  //non so se sia giusto il cast                                  **************************
+
+    insertProcQ(ready_queue, active_process);
+
+    scheduler();
 
 }
 
