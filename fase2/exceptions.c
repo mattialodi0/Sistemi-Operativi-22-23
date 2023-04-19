@@ -51,30 +51,64 @@ void interruptHandler() {
         break;
     case 1:
         //PLT
+        PLTInterrupt();
         break;
     case 2:
         //Interval Timer
+        ITInterrupt();
         break;
     case 3:
         //disk devices
+        nonTimerInterrupt();
         break;
     case 4:
         //flash devices
+        nonTimerInterrupt();
         break;
     case 5:
         //network devices
+        nonTimerInterrupt();
         break;
     case 6:
         //printer devices
+        nonTimerInterrupt();
         break;
     case 7:     //prima in scrittura poi in lettura
         //terminal devices
+        nonTimerInterrupt();
         break;
     
     default:
         break;
     }
 
+}
+
+void PLTInterrupt() {
+
+}
+
+void ITInterrupt() {
+
+}
+
+void nonTimerInterrupt() {
+    //calcolare l'ind. per il device register
+    int dev_reg_addr;
+    //...
+
+    //salvare lo status code del device register 
+    //int status_code = ;
+
+    //ack dell'interrupt: ACKN del device register
+    
+    //V sul semaforo associato al device dell'interrupt per sbloccare il processo che sta aspettando la fine dell'I/O
+
+    //mettere lo status code nel reg. v0 del pcb del processo sbloccato
+
+    //mettere il processo nella resy queue
+
+    //LDST per tornare il controllo al processo corrente
 }
 
 void TLBExceprionHandler() {
