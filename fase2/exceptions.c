@@ -8,11 +8,12 @@ void exeptionHandler() {
 
     cause_reg = getCAUSE();
     exc_code = cause_reg & 124;    //in binario: 1111100, la maschera per excCode
+    //bisogna trasformare il binario in intero
 
     switch (exc_code)
     {
     case 0:
-        //interrupt handler
+        interruptHandler();
         break;
     case 1:
     case 2:
@@ -39,6 +40,35 @@ void exeptionHandler() {
 }
 
 
+void interruptHandler() {
+    //per sapere la causa si legge il reg. cause.IP
+}
+
+void TLBExceprionHandler() {
+    //bisogna realizzare una standard Pass Up or Die operation con PGFAULTEXCEPT come index value:
+
+    if(active_process->p_supportStruct == NULL)
+        TerminateProcess(0);    //elimina il processo correte e la sua progenie
+    else {
+        /*
+            copy the saved exception state into a location accessible to the Support Level,
+             and pass control to a routine specified by the Support Level
+        */
+    }
+}
+
+void ProgramTrapExceptionHandler() {
+    //bisogna realizzare una standard Pass Up or Die operation con GENERALEXCEPT come index value:
+
+    if(active_process->p_supportStruct == NULL)
+        TerminateProcess(0);    //elimina il processo correte e la sua progenie
+    else {
+        /*
+            copy the saved exception state into a location accessible to the Support Level,
+             and pass control to a routine specified by the Support Level
+        */
+    }
+}
 
 
 void syscallHandler() {
