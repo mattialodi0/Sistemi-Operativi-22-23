@@ -42,6 +42,39 @@ void exeptionHandler() {
 
 void interruptHandler() {
     //per sapere la causa si legge il reg. cause.IP
+    int line;
+
+    //in caso di più interrupt si risolve quello con priorità più alta (switch)
+    switch (line)
+    {
+    case 0:     //ingnorato
+        break;
+    case 1:
+        //PLT
+        break;
+    case 2:
+        //Interval Timer
+        break;
+    case 3:
+        //disk devices
+        break;
+    case 4:
+        //flash devices
+        break;
+    case 5:
+        //network devices
+        break;
+    case 6:
+        //printer devices
+        break;
+    case 7:     //prima in scrittura poi in lettura
+        //terminal devices
+        break;
+    
+    default:
+        break;
+    }
+
 }
 
 void TLBExceprionHandler() {
