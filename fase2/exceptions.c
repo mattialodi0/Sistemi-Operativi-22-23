@@ -103,6 +103,7 @@ void nonTimerInterrupt() {
     //ack dell'interrupt: ACKN del device register
     
     //V sul semaforo associato al device dell'interrupt per sbloccare il processo che sta aspettando la fine dell'I/O
+    //se la V non ritorna il pcb salta le prossime due operazioni
 
     //mettere lo status code nel reg. v0 del pcb del processo sbloccato
 
