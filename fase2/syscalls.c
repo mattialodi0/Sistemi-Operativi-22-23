@@ -1,6 +1,3 @@
-#include </usr/include/umps3/umps/libumps.h>
-#include "include/types.h"
-#include "scheduler.h"
 #include "include/syscalls.h"
 
 
@@ -86,10 +83,7 @@ int DOIO(int *cmdAddr, int *cmdValues){
 
 int GetCPUTime(){
     return active_process->p_time;
-    //al momento torna 0, bisogna fare un calcolo tra inizio di quando viene chiamato 
-    //per la prima volta il processo e quando viene chiamata la funzione
-
-    //in realtà credo di no
+    //bisogna sommargli il tempo accumulato nel quanto corrente
 }
 
 int WaitForClock(){

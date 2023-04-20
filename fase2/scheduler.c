@@ -37,3 +37,6 @@ void scheduler() {
         }
     }
 }
+
+
+//va implementato un deadlock detector
