@@ -87,8 +87,7 @@ int GetCPUTime(){
 }
 
 int WaitForClock(){
-    //Eseguire Passeren sul semaforo dell'Interval Timer
-    soft_blocked_count++;
+    Passeren(&IT_sem);
     scheduler();
 }
 

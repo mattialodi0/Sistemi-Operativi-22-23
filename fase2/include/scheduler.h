@@ -21,3 +21,6 @@ struct list_head *ready_queue;
 pcb_t *active_process;
 //contatore di pid usato in exeptions.c
 int pid_count;
+
+//semaforo per lo pseudo clock
+int IT_sem = 0;     // da verificare se vada inizializzato a 0
