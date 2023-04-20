@@ -2,6 +2,9 @@
 #include "include/types.h"
 #include "syscalls.h"
 
+#define timescale 1     //il valore può essere letto dal registro 0x1000.0024 ma per ora assumiamo sia 1
+
+
 
 void exeptionHandler() {
     int cause_reg, exc_code;
@@ -99,7 +102,13 @@ void PLTInterrupt() {
 }
 
 void ITInterrupt() {
+    LDIT(100000/timescale); // carica nell'interval timer  T * la timescale del processore
 
+    //sbloccare tutti i processi fermi al semaforo dello pseudo clock
+
+    //settare il semaforo a 0
+
+    //LDST per tornare il controllo al processo corrente
 }
 
 void nonTimerInterrupt() {
@@ -156,19 +165,19 @@ void syscallHandler() {
     switch (v0)
     {
     case 1:
-        CreateProcess(v1, v2, v3);
+        CreateProcess((state_t *)v1, (support_t *)v2, (nsd_t *)v3);
         break;
     case 2:
         TerminateProcess(v1);
         break;
     case 3:
-        Passeren(v1);
+        Passeren((int *)v1);
         break;
     case 4:
-        Verhogen(v1);
+        Verhogen((int *)v1);
         break;
     case 5:
-        DOIO(v1, v2);
+        DOIO((int *)v1, (int *)v2);
         break;
     case 6:
         GetCPUTime();
@@ -183,7 +192,7 @@ void syscallHandler() {
         GetProcessId(v1);
         break;
     case 10:
-        GetChildren(v1, v2);
+        GetChildren((int *)v1, v2);
         break;
     default:
         break;

@@ -9,7 +9,6 @@
 #include "exceptions.c"
 
 #define DISPNUM 49
-#define timescale 1     //il valore può essere letto dal registro 0x1000.0024 ma per ora assumiamo sia 1
 
 extern void test();
 extern void uTLB_RefillHandler();
