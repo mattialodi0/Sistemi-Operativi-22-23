@@ -1,11 +1,12 @@
-#include </usr/include/umps3/umps/libumps.h>
-#include "include/types.h"
-#include "scheduler.h"
+#include <lib_def.h>
+#include <scheduler.h>
 
+extern struct list_head *ready_queue; 
+extern pcb_t *active_process;   
+extern int process_count;
+extern int soft_blocked_count;
+extern int IT_sem;
 
-// ALLA FINE DELLE SYSCALL CHE NON BLOCCANO O TERMINANO IL PROCESSO:
-// deve essere restituito il controllo al processo aumentando il suo pc di 4
- 
 
 // crea un nuovo processo come figlio del chiamante
 int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns);
@@ -34,8 +35,8 @@ support_t* GetSupportData();
 // ritorna il pid del chiamante
 int GetProcessId(int parent);
 
-// cerca i primi size figli con lo stesso NS del chiamante e li ritorna nell'array children
-// e ritorna il numero di figli del processo
+/* cerca i primi size figli con lo stesso NS del chiamante e li ritorna nell'array children
+*  e ritorna il numero di figli del processo */
 int GetChildren(int *children, int size);
 
 //confronta i namespaces, un campo alla volta, da implementare

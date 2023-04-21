@@ -1,7 +1,8 @@
-#include </usr/include/umps3/umps/libumps.h>
-#include "include/types.h"
+#include <lib_def.h>
+#include <scheduler.h>
 
-
+extern struct list_head *ready_queue; 
+extern pcb_t *active_process;   
 
 void interruptHandler();
 

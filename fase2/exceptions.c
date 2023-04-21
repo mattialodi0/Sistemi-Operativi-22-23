@@ -1,13 +1,7 @@
-#include </usr/include/umps3/umps/libumps.h>
-#include "include/types.h"
-#include <syscalls.h>
-#include <interrupts.h>
-
-#define timescale 1     //il valore può essere letto dal registro 0x1000.0024 ma per ora assumiamo sia 1
+#include "exceptions.h"
 
 
-
-void exeptionHandler() {
+void exceptionHandler() {
     int cause_reg, exc_code;
 
     cause_reg = getCAUSE();
@@ -22,7 +16,7 @@ void exeptionHandler() {
     case 1:
     case 2:
     case 3:
-        TLB exception handler();
+        TLBExceptionHandler();
         break;
     case 4:
     case 5:
@@ -44,7 +38,7 @@ void exeptionHandler() {
 }
 
 
-void TLBExceprionHandler() {
+void TLBExceptionHandler() {
     //bisogna realizzare una standard Pass Up or Die operation con PGFAULTEXCEPT come index value:
 
     if(active_process->p_supportStruct == NULL)

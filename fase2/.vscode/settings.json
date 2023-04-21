@@ -1,6 +1,11 @@
 {
     "files.associations": {
         "libumps.h": "c",
-        "pandos_types.h": "c"
+        "pandos_types.h": "c",
+        "types.h": "c",
+        "lib_def.h": "c",
+        "syscalls.h": "c",
+        "exceptions.h": "c",
+        "interrupts.h": "c"
     }
 }

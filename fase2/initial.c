@@ -1,14 +1,6 @@
-//#include ``/usr/include/umps3/umps/libumps.h''
-#include <pandos_const.h>
-#include <pandos_types.h>
+#include <lib_def.h>
+#include <exceptions.h>
 
-#include <umps3/umps/libumps.h>
-#include <pcb.h>
-#include <ash.h>
-#include <ns.h>
-#include "exceptions.c"
-
-#define DISPNUM 49
 
 extern void test();
 extern void uTLB_RefillHandler();
@@ -16,7 +8,8 @@ extern struct list_head *ready_queue;
 extern pcb_t *active_process;   
 extern int process_count;
 extern int soft_blocked_count;
-extern void exeptionHandler();
+extern int IT_sem;
+extern void exceptionHandler();
 
 int main(void) {
     //processi vivi
@@ -50,6 +43,9 @@ int main(void) {
         sem_dev_terminal_r[i] = 0;
         sem_dev_terminal_w[i] = 0;
     }
+    
+    //setta a 0 il semaforo dello pseudo clock
+    IT_sem = 0;
 
     //iniz. strutture fase 1
     initPcbs();
@@ -60,7 +56,7 @@ int main(void) {
     passupvector_t* puv = (passupvector_t*) PASSUPVECTOR;
     puv->tlb_refill_handler = (memaddr) uTLB_RefillHandler;
     puv->tlb_refill_stackPtr = 0x20001000;
-    puv->exception_handler = (memaddr) exeptionHandler;  //fooBar ancora da implementare; per ora ci mettiamo un ind a caso
+    puv->exception_handler = (memaddr) exceptionHandler;  //fooBar ancora da implementare; per ora ci mettiamo un ind a caso
     puv->exception_stackPtr = 0x20001000;
 
 
