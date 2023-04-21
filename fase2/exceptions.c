@@ -2,6 +2,9 @@
 
 
 void exceptionHandler() {
+    //disabilitare gli interrupt
+    
+
     int cause_reg, exc_code;
 
     cause_reg = getCAUSE();
@@ -35,6 +38,8 @@ void exceptionHandler() {
     default:
         break;
     }
+
+    //abilitare gli interrupt
 }
 
 
@@ -71,28 +76,28 @@ void syscallHandler() {
 
     switch (v0)
     {
-    case 1:
+    case CREATEPROCESS:
         CreateProcess((state_t *)v1, (support_t *)v2, (nsd_t *)v3);
         break;
-    case 2:
+    case TERMPROCESS:
         TerminateProcess(v1);
         break;
-    case 3:
+    case PASSEREN:
         Passeren((int *)v1);
         break;
-    case 4:
+    case VERHOGEN:
         Verhogen((int *)v1);
         break;
-    case 5:
+    case IOWAIT:
         DOIO((int *)v1, (int *)v2);
         break;
-    case 6:
+    case GETTIME:
         GetCPUTime();
         break;
-    case 7:
+    case CLOCKWAIT:
         WaitForClock();
         break;
-    case 8:
+    case GETSUPPORTPTR:
         GetSupportData();
         break;    
     case 9:

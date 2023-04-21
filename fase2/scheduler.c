@@ -25,8 +25,10 @@ void scheduler() {
     else if(process_count > 0) {
         if(soft_blocked_count > 0) {
             unsigned int mask = 0;
-            mask |= 1;
-            mask |= 65280;
+            unsigned int status = getSTATUS();
+            mask = ~TEBITON;        
+            status &= mask;            //disabilita il PLT
+            status |= ~DISABLEINTS;    //disabilita anche gli interrupt
             //abilita gli interrupt, disabilita PLT
             LDCXT(active_process->p_s.reg_sp, mask, active_process->p_s.pc_epc);    //il valore che ci interessa settare è il secondo
             WAIT();

@@ -7,7 +7,7 @@
 #include <ash.h>
 #include <ns.h>
 
-#define timescale 1     //il valore può essere letto dal registro 0x1000.0024 ma per ora assumiamo sia 1
+#define timescale  (* ((cpu_t *) TIMESCALEADDR))     //il valore può essere letto dal registro 0x1000.0024 ma per ora assumiamo sia 1
 
 
 //processi vivi
