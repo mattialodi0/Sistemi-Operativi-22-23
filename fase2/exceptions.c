@@ -2,11 +2,12 @@
 
 
 void exceptionHandler() {
-    //disabilitare gli interrupt
-    
+    //disabilita gli interrupt
+    unsigned int status = getSTATUS();
+    status &= DISABLEINTS;    //disabilita anche gli interrupt
+    LDCXT(active_process->p_s.reg_sp, status, active_process->p_s.pc_epc);    //il valore che ci interessa settare è il secondo
 
     int cause_reg, exc_code;
-
     cause_reg = getCAUSE();
     exc_code = cause_reg & 124;    //in binario: 1111100, la maschera per excCode
     //bisogna trasformare il binario in intero

@@ -28,9 +28,9 @@ void scheduler() {
             unsigned int status = getSTATUS();
             mask = ~TEBITON;        
             status &= mask;            //disabilita il PLT
-            status |= ~DISABLEINTS;    //disabilita anche gli interrupt
+            status |= ~DISABLEINTS;    //abilita gli interrupt
             //abilita gli interrupt, disabilita PLT
-            LDCXT(active_process->p_s.reg_sp, mask, active_process->p_s.pc_epc);    //il valore che ci interessa settare è il secondo
+            LDCXT(active_process->p_s.reg_sp, status, active_process->p_s.pc_epc);    //il valore che ci interessa settare è il secondo
             WAIT();
         }
         else if(soft_blocked_count == 0) {
