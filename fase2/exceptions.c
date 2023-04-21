@@ -40,7 +40,10 @@ void exceptionHandler() {
         break;
     }
 
-    //abilitare gli interrupt
+    //abilita gli interrupt
+    unsigned int status = getSTATUS();
+    status |= ~DISABLEINTS;    //abilita gli interrupt
+    LDCXT(active_process->p_s.reg_sp, status, active_process->p_s.pc_epc);    //il valore che ci interessa settare è il secondo
 }
 
 
