@@ -9,14 +9,18 @@
 int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns){
     pcb_t *new_proc = allocPcb();               //inizializza new_proc, allocPcb la mette == NULL se vuota, quindi va direttamente nell'else?
     if(new_proc != NULL){
-        process_count++;
-        insertProcQ(ready_queue, new_proc);     //inseriamo in coda il processo
-        insertChild(active_process, new_proc);  //inseriamo new_proc come figlio di active_process
+        new_proc->p_parent = NULL;              //Inizializzo tutti i campi del processo attivo a NULL/0
+        INIT_LIST_HEAD(&new_proc->p_child);
+        INIT_LIST_HEAD(&new_proc->p_sib);
+        new_proc->p_semAdd = NULL;
         new_proc->p_time = 0;                   //inizializzo il tempo a 0
         new_proc->p_pid = pid_count++;          //assegno il pid successivo al processo
         for(int i=0; i<NS_TYPE_MAX; i++){      
             new_proc->namespaces[i] = ns;       //controllare inizializzazione namespace
         }
+        process_count++;
+        insertProcQ(ready_queue, new_proc);     //inseriamo in coda il processo
+        insertChild(active_process, new_proc);  //inseriamo new_proc come figlio di active_process
         return new_proc->p_pid;
     }
     else{
@@ -83,6 +87,7 @@ int DOIO(int *cmdAddr, int *cmdValues){
 
 int GetCPUTime(){
     return active_process->p_time;
+    STCK //potrebbe servire il timer TOD e questa macro serve per leggerlo
     //bisogna sommargli il tempo accumulato nel quanto corrente
 }
 
