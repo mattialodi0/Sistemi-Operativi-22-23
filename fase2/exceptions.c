@@ -86,7 +86,7 @@ void TLBExceptionHandler() {
             and pass control to a routine specified by the Support Level */
         //Copy the saved exception state from the BIOS Data Page to the correct sup_exceptState field of the Current Process. 
         state_t state = *(state_t*) 0x0FFFF000;
-        active_process->p_supportStruct->sup_exceptState[0] = state; 
+        active_process->p_supportStruct->sup_exceptState[PGFAULTEXCEPT] = state; 
         //forse serve salvare anche le altre info
 
         //Perform a LDCXT using the fields from the correct sup_exceptContext field of the Current Process.
@@ -94,8 +94,6 @@ void TLBExceptionHandler() {
         unsigned int status = state.status;
         unsigned int pc = state.pc_epc;
         LDCXT(sp, status, pc);
-
-        setINDEX(PGFAULTEXCEPT);
     }
 }
 
@@ -109,7 +107,7 @@ void ProgramTrapExceptionHandler() {
             and pass control to a routine specified by the Support Level */
         //Copy the saved exception state from the BIOS Data Page to the correct sup_exceptState field of the Current Process. 
         state_t state = *(state_t*) 0x0FFFF000;
-        active_process->p_supportStruct->sup_exceptState[0] = state; 
+        active_process->p_supportStruct->sup_exceptState[GENERALEXCEPT] = state; 
         //forse serve salvare anche le altre info
 
         //Perform a LDCXT using the fields from the correct sup_exceptContext field of the Current Process.
@@ -117,8 +115,6 @@ void ProgramTrapExceptionHandler() {
         unsigned int status = state.status;
         unsigned int pc = state.pc_epc;
         LDCXT(sp, status, pc);
-
-        setINDEX(GENERALEXCEPT);
     }
 }
 
