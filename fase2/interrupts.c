@@ -3,28 +3,38 @@
 
 
 void interruptHandler() {
-    //per sapere la causa si legge il reg. cause.IP
-    unsigned int line, cause;
+    //per trovare la linea di interrupt
+    unsigned int line, cause, dev_num;
     cause = getCAUSE();
     cause = cause & 1111111100000000;   //maschera per  avere IP
     cause = cause >> 8;
 
-    if(cause >= 10000000)
+    //per trovare anche il numero del device
+    if(cause >= 1000000)
         line = 1;
-    else if(cause >= 1000000)
-        line = 2;
     else if(cause >= 100000)
+        line = 2;
+    else if(cause >= 10000) {
         line = 3;
-    else if(cause >= 10000)
+        dev_num = find_dev_num(0x10000040);
+    }
+    else if(cause >= 1000) {
         line = 4;
-    else if(cause >= 1000)
+        dev_num = find_dev_num(0x10000040 + 0x04);
+    }
+    else if(cause >= 100) {
         line = 5;
-    else if(cause >= 100)
+        dev_num = find_dev_num(0x10000040 + 0x08);
+    }
+    else if(cause >= 10) {
         line = 6;
-    else if(cause >= 10)
+        dev_num = find_dev_num(0x10000040 + 0x0C);
+    }
+    else if(cause >= 1) {
         line = 7;
-    else if(cause == 1)
-        line = 8;
+        dev_num = find_dev_num(0x10000040 + 0x10);
+    }
+
 
     //in caso di più interrupt si risolve quello con priorità più alta (switch)
     switch (line)
@@ -41,25 +51,18 @@ void interruptHandler() {
         break;
     case 3:
         //disk devices
-        nonTimerInterrupt();
-        break;
     case 4:
         //flash devices
-        nonTimerInterrupt();
-        break;
     case 5:
         //network devices
-        nonTimerInterrupt();
-        break;
     case 6:
         //printer devices
-        nonTimerInterrupt();
+        nonTimerInterrupt(line, dev_num);
         break;
     case 7:     //prima in scrittura poi in lettura
         //terminal devices
-        nonTimerInterrupt();
+        nonTimerInterrupt(line, dev_num);
         break;
-    
     default:
         break;
     }
@@ -90,10 +93,9 @@ void ITInterrupt() {
     //LDST per tornare il controllo al processo corrente
 }
 
-void nonTimerInterrupt() {
+void nonTimerInterrupt(int int_line_no, int dev_num) {
     //calcolare l'ind. per il device register
-    int dev_reg_addr;
-    //...
+    unsigned int dev_reg_addr =  0x10000054 + ((int_line_no - 3) * 0x80) + (dev_num * 0x10);
 
     //salvare lo status code del device register 
     //int status_code = ;
@@ -108,4 +110,28 @@ void nonTimerInterrupt() {
     //mettere il processo nella resy queue
 
     //LDST per tornare il controllo al processo corrente
+}
+
+
+
+unsigned int find_dev_num(unsigned int  bit_map_word) {
+    unsigned int num;
+    if(bit_map_word >= 10000000)
+        num = 7;
+    else if(bit_map_word >= 1000000)
+        num = 6;
+    else if(bit_map_word >= 100000)
+        num = 5;
+    else if(bit_map_word >= 10000)
+        num = 4;
+    else if(bit_map_word >= 1000)
+        num = 3;
+    else if(bit_map_word >= 100)
+        num = 2;
+    else if(bit_map_word >= 10)
+        num = 1;
+    else if(bit_map_word >= 1)
+        num = 0;
+
+    return num;
 }
