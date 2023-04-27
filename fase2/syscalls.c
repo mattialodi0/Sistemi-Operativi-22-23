@@ -46,7 +46,8 @@ void Passeren(int *semaddr){
     if(*semaddr == 0) {
         soft_blocked_count++;
         //salvataggio dello stato
-        //...
+        STST(&active_process->p_s);     //MA setta il PC = 0
+
         insertBlocked(semaddr, active_process);
     }
     else {
@@ -66,7 +67,8 @@ void Verhogen(int *semaddr){
     if(*semaddr == 1) {
         soft_blocked_count++;
         //salvataggio dello stato
-        //...
+        STST(&active_process->p_s);     //MA setta il PC = 0
+
         insertBlocked(semaddr, active_process);
     }
     else {
@@ -138,6 +140,11 @@ int GetChildren(int *children, int size){
 
 //confronta i namespaces, un campo alla volta, da implementare
 bool eqNS(nsd_t *a[], nsd_t *b[]) {
-    return false;
+    bool res=true;
+    for (int i=0; i<MAXPROC; i++) {
+        if (a[i] != b[i]) res=false;
+    }
+
+    return res;
 }
 
