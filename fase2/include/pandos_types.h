@@ -11,40 +11,44 @@
 #include "pandos_const.h"
 #include <list.h>
 
-
 /* PID namespace */
 #define NS_PID 0
 #define NS_TYPE_LAST NS_PID
 #define NS_TYPE_MAX (NS_TYPE_LAST + 1)
 
-typedef signed int   cpu_t;
+typedef signed int cpu_t;
 typedef unsigned int memaddr;
 
-
 /* Page Table Entry descriptor */
-typedef struct pteEntry_t {
+typedef struct pteEntry_t
+{
     unsigned int pte_entryHI;
     unsigned int pte_entryLO;
 } pteEntry_t;
 
-/* Support level context */
-typedef struct context_t {
-    unsigned int stackPtr;
-    unsigned int status;
-    unsigned int pc;
+/* process context */
+typedef struct context_t
+{
+    /* process context fields */
+    unsigned int c_stackPtr, /* stack pointer value */
+        c_status,            /* status reg value */
+        c_pc;                /* PC address */
 } context_t;
 
-
-/* Support level descriptor */
-typedef struct support_t {
-    int        sup_asid;                        /* process ID					*/
-    state_t    sup_exceptState[2];              /* old state exceptions			*/
-    context_t  sup_exceptContext[2];            /* new contexts for passing up	*/
-    pteEntry_t sup_privatePgTbl[USERPGTBLSIZE]; /* user page table				*/
+typedef struct support_t
+{
+    int sup_asid;                   /* Process Id (asid) */
+    state_t sup_exceptState[2];     /* stored excpt states */
+    context_t sup_exceptContext[2]; /* pass up contexts */
+    pteEntry_t sup_privatePgTbl[USERPGTBLSIZE]; /* user page table */
 } support_t;
 
+/* Exceptions related constants */
+#define PGFAULTEXCEPT 0
+#define GENERALEXCEPT 1
 
-typedef struct nsd_t {
+typedef struct nsd_t
+{
     /* Namespace type */
     int n_type;
 
@@ -53,22 +57,23 @@ typedef struct nsd_t {
 } nsd_t, *nsd_PTR;
 
 /* process table entry type */
-typedef struct pcb_t {
+typedef struct pcb_t
+{
     /* process queue  */
     struct list_head p_list;
 
     /* process tree fields */
-    struct pcb_t    *p_parent; /* ptr to parent	*/
-    struct list_head p_child;  /* children list */
-    struct list_head p_sib;    /* sibling list  */
+    struct pcb_t *p_parent;   /* ptr to parent	*/
+    struct list_head p_child; /* children list */
+    struct list_head p_sib;   /* sibling list  */
 
     /* process status information */
-    state_t p_s;    /* processor state */
-    cpu_t   p_time; /* cpu time used by proc */
+    state_t p_s;  /* processor state */
+    cpu_t p_time; /* cpu time used by proc */
 
     /* Pointer to the semaphore the process is currently blocked on */
     int *p_semAdd;
-    
+
     /* Pointer to the support struct */
     support_t *p_supportStruct;
 
@@ -79,9 +84,9 @@ typedef struct pcb_t {
     nsd_t *namespaces[NS_TYPE_MAX];
 } pcb_t, *pcb_PTR;
 
-
 /* semaphore descriptor (SEMD) data structure */
-typedef struct semd_t {
+typedef struct semd_t
+{
     /* Semaphore key */
     int *s_key;
     /* Queue of PCBs blocked on the semaphore */

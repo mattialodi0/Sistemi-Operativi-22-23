@@ -7,12 +7,40 @@ void exceptionHandler() {
     status &= DISABLEINTS;    //disabilita anche gli interrupt
     LDCXT(active_process->p_s.reg_sp, status, active_process->p_s.pc_epc);    //il valore che ci interessa settare è il secondo
 
-    int cause_reg, exc_code;
+    int cause_reg, exc_code, cause;
     cause_reg = getCAUSE();
     exc_code = cause_reg & 124;    //in binario: 1111100, la maschera per excCode
-    //bisogna trasformare il binario in intero
-
-    switch (exc_code)
+    
+    //trasformazione da binario a intero
+    exc_code >> 2;
+    if(exc_code == 0) 
+        cause = 0;
+    else if(exc_code == 1)
+        cause = 1;
+    else if(exc_code == 10)
+        cause = 2;
+    else if(exc_code == 11)
+        cause = 3;
+    else if(exc_code == 100)
+        cause = 4;
+    else if(exc_code == 101)
+        cause = 5;
+    else if(exc_code == 110)
+        cause = 6;
+    else if(exc_code == 111)
+        cause = 7;
+    else if(exc_code == 1000)
+        cause = 8;
+    else if(exc_code == 1001)
+        cause = 9;
+    else if(exc_code == 1010)
+        cause = 10;
+    else if(exc_code == 1011)
+        cause = 11;
+    else if(exc_code == 1100)
+        cause = 12;
+    
+    switch (cause)
     {
     case 0:
         interruptHandler();
@@ -47,29 +75,50 @@ void exceptionHandler() {
 }
 
 
+//standard Pass Up or Die operation con PGFAULTEXCEPT come index value:
 void TLBExceptionHandler() {
-    //bisogna realizzare una standard Pass Up or Die operation con PGFAULTEXCEPT come index value:
 
     if(active_process->p_supportStruct == NULL)
         TerminateProcess(0);    //elimina il processo correte e la sua progenie
     else {
-        /*
-            copy the saved exception state into a location accessible to the Support Level,
-             and pass control to a routine specified by the Support Level
-        */
+        
+        /*  copy the saved exception state into a location accessible to the Support Level,
+            and pass control to a routine specified by the Support Level */
+        //Copy the saved exception state from the BIOS Data Page to the correct sup_exceptState field of the Current Process. 
+        state_t state = *(state_t*) 0x0FFFF000;
+        active_process->p_supportStruct->sup_exceptState[0] = state; 
+        //forse serve salvare anche le altre info
+
+        //Perform a LDCXT using the fields from the correct sup_exceptContext field of the Current Process.
+        unsigned int sp = state.reg_sp;
+        unsigned int status = state.status;
+        unsigned int pc = state.pc_epc;
+        LDCXT(sp, status, pc);
+
+        setINDEX(PGFAULTEXCEPT);
     }
 }
 
+//standard Pass Up or Die operation con GENERALEXCEPT come index value
 void ProgramTrapExceptionHandler() {
-    //bisogna realizzare una standard Pass Up or Die operation con GENERALEXCEPT come index value:
 
     if(active_process->p_supportStruct == NULL)
         TerminateProcess(0);    //elimina il processo correte e la sua progenie
     else {
-        /*
-            copy the saved exception state into a location accessible to the Support Level,
-             and pass control to a routine specified by the Support Level
-        */
+        /*  copy the saved exception state into a location accessible to the Support Level,
+            and pass control to a routine specified by the Support Level */
+        //Copy the saved exception state from the BIOS Data Page to the correct sup_exceptState field of the Current Process. 
+        state_t state = *(state_t*) 0x0FFFF000;
+        active_process->p_supportStruct->sup_exceptState[0] = state; 
+        //forse serve salvare anche le altre info
+
+        //Perform a LDCXT using the fields from the correct sup_exceptContext field of the Current Process.
+        unsigned int sp = state.reg_sp;
+        unsigned int status = state.status;
+        unsigned int pc = state.pc_epc;
+        LDCXT(sp, status, pc);
+
+        setINDEX(GENERALEXCEPT);
     }
 }
 

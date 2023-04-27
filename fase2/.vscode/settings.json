@@ -6,6 +6,7 @@
         "lib_def.h": "c",
         "syscalls.h": "c",
         "exceptions.h": "c",
-        "interrupts.h": "c"
+        "interrupts.h": "c",
+        "scheduler.h": "c"
     }
 }
