@@ -12,7 +12,7 @@ void exceptionHandler() {
     exc_code = cause_reg & 124;    //in binario: 1111100, la maschera per excCode
     
     //trasformazione da binario a intero
-    exc_code >> 2;
+    exc_code = exc_code >> 2;
     if(exc_code == 0) 
         cause = 0;
     else if(exc_code == 1)
@@ -69,7 +69,7 @@ void exceptionHandler() {
     }
 
     //abilita gli interrupt
-    unsigned int status = getSTATUS();
+    status = getSTATUS();
     status |= ~DISABLEINTS;    //abilita gli interrupt
     LDCXT(active_process->p_s.reg_sp, status, active_process->p_s.pc_epc);    //il valore che ci interessa settare è il secondo
 }

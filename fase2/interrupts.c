@@ -4,7 +4,27 @@
 
 void interruptHandler() {
     //per sapere la causa si legge il reg. cause.IP
-    int line;
+    unsigned int line, cause;
+    cause = getCAUSE();
+    cause = cause & 1111111100000000;   //maschera per  avere IP
+    cause = cause >> 8;
+
+    if(cause >= 10000000)
+        line = 1;
+    else if(cause >= 1000000)
+        line = 2;
+    else if(cause >= 100000)
+        line = 3;
+    else if(cause >= 10000)
+        line = 4;
+    else if(cause >= 1000)
+        line = 5;
+    else if(cause >= 100)
+        line = 6;
+    else if(cause >= 10)
+        line = 7;
+    else if(cause == 1)
+        line = 8;
 
     //in caso di più interrupt si risolve quello con priorità più alta (switch)
     switch (line)

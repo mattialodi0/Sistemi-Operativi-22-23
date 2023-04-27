@@ -82,7 +82,7 @@ void Verhogen(int *semaddr){
 }
 
 int DOIO(int *cmdAddr, int *cmdValues){
-
+    //capitolo 5 della documentazione
 }
 
 int GetCPUTime(){
