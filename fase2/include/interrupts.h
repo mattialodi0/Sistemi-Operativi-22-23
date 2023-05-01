@@ -12,3 +12,5 @@ void PLTInterrupt();
 void ITInterrupt();
 
 void nonTimerInterrupt();
+
+unsigned int find_dev_num(unsigned int  bit_map_word);

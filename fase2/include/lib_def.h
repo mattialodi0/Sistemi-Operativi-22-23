@@ -23,3 +23,15 @@ int pid_count;
 
 //semaforo per lo pseudo clock
 int IT_sem;     // da verificare se vada inizializzato a 0
+
+
+
+//questa è una magia, non preoccupatevi
+#include <stddef.h>
+void *memcpy(void *dest, const void *src, size_t n)
+{
+    for (size_t i = 0; i < n; i++)
+    {
+        ((char*)dest)[i] = ((char*)src)[i];
+    }
+}

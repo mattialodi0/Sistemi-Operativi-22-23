@@ -89,7 +89,7 @@ int DOIO(int *cmdAddr, int *cmdValues){
 
 int GetCPUTime(){
     return active_process->p_time;
-    STCK //potrebbe servire il timer TOD e questa macro serve per leggerlo
+    //STCK(); //potrebbe servire il timer TOD e questa macro serve per leggerlo
     //bisogna sommargli il tempo accumulato nel quanto corrente
 }
 
@@ -113,12 +113,12 @@ int GetProcessId(int parent){
 int GetChildren(int *children, int size){
     struct list_head *pos;
     int n = 0;
-    pcb_t *child = container_of(active_process->p_child, pid_t, p_child);
-    pcb_t *child_sib = container_of(child->p_sib, pid_t, p_sib);
+    /*pcb_t *child = container_of(active_process->p_child, pcb_t, p_child);
+    pcb_t *child_sib = container_of(child->p_sib, pcb_t, p_sib);
 
     if(eqNS(child->namespaces, active_process->namespaces)) n++;
     list_for_each_entry(pos, child_sib, p_sib) {
-        if(eqNS(container_of(pos, pid_t, p_sib)->namespaces, active_process->namespaces))    
+        if(eqNS(container_of(pos, pcb_t, p_sib)->namespaces, active_process->namespaces))    
             n++;
     }
 
@@ -129,10 +129,10 @@ int GetChildren(int *children, int size){
     }
     list_for_each_entry(pos, child_sib, p_sib) {
         if(i >= size) break;
-        if(eqNS(container_of(pos, pid_t, p_sib)->namespaces, active_process->namespaces))    
-            children[i] = container_of(pos, pid_t, p_sib)->p_pid;
+        if(eqNS(container_of(pos, pcb_t, p_sib)->namespaces, active_process->namespaces))    
+            children[i] = container_of(pos, pcb_t, p_sib)->p_pid;
             i++;
-    }
+    }*/
 
     return n;
 }   

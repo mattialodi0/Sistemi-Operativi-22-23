@@ -7,6 +7,7 @@
         "syscalls.h": "c",
         "exceptions.h": "c",
         "interrupts.h": "c",
-        "scheduler.h": "c"
+        "scheduler.h": "c",
+        "pandos_const.h": "c"
     }
 }
