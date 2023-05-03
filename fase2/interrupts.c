@@ -87,10 +87,19 @@ void ITInterrupt() {
     LDIT(100000/timescale); // carica nell'interval timer  T * la timescale del processore
 
     //sbloccare tutti i processi fermi al semaforo dello pseudo clock
+    while(headBlocked(&IT_sem) != NULL) {
+        if(IT_sem == 1) 
+            Passeren(&IT_sem);
+        else if(IT_sem == 0)
+            Verhogen(&IT_sem);
+    }
 
     //settare il semaforo a 0
+    IT_sem = 0;
 
     //LDST per tornare il controllo al processo corrente
+    state_t* state = (state_t*) BIOSDATAPAGE; //costante definita in umps
+    LDST(state);
 }
 
 void nonTimerInterrupt(int int_line_no, int dev_num) {
@@ -98,18 +107,24 @@ void nonTimerInterrupt(int int_line_no, int dev_num) {
     unsigned int dev_reg_addr =  0x10000054 + ((int_line_no - 3) * 0x80) + (dev_num * 0x10);
 
     //salvare lo status code del device register 
-    //int status_code = ;
+    unsigned int status_code = ;
 
     //ack dell'interrupt: ACKN del device register
-    
+    *dev_reg_addr = ACKN;
+
     //V sul semaforo associato al device dell'interrupt per sbloccare il processo che sta aspettando la fine dell'I/O
     //se la V non ritorna il pcb salta le prossime due operazioni
+    pcb_t* proc;
 
     //mettere lo status code nel reg. v0 del pcb del processo sbloccato
+    proc->state->p_s.s_v0 = status_code;
 
-    //mettere il processo nella resy queue
+    //mettere il processo nella redy queue
+    insertProcQ(ready_queue, proc);
 
     //LDST per tornare il controllo al processo corrente
+    state_t* state = (state_t*) BIOSDATAPAGE; //costante definita in umps
+    LDST(state);
 }
 
 
