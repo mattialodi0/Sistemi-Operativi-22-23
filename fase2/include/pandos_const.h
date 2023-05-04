@@ -49,6 +49,7 @@
 #define PASSEREN      3
 #define VERHOGEN      4
 #define DOIO          5
+#define DOIO          5
 #define GETTIME       6
 #define CLOCKWAIT     7
 #define GETSUPPORTPTR 8
