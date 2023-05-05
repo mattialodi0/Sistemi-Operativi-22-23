@@ -120,6 +120,8 @@ void ProgramTrapExceptionHandler() {
 
 
 void syscallHandler() {
+    //controllo se si è in user mode, altrimenti Trap
+
     int v0, v1, v2, v3;
     //vanno presi dai registri e castati
 
@@ -137,8 +139,8 @@ void syscallHandler() {
     case VERHOGEN:
         Verhogen((int *)v1);
         break;
-    case IOWAIT:
-        DOIO((int *)v1, (int *)v2);
+    case DOIO:
+        DoIO((int *)v1, (int *)v2);
         break;
     case GETTIME:
         GetCPUTime();

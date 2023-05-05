@@ -107,17 +107,17 @@ void nonTimerInterrupt(int int_line_no, int dev_num) {
     unsigned int dev_reg_addr =  0x10000054 + ((int_line_no - 3) * 0x80) + (dev_num * 0x10);
 
     //salvare lo status code del device register 
-    unsigned int status_code = ;
+    unsigned int status_code = 0;       //????????????????????? da cambiare  
 
     //ack dell'interrupt: ACKN del device register
-    *dev_reg_addr = ACKN;
+    dev_reg_addr = ACK;         //??????????????????????????????????? sicuramente sbagliato
 
     //V sul semaforo associato al device dell'interrupt per sbloccare il processo che sta aspettando la fine dell'I/O
     //se la V non ritorna il pcb salta le prossime due operazioni
     pcb_t* proc;
 
     //mettere lo status code nel reg. v0 del pcb del processo sbloccato
-    proc->state->p_s.s_v0 = status_code;
+    proc->p_s.reg_v0 = status_code;
 
     //mettere il processo nella redy queue
     insertProcQ(ready_queue, proc);

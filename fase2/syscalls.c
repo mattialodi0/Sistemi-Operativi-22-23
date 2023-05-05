@@ -51,11 +51,12 @@ void Passeren(int *semaddr){
         insertBlocked(semaddr, active_process);
     }
     else {
+        *semaddr--;
         pcb_t *waked_proc = removeBlocked(semaddr);
         if(waked_proc != NULL) {
             //wakeup proc
             //...
-            soft_blocked_count++;
+            soft_blocked_count--;
         }
         else 
             *semaddr--;
@@ -72,18 +73,18 @@ void Verhogen(int *semaddr){
         insertBlocked(semaddr, active_process);
     }
     else {
+        *semaddr++;
         pcb_t *waked_proc = removeBlocked(semaddr);
         if(waked_proc != NULL) {
-            //wakeup proc
-            //...
-            soft_blocked_count++;
+            insertProcQ(ready_queue, waked_proc);            
+            soft_blocked_count--;
         }
         else 
             *semaddr++;
     }
 }
 
-int DOIO(int *cmdAddr, int *cmdValues){
+int DoIO(int *cmdAddr, int *cmdValues){
     //capitolo 5 della documentazione
 }
 

@@ -21,7 +21,7 @@ void Passeren(int *semaddr);
 void Verhogen(int *semaddr);
 
 // effettua un'operazione di I/O
-int DOIO(int *cmdAddr, int *cmdValues);
+int DoIO(int *cmdAddr, int *cmdValues);
 
 // restituisce il tempo di esecuzione del processo che l'ha chiamata fino a quel momento
 int GetCPUTime();
