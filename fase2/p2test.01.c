@@ -229,7 +229,8 @@ void addokbuf(char *strp) {
     mp--;
     termprint(tstrp, 0);
 }
-void test() { 
+void test() { //addokbuf("ok");
+
 
     SYSCALL(VERHOGEN, (int)&sem_testsem, 0, 0); /* V(sem_testsem)   */
 

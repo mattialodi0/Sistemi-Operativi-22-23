@@ -8,17 +8,17 @@
 //se il process count è 0 richiama l'HALT BIOS
 //se il process count è > 0 e il Soft-Block Count > 0 va in Wait State 
 //controllo se process count > 0 e Soft-Block Count == 0 => deadlock. ???. Richiamare PANIC BIOS.
-
+extern void addokbuf();
 
 void scheduler() {
-    active_process = removeProcQ(ready_queue);
+    active_process = removeProcQ(&ready_queue);
     
     //load 5 ms in PLT
     setTIMER(5);
 
     //load state
-    LDST(&active_process->p_s);
-
+    LDST(&active_process->p_s);             //SBAGLIATO
+addokbuf("000");
     if(process_count == 0) {
         HALT();
     }

@@ -18,7 +18,7 @@ int process_count;
 //processi bloccati
 int soft_blocked_count;
 //processi ready
-struct list_head *ready_queue; 
+struct list_head ready_queue; 
 //puntatore al proc attivo
 pcb_t *active_process;
 //contatore di pid usato in exeptions.c

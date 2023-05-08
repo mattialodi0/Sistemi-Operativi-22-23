@@ -1,7 +1,7 @@
 #include <lib_def.h>
 #include <scheduler.h>
 
-extern struct list_head *ready_queue; 
+extern struct list_head ready_queue; 
 extern pcb_t *active_process;   
 extern int IT_sem;
 

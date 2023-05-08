@@ -8,6 +8,7 @@
         "exceptions.h": "c",
         "interrupts.h": "c",
         "scheduler.h": "c",
-        "pandos_const.h": "c"
+        "pandos_const.h": "c",
+        "typeinfo": "c"
     }
 }

@@ -14,7 +14,7 @@ int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
         new_proc->p_s = *statep;              // assegno allo stato il parametro in input
         new_proc->p_supportStruct = supportp; // assegno alla struttura di supporto il parametro in input
         process_count++;
-        insertProcQ(ready_queue, new_proc);    // inseriamo in coda il processo
+        insertProcQ(&ready_queue, new_proc);    // inseriamo in coda il processo
         insertChild(active_process, new_proc); // inseriamo new_proc come figlio di active_process
         new_proc->p_semAdd = NULL;
         new_proc->p_time = 0; // inizializzo il tempo a 0
@@ -98,7 +98,7 @@ void Verhogen(int *semaddr)
         pcb_t *waked_proc = removeBlocked(semaddr);
         if (waked_proc != NULL)
         {
-            insertProcQ(ready_queue, waked_proc);
+            insertProcQ(&ready_queue, waked_proc);
             soft_blocked_count--;
         }
         else

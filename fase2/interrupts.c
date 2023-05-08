@@ -77,7 +77,7 @@ void PLTInterrupt() {
     //copiare lo stato del processore (all'inizio della BIOS data page) nel pcb del processo corrente
     active_process->p_s = *(state_t *)0x0FFFF000;  //non so se sia giusto il cast                                  **************************
 
-    insertProcQ(ready_queue, active_process);
+    insertProcQ(&ready_queue, active_process);
 
     scheduler();
 
@@ -120,7 +120,7 @@ void nonTimerInterrupt(int int_line_no, int dev_num) {
     proc->p_s.reg_v0 = status_code;
 
     //mettere il processo nella redy queue
-    insertProcQ(ready_queue, proc);
+    insertProcQ(&ready_queue, proc);
 
     //LDST per tornare il controllo al processo corrente
     state_t* state = (state_t*) BIOSDATAPAGE; //costante definita in umps

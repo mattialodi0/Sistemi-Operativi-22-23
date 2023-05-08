@@ -4,15 +4,15 @@
 
 extern void test();
 extern void uTLB_RefillHandler();
-extern struct list_head *ready_queue; 
+extern struct list_head ready_queue; 
 extern pcb_t *active_process;   
 extern int process_count;
 extern int soft_blocked_count;
 extern int IT_sem;
 extern void exceptionHandler();
-extern void addokbuf();
 
-int main(void) {  addokbuf("ok");
+
+int main(void) {  
     //processi vivi
     process_count = 0;
 
@@ -20,8 +20,7 @@ int main(void) {  addokbuf("ok");
     soft_blocked_count = 0;
 
     //processi ready
-    ready_queue; 
-    mkEmptyProcQ(ready_queue);
+    mkEmptyProcQ(&ready_queue);
 
     //puntatore al proc attivo
     active_process = NULL;   
@@ -69,7 +68,7 @@ int main(void) {  addokbuf("ok");
     //creazione di un processo      cap. 2.2 della documentazione
     pcb_t *first_proc = allocPcb();
     process_count++;
-    insertProcQ(ready_queue, first_proc);
+    insertProcQ(&ready_queue, first_proc);
 
     first_proc->p_s.entry_hi = 0;      //pid forse
     first_proc->p_s.cause;
@@ -84,7 +83,6 @@ int main(void) {  addokbuf("ok");
     INIT_LIST_HEAD(&first_proc->p_sib);
     first_proc->p_time = 0;
     first_proc->p_semAdd = NULL;
-
     //chiamata allo scheduler
     scheduler();
 
