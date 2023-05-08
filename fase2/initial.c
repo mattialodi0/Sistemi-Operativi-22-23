@@ -10,8 +10,9 @@ extern int process_count;
 extern int soft_blocked_count;
 extern int IT_sem;
 extern void exceptionHandler();
+extern void addokbuf();
 
-int main(void) {
+int main(void) {  addokbuf("ok");
     //processi vivi
     process_count = 0;
 
