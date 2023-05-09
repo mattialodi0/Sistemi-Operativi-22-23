@@ -32,7 +32,7 @@ typedef struct pcb_t {
     nsd_t *p_namespaces[MAXSEM]; //ACTIVE namespace for each type
 } pcb_t, *pcb_PTR;*/
 
-
+extern int emptyChild();
 
 
 static nsd_t *nsFree_h[MAXTYPES];

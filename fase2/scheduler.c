@@ -9,6 +9,7 @@
 //se il process count è > 0 e il Soft-Block Count > 0 va in Wait State 
 //controllo se process count > 0 e Soft-Block Count == 0 => deadlock. ???. Richiamare PANIC BIOS.
 extern void addokbuf();
+extern void debug();
 
 void scheduler() {
     active_process = removeProcQ(&ready_queue);
@@ -16,9 +17,23 @@ void scheduler() {
     //load 5 ms in PLT
     setTIMER(5);
 
+    //mette il proc in kernel mode
+    // active_process->p_s.status = active_process->p_s.status | 2;
+    // active_process->p_s.status = active_process->p_s.status | 8;
+
+
+    if(((active_process->p_s.status & 2) == 2))
+        addokbuf("kernel mode c\n");
+    
+    if(((active_process->p_s.status & 8) == 8))
+        addokbuf("kernel mode p\n");
+    if(((active_process->p_s.status | !2) == 0))
+        addokbuf("user mode");
+
     //load state
-    LDST(&active_process->p_s);             //SBAGLIATO
+    LDST(&(active_process->p_s));
 addokbuf("000");
+
     if(process_count == 0) {
         HALT();
     }
