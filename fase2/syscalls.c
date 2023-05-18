@@ -70,6 +70,8 @@ void Passeren(int *semaddr)
         STST(&active_process->p_s); // MA setta il PC = 0
 
         insertBlocked(semaddr, active_process);
+        //forse va richiamato lo scheduler per selezionare un nuovo processo
+        //scheduler();
     }
     else
     {
@@ -78,7 +80,7 @@ void Passeren(int *semaddr)
         if (waked_proc != NULL)
         {
             // wakeup proc
-            //...
+            insertProcQ(&ready_queue, waked_proc);
             soft_blocked_count--;
         }
         else
