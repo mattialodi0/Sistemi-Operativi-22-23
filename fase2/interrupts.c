@@ -1,7 +1,6 @@
  #include <interrupts.h>
 
 
-
 void interruptHandler() {
     //per trovare la linea di interrupt
     unsigned int line, cause, dev_num;

@@ -1,5 +1,5 @@
 #include <lib_def.h>
-#include <scheduler.h>
+#include <syscalls.h>
 
 extern struct list_head ready_queue; 
 extern pcb_t *active_process;   

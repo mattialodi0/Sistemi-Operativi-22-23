@@ -70,12 +70,23 @@ int main(void) {
     process_count++;
     insertProcQ(&ready_queue, first_proc);
 
-    first_proc->p_s.entry_hi = 0;      //pid forse
-    first_proc->p_s.status = first_proc->p_s.status | 17826302;   //KUp = 0 per la kernel-mode, IEp = 1 e IM = 1 per abilitare gli interrupt, TE = 1 per l'interval timer
+    //set dello stato 
+    
+    //interrupt abilitati 
+    first_proc->p_s.status |= IEPON;
+    first_proc->p_s.status |= IMON;
+    //PLT abilitato
+    first_proc->p_s.status |= TEBITON;
+    //kernel mode abilitata
+    first_proc->p_s.status &= !USERPON;
+
     first_proc->p_s.pc_epc = (memaddr) test;
-    RAMTOP(first_proc->p_s.reg_sp);
+
+//    first_proc->p_s.entry_hi = 0;      //pid forse
+
+    RAMTOP(first_proc->p_s.reg_sp);     //setta sp a RAMTOP
     first_proc->p_supportStruct = NULL;     //settata la struttura di supporto a NULL
-    first_proc->p_pid = 0;                  //setta il pid
+    first_proc->p_pid = 1;                  //setta il pid
 
     first_proc->p_parent = NULL;    //vanno cambiati  
     INIT_LIST_HEAD(&first_proc->p_child);

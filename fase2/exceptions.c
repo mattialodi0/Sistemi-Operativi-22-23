@@ -1,6 +1,5 @@
 #include <exceptions.h>
 
-extern void addokbuf();
 
 void exceptionHandler() {
     //disabilita gli interrupt
@@ -8,7 +7,6 @@ void exceptionHandler() {
     status &= DISABLEINTS;    //disabilita anche gli interrupt
     LDCXT(active_process->p_s.reg_sp, status, active_process->p_s.pc_epc);    //il valore che ci interessa settare è il secondo
 
-    addokbuf("ok");
     int cause_reg, exc_code, cause;
     cause_reg = getCAUSE();
     exc_code = cause_reg & 124;    //in binario: 1111100, la maschera per excCode
