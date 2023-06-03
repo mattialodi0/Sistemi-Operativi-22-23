@@ -4,12 +4,27 @@
 
 extern void test();
 extern void uTLB_RefillHandler();
+extern void exceptionHandler();
+/*
 extern struct list_head ready_queue; 
 extern pcb_t *active_process;   
 extern int process_count;
 extern int soft_blocked_count;
 extern int IT_sem;
-extern void exceptionHandler();
+*/
+//processi vivi
+int process_count;
+//processi bloccati
+int soft_blocked_count;
+//processi ready
+struct list_head ready_queue; 
+//puntatore al proc attivo
+pcb_t *active_process;
+//contatore di pid usato in exeptions.c
+int pid_count;
+
+//semaforo per lo pseudo clock
+int IT_sem;     // da verificare se vada inizializzato a 0
 
 
 int main(void) {  

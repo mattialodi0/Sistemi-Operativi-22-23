@@ -10,6 +10,7 @@
 //controllo se process count > 0 e Soft-Block Count == 0 => deadlock. ???. Richiamare PANIC BIOS.
 
 extern void debug();
+extern int process_count;
 
 void scheduler() {
     active_process = removeProcQ(&ready_queue);

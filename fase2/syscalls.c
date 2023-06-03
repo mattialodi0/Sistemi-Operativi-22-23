@@ -1,5 +1,7 @@
 #include <syscalls.h>
 
+extern int pid_count;
+
 // ALLA FINE DELLE SYSCALL CHE NON BLOCCANO O TERMINANO IL PROCESSO:
 // deve essere restituito il controllo al processo aumentando il suo pc di 4    
 int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)

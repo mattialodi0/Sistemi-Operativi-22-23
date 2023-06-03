@@ -12,7 +12,7 @@
 
 #define timescale  (* ((cpu_t *) TIMESCALEADDR))     //il valore può essere letto dal registro 0x1000.0024 ma per ora assumiamo sia 1
 
-
+/*
 //processi vivi
 int process_count;
 //processi bloccati
@@ -27,7 +27,7 @@ int pid_count;
 //semaforo per lo pseudo clock
 int IT_sem;     // da verificare se vada inizializzato a 0
 
-
+*/
 
 
 //funzione usata per mettere un breakpoint
