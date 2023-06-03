@@ -17,15 +17,11 @@ void scheduler() {
     //load 5 ms in PLT
     setTIMER(5);
 
-    //mette il proc in kernel mode
-    // active_process->p_s.status = active_process->p_s.status | 2;
-    // active_process->p_s.status = active_process->p_s.status | 8;
-
-
 //***********************************************************************************************
     //load state
-    LDST(&(active_process->p_s));
-return 0;
+    LDST((STATE_PTR) (&(active_process->p_s)));
+
+PANIC();
 
     if(process_count == 0) {
         HALT();
