@@ -87,8 +87,9 @@ int main(void) {
 
     //set dello stato 
     
+    //STST(&(first_proc->p_s.status));
+    first_proc->p_s.status = getSTATUS();
     //interrupt abilitati 
-    STST(&(first_proc->p_s.status));
     first_proc->p_s.status |= IEPON;
     first_proc->p_s.status |= IMON;
     //PLT abilitato
