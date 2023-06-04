@@ -20,7 +20,6 @@ debug();
     //load state
     LDST((STATE_PTR) (&(active_process->p_s)));     
 
-
     if(process_count == 0) {
         HALT();
     }

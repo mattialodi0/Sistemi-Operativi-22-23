@@ -71,7 +71,7 @@ int main(void) {
     passupvector_t* puv = (passupvector_t*) PASSUPVECTOR;
     puv->tlb_refill_handler = (memaddr) uTLB_RefillHandler;
     puv->tlb_refill_stackPtr = 0x20001000;
-    puv->exception_handler = (memaddr) exceptionHandler;  //fooBar ancora da implementare; per ora ci mettiamo un ind a caso
+    puv->exception_handler = (memaddr) exceptionHandler;
     puv->exception_stackPtr = 0x20001000;
 
 
@@ -95,7 +95,9 @@ int main(void) {
     //PLT abilitato
     first_proc->p_s.status |= TEBITON;
     //kernel mode abilitata
-    //first_proc->p_s.status &= ~USERPON;
+    //first_proc->p_s.status &= ~USERPON; //lo è già
+    
+    //first_proc->p_s.status |= 0x00400000; //cambia come vengono gestite le eccezioni
 
     first_proc->p_s.pc_epc = (memaddr) test;
 

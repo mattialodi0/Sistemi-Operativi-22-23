@@ -6,9 +6,8 @@ void exceptionHandler() {
     //disabilita gli interrupt
     state_t state = active_process->p_s;
     state.status &= DISABLEINTS;
-debug();
+debug1();
     LDST(&state);
-debug();
 
     int cause_reg, exc_code, cause;
     cause_reg = getCAUSE();
