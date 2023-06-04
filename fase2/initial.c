@@ -88,12 +88,13 @@ int main(void) {
     //set dello stato 
     
     //interrupt abilitati 
+    STST(&(first_proc->p_s.status));
     first_proc->p_s.status |= IEPON;
     first_proc->p_s.status |= IMON;
     //PLT abilitato
     first_proc->p_s.status |= TEBITON;
     //kernel mode abilitata
-    first_proc->p_s.status &= !USERPON;
+    //first_proc->p_s.status &= ~USERPON;
 
     first_proc->p_s.pc_epc = (memaddr) test;
 

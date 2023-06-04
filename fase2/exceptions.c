@@ -1,11 +1,14 @@
 #include <exceptions.h>
 
 
+
 void exceptionHandler() {
     //disabilita gli interrupt
-    unsigned int status = getSTATUS();
-    status &= DISABLEINTS;    //disabilita anche gli interrupt
-    LDCXT(active_process->p_s.reg_sp, status, active_process->p_s.pc_epc);    //il valore che ci interessa settare è il secondo
+    state_t state = active_process->p_s;
+    state.status &= DISABLEINTS;
+debug();
+    LDST(&state);
+debug();
 
     int cause_reg, exc_code, cause;
     cause_reg = getCAUSE();
@@ -68,7 +71,7 @@ void exceptionHandler() {
     }
 
     //abilita gli interrupt
-    status = getSTATUS();
+    unsigned int status = getSTATUS();
     status |= ~DISABLEINTS;    //abilita gli interrupt
     LDCXT(active_process->p_s.reg_sp, status, active_process->p_s.pc_epc);    //il valore che ci interessa settare è il secondo
 }
