@@ -1,13 +1,12 @@
 #include <exceptions.h>
 
 
-
 void exceptionHandler() {
     //disabilita gli interrupt
     state_t state = active_process->p_s;
     state.status &= DISABLEINTS;
-debug1();
     LDST(&state);
+
 
     int cause_reg, exc_code, cause;
     cause_reg = getCAUSE();
