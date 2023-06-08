@@ -110,6 +110,7 @@ int main(void) {
     INIT_LIST_HEAD(&first_proc->p_sib);
     first_proc->p_time = 0;
     first_proc->p_semAdd = NULL;
+    
     //chiamata allo scheduler
     scheduler();
 
