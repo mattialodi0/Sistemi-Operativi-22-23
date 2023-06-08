@@ -27,7 +27,7 @@ int pid_count;
 int IT_sem;     // da verificare se vada inizializzato a 0
 
 
-int main(void) {  
+int main(void) {
     //processi vivi
     process_count = 0;
 
@@ -84,7 +84,6 @@ int main(void) {
     pcb_t *first_proc = allocPcb();
     process_count++;
     insertProcQ(&ready_queue, first_proc);
-
     //set dello stato 
     first_proc->p_s.status = getSTATUS();
     //interrupt abilitati 
@@ -113,6 +112,10 @@ int main(void) {
     
     //chiamata allo scheduler
     scheduler();
+
+    /*debug();
+    state_t st; STST(&st); LDST(&st);       //prova che LDST non va
+    debug1();*/
 
     return 0;
 }
