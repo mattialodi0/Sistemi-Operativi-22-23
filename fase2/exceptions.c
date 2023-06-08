@@ -2,11 +2,11 @@
 
 
 void exceptionHandler() {
+debug1();
     //disabilita gli interrupt
     state_t state = active_process->p_s;
     state.status &= DISABLEINTS;
-    LDST(&state);
-
+    LDST((STATE_PTR) &state);
 
     int cause_reg, exc_code, cause;
     cause_reg = getCAUSE();
