@@ -2,7 +2,7 @@
 
 
 void exceptionHandler() {
-debug1();
+
     //disabilita gli interrupt
     state_t state = active_process->p_s;
     state.status &= DISABLEINTS;

@@ -40,6 +40,9 @@ int main(void) {
     //puntatore al proc attivo
     active_process = NULL;   
 
+    //setta a 0 il semaforo dello pseudo clock
+    IT_sem = 0;
+    
     //array di semafori, uno per dispositivo
     //int sem_disp[DISPNUM];  un unico array
     int sem_dev_disk[8];
@@ -59,13 +62,6 @@ int main(void) {
         sem_dev_terminal_w[i] = 0;
     }
     
-    //setta a 0 il semaforo dello pseudo clock
-    IT_sem = 0;
-
-    //iniz. strutture fase 1
-    initPcbs();
-    initASH();
-    initNamespaces();
 
     //pass up vector, for processor 0 at 0x0FFF.F900
     passupvector_t* puv = (passupvector_t*) PASSUPVECTOR;
@@ -73,7 +69,12 @@ int main(void) {
     puv->tlb_refill_stackPtr = 0x20001000;
     puv->exception_handler = (memaddr) exceptionHandler;
     puv->exception_stackPtr = 0x20001000;
+    
 
+    //iniz. strutture fase 1
+    initPcbs();
+    initASH();
+    initNamespaces();
 
     //iniz. interval timer 100ms
     //unsigned int timescale = 0x1000.0024;     //per leggere il valore della timescale
