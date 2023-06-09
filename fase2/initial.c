@@ -64,12 +64,15 @@ int main(void) {
     
 
     //pass up vector, for processor 0 at 0x0FFF.F900
-    passupvector_t* puv = (passupvector_t*) PASSUPVECTOR;
+    //passupvector_t* puv = (passupvector_t*) PASSUPVECTOR;
     puv->tlb_refill_handler = (memaddr) uTLB_RefillHandler;
     puv->tlb_refill_stackPtr = 0x20001000;
     puv->exception_handler = (memaddr) exceptionHandler;
     puv->exception_stackPtr = 0x20001000;
-    
+    /*unsigned int* puv = (unsigned int*) PASSUPVECTOR; *puv = (memaddr) uTLB_RefillHandler;    //versione altrenativa ma da lo stesso errore
+    puv = PASSUPVECTOR + 0x04; *puv =  0x20001000;
+    puv = PASSUPVECTOR + 0x08; *puv = (memaddr) exceptionHandler;
+    puv = PASSUPVECTOR + 0x0C; *puv =  0x20001000;*/
 
     //iniz. strutture fase 1
     initPcbs();
