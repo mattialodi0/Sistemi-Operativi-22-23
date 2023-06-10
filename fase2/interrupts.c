@@ -6,7 +6,7 @@ void interruptHandler() {
     unsigned int line, cause, dev_num;
     cause = getCAUSE();
     cause = cause & 1111111100000000;   //maschera per  avere IP
-    cause = cause >> 8;
+    cause >>= 8;
 
     //per trovare anche il numero del device
     if(cause >= 1000000)
@@ -95,7 +95,7 @@ void ITInterrupt() {
 
     //settare il semaforo a 0
     IT_sem = 0;
-
+debug();
     //LDST per tornare il controllo al processo corrente
     state_t* state = (state_t*) BIOSDATAPAGE; //costante definita in umps
     LDST(state);

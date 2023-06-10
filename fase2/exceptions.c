@@ -2,44 +2,44 @@
 
 
 void exceptionHandler() {
-
-    //disabilita gli interrupt
-    state_t state = active_process->p_s;
+    //disabilita gli interrupt      forse lo fa in automatico
+    /*state_t state = active_process->p_s;
     state.status &= DISABLEINTS;
-    LDST((STATE_PTR) &state);
+    LDST((STATE_PTR) &state);*/
 
     int cause_reg, exc_code, cause;
     cause_reg = getCAUSE();
-    exc_code = cause_reg & 124;    //in binario: 1111100, la maschera per excCode
+    exc_code = cause_reg & GETEXECCODE;
     
     //trasformazione da binario a intero
     exc_code = exc_code >> 2;
-    if(exc_code == 0) 
-        cause = 0;
-    else if(exc_code == 1)
-        cause = 1;
-    else if(exc_code == 10)
-        cause = 2;
-    else if(exc_code == 11)
-        cause = 3;
-    else if(exc_code == 100)
-        cause = 4;
-    else if(exc_code == 101)
-        cause = 5;
-    else if(exc_code == 110)
-        cause = 6;
-    else if(exc_code == 111)
-        cause = 7;
-    else if(exc_code == 1000)
-        cause = 8;
-    else if(exc_code == 1001)
-        cause = 9;
-    else if(exc_code == 1010)
-        cause = 10;
+    if(exc_code == 1100)
+        cause = 12;
     else if(exc_code == 1011)
         cause = 11;
-    else if(exc_code == 1100)
-        cause = 12;
+    else if(exc_code == 1010)
+        cause = 10;
+    else if(exc_code == 1001)
+        cause = 9;
+    else if(exc_code == 1000)
+        cause = 8;
+    else if(exc_code == 111)
+        cause = 7;
+    else if(exc_code == 110)
+        cause = 6;
+    else if(exc_code == 101)
+        cause = 5;
+    else if(exc_code == 100)
+        cause = 4;
+    else if(exc_code == 11)
+        cause = 3;
+    else if(exc_code == 10)
+        cause = 2;
+    else if(exc_code == 1)
+        cause = 1;
+    else if(exc_code == 0) 
+        cause = 0;
+
     switch (cause)
     {
     case 0:
@@ -69,15 +69,20 @@ void exceptionHandler() {
     }
 
     //abilita gli interrupt
-    unsigned int status = getSTATUS();
+    /*unsigned int status = getSTATUS();
     status |= ~DISABLEINTS;    //abilita gli interrupt
     LDCXT(active_process->p_s.reg_sp, status, active_process->p_s.pc_epc);    //il valore che ci interessa settare è il secondo
+    */
+
+   //carica lo stato del processore come era prima dell'eccezione
+   state_t* s = (state_t*) 0x0FFFF000;  //ind del BIOS data page
+   LDST((STATE_PTR) s);
 }
 
 
 //standard Pass Up or Die operation con PGFAULTEXCEPT come index value:
 void TLBExceptionHandler() {
-
+    
     if(active_process->p_supportStruct == NULL)
         TerminateProcess(0);    //elimina il processo correte e la sua progenie
     else {
@@ -99,8 +104,8 @@ void TLBExceptionHandler() {
 
 //standard Pass Up or Die operation con GENERALEXCEPT come index value
 void ProgramTrapExceptionHandler() {
-
-    if(active_process->p_supportStruct == NULL)
+//debug();
+   if(active_process->p_supportStruct == NULL)
         TerminateProcess(0);    //elimina il processo correte e la sua progenie
     else {
         /*  copy the saved exception state into a location accessible to the Support Level,

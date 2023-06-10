@@ -64,7 +64,7 @@ int main(void) {
     
 
     //pass up vector, for processor 0 at 0x0FFF.F900
-    //passupvector_t* puv = (passupvector_t*) PASSUPVECTOR;
+    passupvector_t* puv = (passupvector_t*) PASSUPVECTOR;
     puv->tlb_refill_handler = (memaddr) uTLB_RefillHandler;
     puv->tlb_refill_stackPtr = 0x20001000;
     puv->exception_handler = (memaddr) exceptionHandler;
