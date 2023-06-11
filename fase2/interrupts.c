@@ -95,7 +95,7 @@ void ITInterrupt() {
 
     //settare il semaforo a 0
     IT_sem = 0;
-debug();
+
     //LDST per tornare il controllo al processo corrente
     state_t* state = (state_t*) BIOSDATAPAGE; //costante definita in umps
     LDST(state);

@@ -3,14 +3,15 @@
 
 void exceptionHandler() {
     //disabilita gli interrupt      forse lo fa in automatico
-    /*state_t state = active_process->p_s;
+    state_t state;
+    STST(&state);
     state.status &= DISABLEINTS;
-    LDST((STATE_PTR) &state);*/
+    LDST((STATE_PTR) &state);
 
     int cause_reg, exc_code, cause;
     cause_reg = getCAUSE();
     exc_code = cause_reg & GETEXECCODE;
-    
+
     //trasformazione da binario a intero
     exc_code = exc_code >> 2;
     if(exc_code == 1100)

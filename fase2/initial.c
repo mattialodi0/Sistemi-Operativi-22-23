@@ -83,7 +83,6 @@ int main(void) {
     //unsigned int timescale = 0x1000.0024;     //per leggere il valore della timescale
     LDIT(100000/timescale); // carica nell'interval timer  T * la timescale del processore
 
-
     //creazione di un processo      cap. 2.2 della documentazione
     pcb_t *first_proc = allocPcb();
     process_count++;
@@ -101,6 +100,7 @@ int main(void) {
     //first_proc->p_s.status |= 0x00400000; //cambia come vengono gestite le eccezioni
 
     first_proc->p_s.pc_epc = (memaddr) test;
+    first_proc->p_s.reg_t9 = (memaddr) test;
 
 //    first_proc->p_s.entry_hi = 0;      //pid forse
 
