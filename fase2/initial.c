@@ -88,7 +88,7 @@ int main(void) {
     process_count++;
     insertProcQ(&ready_queue, first_proc);
     //set dello stato 
-    first_proc->p_s.status = getSTATUS();
+    STST(&first_proc->p_s);
     //interrupt abilitati 
     first_proc->p_s.status |= IEPON;
     first_proc->p_s.status |= IMON;
@@ -108,18 +108,14 @@ int main(void) {
     first_proc->p_supportStruct = NULL;     //settata la struttura di supporto a NULL
     first_proc->p_pid = 1;                  //setta il pid
 
-    first_proc->p_parent = NULL;    //vanno cambiati  
+    /*first_proc->p_parent = NULL;    //vanno cambiati  
     INIT_LIST_HEAD(&first_proc->p_child);
     INIT_LIST_HEAD(&first_proc->p_sib);
+    first_proc->p_semAdd = NULL;*/
     first_proc->p_time = 0;
-    first_proc->p_semAdd = NULL;
     
     //chiamata allo scheduler
     scheduler();
-
-    /*debug();
-    state_t st; STST(&st); LDST(&st);       //prova che LDST non va
-    debug1();*/
 
     return 0;
 }
