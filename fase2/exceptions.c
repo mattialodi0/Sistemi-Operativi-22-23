@@ -70,10 +70,9 @@ void exceptionHandler() {
     }
 
     //abilita gli interrupt
-    /*unsigned int status = getSTATUS();
-    status |= ~DISABLEINTS;    //abilita gli interrupt
-    LDCXT(active_process->p_s.reg_sp, status, active_process->p_s.pc_epc);    //il valore che ci interessa settare è il secondo
-    */
+    STST(&state);
+    LDST((STATE_PTR) &state);
+    state.status |= ~DISABLEINTS;
 
    //carica lo stato del processore come era prima dell'eccezione
    state_t* s = (state_t*) 0x0FFFF000;  //ind del BIOS data page
@@ -105,7 +104,7 @@ void TLBExceptionHandler() {
 
 //standard Pass Up or Die operation con GENERALEXCEPT come index value
 void ProgramTrapExceptionHandler() {
-//debug();
+
    if(active_process->p_supportStruct == NULL)
         TerminateProcess(0);    //elimina il processo correte e la sua progenie
     else {

@@ -11,13 +11,13 @@
 
 
 void scheduler() {
+    //remove proc from ready queue
     active_process = removeProcQ(&ready_queue);
-    
     //load 5 ms in PLT
     setTIMER(5);
-
     //load state
     LDST((STATE_PTR) (&(active_process->p_s)));
+
 
     if(process_count == 0) {
         HALT();
