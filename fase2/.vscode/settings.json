@@ -9,6 +9,7 @@
         "interrupts.h": "c",
         "scheduler.h": "c",
         "pandos_const.h": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "const.h": "c"
     }
 }

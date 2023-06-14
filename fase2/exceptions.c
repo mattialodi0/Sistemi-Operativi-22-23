@@ -6,36 +6,9 @@ void exceptionHandler() {
     int cause_reg, exc_code, cause;
     cause_reg = getCAUSE();
     exc_code = cause_reg & GETEXECCODE;//get cause execode
-    //trasformazione da binario a intero
-    exc_code = exc_code >> 2;
-    if(exc_code == 1100)
-        cause = 12;
-    else if(exc_code == 1011)
-        cause = 11;
-    else if(exc_code == 1010)
-        cause = 10;
-    else if(exc_code == 1001)
-        cause = 9;
-    else if(exc_code == 1000)
-        cause = 8;
-    else if(exc_code == 111)
-        cause = 7;
-    else if(exc_code == 110)
-        cause = 6;
-    else if(exc_code == 101)
-        cause = 5;
-    else if(exc_code == 100)
-        cause = 4;
-    else if(exc_code == 11)
-        cause = 3;
-    else if(exc_code == 10)
-        cause = 2;
-    else if(exc_code == 1)
-        cause = 1;
-    else if(exc_code == 0) 
-        cause = 0;
+    exc_code >>= 2;
 
-    switch (cause)
+    switch (exc_code)
     {
     case 0:
         interruptHandler();
@@ -62,10 +35,6 @@ void exceptionHandler() {
     default:
         break;
     }
-
-   //carica lo stato del processore come era prima dell'eccezione
-   //state_t* s = (state_t*) 0x0FFFF000;  //ind del BIOS data page
-   //LDST((STATE_PTR) s);
 }
 
 
