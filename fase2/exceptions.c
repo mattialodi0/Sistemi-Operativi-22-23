@@ -2,16 +2,10 @@
 
 
 void exceptionHandler() {
-    //disabilita gli interrupt      forse lo fa in automatico
-    state_t state;
-    STST(&state);
-    state.status &= DISABLEINTS;
-    LDST((STATE_PTR) &state);
 
     int cause_reg, exc_code, cause;
     cause_reg = getCAUSE();
     exc_code = cause_reg & GETEXECCODE;
-
     //trasformazione da binario a intero
     exc_code = exc_code >> 2;
     if(exc_code == 1100)
@@ -69,14 +63,9 @@ void exceptionHandler() {
         break;
     }
 
-    //abilita gli interrupt
-    STST(&state);
-    LDST((STATE_PTR) &state);
-    state.status |= ~DISABLEINTS;
-
    //carica lo stato del processore come era prima dell'eccezione
-   state_t* s = (state_t*) 0x0FFFF000;  //ind del BIOS data page
-   LDST((STATE_PTR) s);
+   //state_t* s = (state_t*) 0x0FFFF000;  //ind del BIOS data page
+   //LDST((STATE_PTR) s);
 }
 
 
