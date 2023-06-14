@@ -5,7 +5,7 @@ void exceptionHandler() {
 
     int cause_reg, exc_code, cause;
     cause_reg = getCAUSE();
-    exc_code = cause_reg & GETEXECCODE;
+    exc_code = cause_reg & GETEXECCODE;//get cause execode
     //trasformazione da binario a intero
     exc_code = exc_code >> 2;
     if(exc_code == 1100)
