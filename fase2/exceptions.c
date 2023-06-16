@@ -71,7 +71,6 @@ void ProgramTrapExceptionHandler() {
         //Copy the saved exception state from the BIOS Data Page to the correct sup_exceptState field of the Current Process. 
         state_t state = *(state_t*) 0x0FFFF000;
         active_process->p_supportStruct->sup_exceptState[GENERALEXCEPT] = state; 
-        //forse serve salvare anche le altre info
 
         //Perform a LDCXT using the fields from the correct sup_exceptContext field of the Current Process.
         unsigned int sp = state.reg_sp;

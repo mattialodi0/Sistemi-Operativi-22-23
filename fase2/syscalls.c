@@ -48,17 +48,18 @@ void TerminateProcess(int pid){
         outChild(active_process);               //outChild per eliminare i figli dal padre
         //Da controllare da riga 36 a 40
         if(active_process->p_semAdd < 0){       //if semaphor < 0 deve essere incrementato (controllare su 3.9 del libro)
-            if(headBlocked(active_process) == NULL){
+            if(headBlocked(active_process->p_semAdd) == NULL){
                 active_process->p_semAdd++;
             }
         }
+        active_process = NULL;
     }
     else{
         //cercare processo con stesso pid
         //stessa cosa dell'if ma con il processo del pid preso in input
     }
     process_count--;
-    soft_blocked_count--;
+    soft_blocked_count--;   // ?
     scheduler();
 }
 
