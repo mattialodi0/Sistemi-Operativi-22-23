@@ -44,11 +44,10 @@ void TLBExceptionHandler() {
     if(active_process->p_supportStruct == NULL)
         TerminateProcess(0);    //elimina il processo correte e la sua progenie
     else {
-        
         /*  copy the saved exception state into a location accessible to the Support Level,
             and pass control to a routine specified by the Support Level */
         //Copy the saved exception state from the BIOS Data Page to the correct sup_exceptState field of the Current Process. 
-        state_t state = *(state_t*) 0x0FFFF000;
+        state_t state = *(state_t*) BIOSDATAPAGE;
         active_process->p_supportStruct->sup_exceptState[PGFAULTEXCEPT] = state; 
         //forse serve salvare anche le altre info
 
@@ -63,20 +62,21 @@ void TLBExceptionHandler() {
 //standard Pass Up or Die operation con GENERALEXCEPT come index value
 void ProgramTrapExceptionHandler() {
 
-   if(active_process->p_supportStruct == NULL)
+    if(active_process->p_supportStruct == NULL)
         TerminateProcess(0);    //elimina il processo correte e la sua progenie
     else {
         /*  copy the saved exception state into a location accessible to the Support Level,
             and pass control to a routine specified by the Support Level */
         //Copy the saved exception state from the BIOS Data Page to the correct sup_exceptState field of the Current Process. 
-        state_t state = *(state_t*) 0x0FFFF000;
+        state_t state = *(state_t*) BIOSDATAPAGE;
         active_process->p_supportStruct->sup_exceptState[GENERALEXCEPT] = state; 
+debug1();
 
         //Perform a LDCXT using the fields from the correct sup_exceptContext field of the Current Process.
         unsigned int sp = state.reg_sp;
         unsigned int status = state.status;
-        unsigned int pc = state.pc_epc;
-        LDCXT(sp, status, pc);
+        unsigned int pc = state.pc_epc; 
+        LDCXT(sp, status, pc);  
     }
 }
 

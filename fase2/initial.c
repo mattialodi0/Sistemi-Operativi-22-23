@@ -61,7 +61,6 @@ int main(void) {
         sem_dev_terminal_r[i] = 0;
         sem_dev_terminal_w[i] = 0;
     }
-    
 
     //pass up vector, for processor 0 at 0x0FFF.F900
     passupvector_t* puv = (passupvector_t*) PASSUPVECTOR;
@@ -113,7 +112,7 @@ int main(void) {
     INIT_LIST_HEAD(&first_proc->p_sib);
     first_proc->p_semAdd = NULL;*/
     first_proc->p_time = 0;
-    
+
     //chiamata allo scheduler
     scheduler();
 
