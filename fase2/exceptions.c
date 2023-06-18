@@ -5,7 +5,7 @@ void exceptionHandler() {
 
     int cause_reg, exc_code, cause;
     cause_reg = getCAUSE();
-    exc_code = cause_reg & GETEXECCODE;//get cause execode
+    exc_code = cause_reg & GETEXECCODE; //get cause execode
     exc_code >>= 2;
 
     switch (exc_code)
@@ -33,6 +33,7 @@ void exceptionHandler() {
         break;
     
     default:
+        //ProgramTrapExceptionHandler();  //se ci possono essere exc_code > 12
         break;
     }
 }
