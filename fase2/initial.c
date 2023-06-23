@@ -87,7 +87,7 @@ int main(void) {
     process_count++;
     insertProcQ(&ready_queue, first_proc);
     //set dello stato 
-    STST(&first_proc->p_s);
+    //STST(&first_proc->p_s);
     //interrupt abilitati 
     first_proc->p_s.status |= IEPON;
     first_proc->p_s.status |= IMON;

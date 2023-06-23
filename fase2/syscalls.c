@@ -59,7 +59,7 @@ void TerminateProcess(int pid){
         //stessa cosa dell'if ma con il processo del pid preso in input
     }
     process_count--;
-    soft_blocked_count--;   // ?
+    //soft_blocked_count--;   // ?
     scheduler();
 }
 

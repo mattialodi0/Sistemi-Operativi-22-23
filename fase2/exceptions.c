@@ -2,7 +2,6 @@
 
 
 void exceptionHandler() {
-
     int cause_reg, exc_code, cause;
     cause_reg = getCAUSE();
     exc_code = cause_reg & GETEXECCODE; //get cause execode
@@ -20,6 +19,7 @@ void exceptionHandler() {
         break;
     case 4:
     case 5:
+    debug();
     case 6:
     case 7:
     case 9:
@@ -71,7 +71,6 @@ void ProgramTrapExceptionHandler() {
         //Copy the saved exception state from the BIOS Data Page to the correct sup_exceptState field of the Current Process. 
         state_t state = *(state_t*) BIOSDATAPAGE;
         active_process->p_supportStruct->sup_exceptState[GENERALEXCEPT] = state; 
-debug1();
 
         //Perform a LDCXT using the fields from the correct sup_exceptContext field of the Current Process.
         unsigned int sp = state.reg_sp;

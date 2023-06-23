@@ -230,13 +230,12 @@ void addokbuf(char *strp) {
     termprint(tstrp, 0);
 }
 void test() {
-debug();
+
     SYSCALL(VERHOGEN, (int)&sem_testsem, 0, 0); /* V(sem_testsem)   */
 
     print("p1 v(sem_testsem)\n");
 
     /* set up states of the other processes */
-
     STST(&hp_p1state);
     hp_p1state.reg_sp = hp_p1state.reg_sp - QPAGE;
     hp_p1state.pc_epc = hp_p1state.reg_t9 = (memaddr)hp_p1;
