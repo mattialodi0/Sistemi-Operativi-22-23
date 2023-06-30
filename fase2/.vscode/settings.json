@@ -10,6 +10,12 @@
         "scheduler.h": "c",
         "pandos_const.h": "c",
         "typeinfo": "c",
-        "const.h": "c"
+        "const.h": "c",
+        "array": "c",
+        "compare": "c",
+        "functional": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c"
     }
 }

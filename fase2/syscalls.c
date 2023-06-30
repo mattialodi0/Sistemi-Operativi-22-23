@@ -46,7 +46,6 @@ int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
 void TerminateProcess(int pid){
     if (pid == 0){                              //pid == 0, bisogna terminare active_process (processo invocante), e i suoi figli
         outChild(active_process);               //outChild per eliminare i figli dal padre
-        //Da controllare da riga 36 a 40
         if(active_process->p_semAdd < 0){       //if semaphor < 0 deve essere incrementato (controllare su 3.9 del libro)
             if(headBlocked(active_process->p_semAdd) == NULL){
                 active_process->p_semAdd++;
@@ -56,12 +55,34 @@ void TerminateProcess(int pid){
     }
     else{
         //cercare processo con stesso pid
+        pcb_PTR target_process = findProcess(pid);
         //stessa cosa dell'if ma con il processo del pid preso in input
+        if(target_process != NULL){
+            outChild(target_process);
+            target_process->p_semAdd++;
+            target_process = NULL;
+        }
     }
     process_count--;
-    //soft_blocked_count--;   // ?
+    soft_blocked_count--;   // ?
     scheduler();
 }
+
+/*
+pcb_PTR findProcess(int pid) {
+    struct list_head* current_process;
+    pcb_PTR pcb;
+
+    list_for_each(current_process, &ready_queue) {
+        pcb = list_entry(current_process, pcb_PTR, p_list);
+        if (pcb->p_pid == pid) {
+            return pcb;
+        }
+    }
+    // Processo non trovato
+    return NULL;
+}
+*/
 
 // decrementa il semaforo all'ind semaddr, se diventa < 0 il processo viene bloccato e si chiama lo scheduler
 void Passeren(int *semaddr)

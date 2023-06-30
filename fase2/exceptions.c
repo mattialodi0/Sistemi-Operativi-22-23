@@ -19,7 +19,8 @@ void exceptionHandler() {
         break;
     case 4:
     case 5:
-    debug();
+        debug();
+        break;  //?
     case 6:
     case 7:
     case 9:
