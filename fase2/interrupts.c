@@ -3,69 +3,39 @@
 
 void interruptHandler() {
     //per trovare la linea di interrupt
-    unsigned int line, cause, dev_num;
+    unsigned int cause, dev_num;
     cause = getCAUSE();
-    cause = cause & 1111111100000000;   //maschera per  avere IP
     cause >>= 8;
-
+    cause &= 11111111;   //maschera per avere solo IP
+//IT_sem=cause;debug();
     //per trovare anche il numero del device
-    if(cause >= 1000000)
-        line = 1;
-    else if(cause >= 100000)
-        line = 2;
-    else if(cause >= 10000) {
-        line = 3;
+    if(cause == 0) return; 
+    else if(cause & LOCALTIMERINT > 0) { //linea 1
+        PLTInterrupt();
+    }
+    else if(cause & TIMERINTERRUPT > 0) {  //linea 2
+        ITInterrupt();
+    }
+    else if(cause & DISKINTERRUPT > 0) {  //linea 3
+        nonTimerInterrupt(3, dev_num);
         dev_num = find_dev_num(0x10000040);
     }
-    else if(cause >= 1000) {
-        line = 4;
+    else if(cause & FLASHINTERRUPT > 0) {  //linea 4
+        nonTimerInterrupt(4, dev_num);
         dev_num = find_dev_num(0x10000040 + 0x04);
     }
-    else if(cause >= 100) {
-        line = 5;
+    else if(cause & 0x00002000 > 0) {  //linea 5
+        nonTimerInterrupt(5, dev_num);
         dev_num = find_dev_num(0x10000040 + 0x08);
     }
-    else if(cause >= 10) {
-        line = 6;
+    else if(cause & PRINTINTERRUPT > 0) {  //linea 6
+        nonTimerInterrupt(6, dev_num);
         dev_num = find_dev_num(0x10000040 + 0x0C);
     }
-    else if(cause >= 1) {
-        line = 7;
+    else if(cause & TERMINTERRUPT > 0) {  //linea 7
+        nonTimerInterrupt(7, dev_num);
         dev_num = find_dev_num(0x10000040 + 0x10);
     }
-
-
-    //in caso di più interrupt si risolve quello con priorità più alta (switch)
-    switch (line)
-    {
-    case 0:     //ingnorato
-        break;
-    case 1:
-        //PLT
-        PLTInterrupt();
-        break;
-    case 2:
-        //Interval Timer
-        ITInterrupt();
-        break;
-    case 3:
-        //disk devices
-    case 4:
-        //flash devices
-    case 5:
-        //network devices
-    case 6:
-        //printer devices
-        nonTimerInterrupt(line, dev_num);
-        break;
-    case 7:     //prima in scrittura poi in lettura
-        //terminal devices
-        nonTimerInterrupt(line, dev_num);
-        break;
-    default:
-        break;
-    }
-
 }
 
 //è scaduto il quanto di tempo a disposizione del processo corrente e questo va messo da running a ready
@@ -130,19 +100,19 @@ void nonTimerInterrupt(int int_line_no, int dev_num) {
 
 unsigned int find_dev_num(unsigned int  bit_map_word) {
     unsigned int num;
-    if(bit_map_word >= 10000000)
+    if(bit_map_word >= 128)
         num = 7;
-    else if(bit_map_word >= 1000000)
+    else if(bit_map_word >= 64)
         num = 6;
-    else if(bit_map_word >= 100000)
+    else if(bit_map_word >= 32)
         num = 5;
-    else if(bit_map_word >= 10000)
+    else if(bit_map_word >= 16)
         num = 4;
-    else if(bit_map_word >= 1000)
+    else if(bit_map_word >= 8)
         num = 3;
-    else if(bit_map_word >= 100)
+    else if(bit_map_word >= 4)
         num = 2;
-    else if(bit_map_word >= 10)
+    else if(bit_map_word >= 2)
         num = 1;
     else if(bit_map_word >= 1)
         num = 0;

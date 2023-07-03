@@ -53,7 +53,7 @@ void TerminateProcess(int pid){
         }
         active_process = NULL;
     }
-    else{
+    else{/*
         //cercare processo con stesso pid
         pcb_PTR target_process = findProcess(pid);
         //stessa cosa dell'if ma con il processo del pid preso in input
@@ -61,7 +61,7 @@ void TerminateProcess(int pid){
             outChild(target_process);
             target_process->p_semAdd++;
             target_process = NULL;
-        }
+        }*/
     }
     process_count--;
     soft_blocked_count--;   // ?

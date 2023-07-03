@@ -42,3 +42,5 @@ int GetChildren(int *children, int size);
 //confronta i namespaces, un campo alla volta, da implementare
 bool eqNS(nsd_t *a[], nsd_t *b[]);
 
+pcb_PTR findProcess(int pid);
+
