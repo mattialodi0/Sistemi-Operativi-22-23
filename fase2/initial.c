@@ -26,6 +26,7 @@ int pid_count;
 //semaforo per lo pseudo clock
 int IT_sem;     // da verificare se vada inizializzato a 0
 
+int debug_var=0;
 
 int main(void) {
     //processi vivi

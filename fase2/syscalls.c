@@ -3,7 +3,7 @@
 extern int pid_count;
 
 // ALLA FINE DELLE SYSCALL CHE NON BLOCCANO O TERMINANO IL PROCESSO:
-// deve essere restituito il controllo al processo aumentando il suo pc di 4    
+// deve essere restituito il controllo al processo aumentando il suo pc di 4
 int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
 {
     pcb_t *new_proc = allocPcb(); // inizializza new_proc, allocPcb la mette == NULL se vuota, quindi va direttamente nell'else?
@@ -16,7 +16,7 @@ int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
         new_proc->p_s = *statep;              // assegno allo stato il parametro in input
         new_proc->p_supportStruct = supportp; // assegno alla struttura di supporto il parametro in input
         process_count++;
-        insertProcQ(&ready_queue, new_proc);    // inseriamo in coda il processo
+        insertProcQ(&ready_queue, new_proc);   // inseriamo in coda il processo
         insertChild(active_process, new_proc); // inseriamo new_proc come figlio di active_process
         new_proc->p_semAdd = NULL;
         new_proc->p_time = 0; // inizializzo il tempo a 0
@@ -43,28 +43,33 @@ int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
 }
 
 // termina il processo indicato da pid insieme ai suoi figli
-void TerminateProcess(int pid){
-    if (pid == 0){                              //pid == 0, bisogna terminare active_process (processo invocante), e i suoi figli
-        outChild(active_process);               //outChild per eliminare i figli dal padre
-        if(active_process->p_semAdd < 0){       //if semaphor < 0 deve essere incrementato (controllare su 3.9 del libro)
-            if(headBlocked(active_process->p_semAdd) == NULL){
+void TerminateProcess(int pid)
+{
+    if (pid == 0)
+    {                             // pid == 0, bisogna terminare active_process (processo invocante), e i suoi figli
+        outChild(active_process); // outChild per eliminare i figli dal padre
+        if (active_process->p_semAdd < 0)
+        { // if semaphor < 0 deve essere incrementato (controllare su 3.9 del libro)
+            if (headBlocked(active_process->p_semAdd) == NULL)
+            {
                 active_process->p_semAdd++;
             }
         }
         active_process = NULL;
     }
-    else{/*
-        //cercare processo con stesso pid
-        pcb_PTR target_process = findProcess(pid);
-        //stessa cosa dell'if ma con il processo del pid preso in input
-        if(target_process != NULL){
-            outChild(target_process);
-            target_process->p_semAdd++;
-            target_process = NULL;
-        }*/
+    else
+    { /*
+     //cercare processo con stesso pid
+     pcb_PTR target_process = findProcess(pid);
+     //stessa cosa dell'if ma con il processo del pid preso in input
+     if(target_process != NULL){
+         outChild(target_process);
+         target_process->p_semAdd++;
+         target_process = NULL;
+     }*/
     }
     process_count--;
-    soft_blocked_count--;   // ?
+    soft_blocked_count--; // ?
     scheduler();
 }
 
@@ -94,8 +99,8 @@ void Passeren(int *semaddr)
         STST(&active_process->p_s); // MA setta il PC = 0
 
         insertBlocked(semaddr, active_process);
-        //forse va richiamato lo scheduler per selezionare un nuovo processo
-        //scheduler();
+        // forse va richiamato lo scheduler per selezionare un nuovo processo
+        // scheduler();
     }
     else
     {

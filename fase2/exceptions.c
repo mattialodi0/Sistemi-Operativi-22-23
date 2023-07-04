@@ -1,10 +1,10 @@
 #include <exceptions.h>
 
-
-void exceptionHandler() {
+void exceptionHandler()
+{
     int cause_reg, exc_code, cause;
     cause_reg = getCAUSE();
-    exc_code = cause_reg & GETEXECCODE; //get cause execode
+    exc_code = cause_reg & GETEXECCODE; // get cause execode
     exc_code >>= 2;
 
     switch (exc_code)
@@ -30,28 +30,29 @@ void exceptionHandler() {
     case 8:
         syscallHandler();
         break;
-    
+
     default:
-        //ProgramTrapExceptionHandler();  //se ci possono essere exc_code > 12
+        // ProgramTrapExceptionHandler();  //se ci possono essere exc_code > 12
         break;
     }
 }
 
+// standard Pass Up or Die operation con PGFAULTEXCEPT come index value:
+void TLBExceptionHandler()
+{
 
-//standard Pass Up or Die operation con PGFAULTEXCEPT come index value:
-void TLBExceptionHandler() {
-    
-    if(active_process->p_supportStruct == NULL)
-        TerminateProcess(0);    //elimina il processo correte e la sua progenie
-    else {
+    if (active_process->p_supportStruct == NULL)
+        TerminateProcess(0); // elimina il processo correte e la sua progenie
+    else
+    {
         /*  copy the saved exception state into a location accessible to the Support Level,
             and pass control to a routine specified by the Support Level */
-        //Copy the saved exception state from the BIOS Data Page to the correct sup_exceptState field of the Current Process. 
-        state_t state = *(state_t*) BIOSDATAPAGE;
-        active_process->p_supportStruct->sup_exceptState[PGFAULTEXCEPT] = state; 
-        //forse serve salvare anche le altre info
+        // Copy the saved exception state from the BIOS Data Page to the correct sup_exceptState field of the Current Process.
+        state_t state = *(state_t *)BIOSDATAPAGE;
+        active_process->p_supportStruct->sup_exceptState[PGFAULTEXCEPT] = state;
+        // forse serve salvare anche le altre info
 
-        //Perform a LDCXT using the fields from the correct sup_exceptContext field of the Current Process.
+        // Perform a LDCXT using the fields from the correct sup_exceptContext field of the Current Process.
         unsigned int sp = state.reg_sp;
         unsigned int status = state.status;
         unsigned int pc = state.pc_epc;
@@ -59,32 +60,34 @@ void TLBExceptionHandler() {
     }
 }
 
-//standard Pass Up or Die operation con GENERALEXCEPT come index value
-void ProgramTrapExceptionHandler() {
+// standard Pass Up or Die operation con GENERALEXCEPT come index value
+void ProgramTrapExceptionHandler()
+{
 
-    if(active_process->p_supportStruct == NULL)
-        TerminateProcess(0);    //elimina il processo correte e la sua progenie
-    else {
+    if (active_process->p_supportStruct == NULL)
+        TerminateProcess(0); // elimina il processo correte e la sua progenie
+    else
+    {
         /*  copy the saved exception state into a location accessible to the Support Level,
             and pass control to a routine specified by the Support Level */
-        //Copy the saved exception state from the BIOS Data Page to the correct sup_exceptState field of the Current Process. 
-        state_t state = *(state_t*) BIOSDATAPAGE;
-        active_process->p_supportStruct->sup_exceptState[GENERALEXCEPT] = state; 
+        // Copy the saved exception state from the BIOS Data Page to the correct sup_exceptState field of the Current Process.
+        state_t state = *(state_t *)BIOSDATAPAGE;
+        active_process->p_supportStruct->sup_exceptState[GENERALEXCEPT] = state;
 
-        //Perform a LDCXT using the fields from the correct sup_exceptContext field of the Current Process.
+        // Perform a LDCXT using the fields from the correct sup_exceptContext field of the Current Process.
         unsigned int sp = state.reg_sp;
         unsigned int status = state.status;
-        unsigned int pc = state.pc_epc; 
-        LDCXT(sp, status, pc);  
+        unsigned int pc = state.pc_epc;
+        LDCXT(sp, status, pc);
     }
 }
 
-
-void syscallHandler() {
-    //controllo se si è in user mode, altrimenti Trap
+void syscallHandler()
+{
+    // controllo se si è in user mode, altrimenti Trap
 
     int v0, v1, v2, v3;
-    //vanno presi dai registri e castati
+    // vanno presi dai registri e castati
 
     switch (v0)
     {
@@ -111,14 +114,14 @@ void syscallHandler() {
         break;
     case GETSUPPORTPTR:
         GetSupportData();
-        break;    
+        break;
     case 9:
         GetProcessId(v1);
         break;
     case 10:
         GetChildren((int *)v1, v2);
         break;
-        
+
     default:
         break;
     }
