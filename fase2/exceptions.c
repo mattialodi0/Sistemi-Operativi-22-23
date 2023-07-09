@@ -1,4 +1,5 @@
 #include <exceptions.h>
+extern int debug_var;
 
 void exceptionHandler()
 {
@@ -7,6 +8,8 @@ void exceptionHandler()
     exc_code = cause_reg & GETEXECCODE; // get cause execode
     exc_code >>= 2;
 
+    debug_var = exc_code;
+    debug();
     switch (exc_code)
     {
     case 0:
@@ -40,7 +43,6 @@ void exceptionHandler()
 // standard Pass Up or Die operation con PGFAULTEXCEPT come index value:
 void TLBExceptionHandler()
 {
-
     if (active_process->p_supportStruct == NULL)
         TerminateProcess(0); // elimina il processo correte e la sua progenie
     else

@@ -2,54 +2,59 @@
 
 extern int debug_var;
 
-void interruptHandler()
+void interruptHandler()     //non riesce a gestire più interrupt contemporanei perchè con gli & non va
 {
     // per trovare la linea di interrupt
     unsigned int cause, dev_num;
     cause = getCAUSE();
-    cause >>= 8;
-    cause &= 11111111; // maschera per avere solo IP
 
-    debug_var = cause;
+    //debug_var = cause == LOCALTIMERINT;
+    //debug();
 
     // per trovare anche il numero del device
-    if (cause == 0) {
+    /*if (cause == 0) {
         return;
     }
-    else if (cause & LOCALTIMERINT > 0)
+    else */if (cause == LOCALTIMERINT)
     { // linea 1
         PLTInterrupt();
+        return;
     }
-    else if (cause & TIMERINTERRUPT > 0)
+    else if (cause == TIMERINTERRUPT)
     { // linea 2
         ITInterrupt();
+        return;
     }
-    else if (cause & DISKINTERRUPT > 0)
+    else if (cause == DISKINTERRUPT)
     { // linea 3
         nonTimerInterrupt(3, dev_num);
         dev_num = find_dev_num(0x10000040);
+        return;
     }
-    else if (cause & FLASHINTERRUPT > 0)
+    else if (cause == FLASHINTERRUPT)
     { // linea 4
         nonTimerInterrupt(4, dev_num);
         dev_num = find_dev_num(0x10000040 + 0x04);
+        return;
     }
-    else if (cause & 0x00002000 > 0)
+    else if (cause ==  0x00002000)
     { // linea 5
         nonTimerInterrupt(5, dev_num);
         dev_num = find_dev_num(0x10000040 + 0x08);
+        return;
     }
-    else if (cause & PRINTINTERRUPT > 0)
+    else if (cause ==  PRINTINTERRUPT)
     { // linea 6
         nonTimerInterrupt(6, dev_num);
         dev_num = find_dev_num(0x10000040 + 0x0C);
+        return;
     }
-    else if (cause & TERMINTERRUPT > 0)
+    else if (cause == TERMINTERRUPT)
     { // linea 7
         nonTimerInterrupt(7, dev_num);
         dev_num = find_dev_num(0x10000040 + 0x10);
+        return;
     }
-        debug();
 }
 
 // è scaduto il quanto di tempo a disposizione del processo corrente e questo va messo da running a ready
@@ -68,7 +73,6 @@ void PLTInterrupt()
 
 void ITInterrupt()
 {    
-    debug1();
     LDIT(100000 / timescale); // carica nell'interval timer  T * la timescale del processore
 
     // sbloccare tutti i processi fermi al semaforo dello pseudo clock
