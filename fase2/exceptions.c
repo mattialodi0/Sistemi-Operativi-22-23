@@ -5,11 +5,10 @@ void exceptionHandler()
 {
     int cause_reg, exc_code, cause;
     cause_reg = getCAUSE();
-    exc_code = cause_reg & GETEXECCODE; // get cause execode
-    exc_code >>= 2;
+    exc_code = cause_reg & GETEXECCODE; // qui c' è un errore
+    
+    /*exc_code >>= 2;
 
-    debug_var = exc_code;
-    debug();
     switch (exc_code)
     {
     case 0:
@@ -28,9 +27,40 @@ void exceptionHandler()
     case 10:
     case 11:
     case 12:
+    debug();
         ProgramTrapExceptionHandler();
         break;
     case 8:
+        syscallHandler();
+        break;
+
+    default:
+        // ProgramTrapExceptionHandler();  //se ci possono essere exc_code > 12
+        break;
+    }*/
+    debug_var = exc_code;
+    debug();
+    switch (exc_code)
+    {
+    case 0:
+        interruptHandler();
+        break;
+    case 4:
+    case 8:
+    case 12:
+        TLBExceptionHandler();
+        break;
+    case 16:
+    case 20:
+    case 24:
+    case 28:
+    case 32:
+    case 36:
+    case 40:
+    case 44:
+        ProgramTrapExceptionHandler();
+        break;
+    case 48:
         syscallHandler();
         break;
 

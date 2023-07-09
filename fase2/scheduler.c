@@ -21,6 +21,7 @@ void scheduler()
         // load state
         LDST((STATE_PTR)(&(active_process->p_s))); // causa un B5 che è sbagliato
         // LDST(&active_process->p_s);  //causa un B5 che è sbagliato
+        debug1();
     }
     else
     {
