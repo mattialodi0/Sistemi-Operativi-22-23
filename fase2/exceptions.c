@@ -61,7 +61,6 @@ void TLBExceptionHandler()
 // standard Pass Up or Die operation con GENERALEXCEPT come index value
 void ProgramTrapExceptionHandler()
 {
-
     if (active_process->p_supportStruct == NULL)
         TerminateProcess(0); // elimina il processo correte e la sua progenie
     else
