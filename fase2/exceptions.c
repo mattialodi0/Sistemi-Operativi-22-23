@@ -3,7 +3,7 @@ extern int debug_var;
 
 void exceptionHandler()
 {
-    int cause_reg, exc_code, cause;
+    int cause_reg, exc_code;
     cause_reg = getCAUSE();
     exc_code = cause_reg & GETEXECCODE;
     exc_code >>= 2;
@@ -61,6 +61,7 @@ void TLBExceptionHandler()
 // standard Pass Up or Die operation con GENERALEXCEPT come index value
 void ProgramTrapExceptionHandler()
 {
+    debug();
     if (active_process->p_supportStruct == NULL)
         TerminateProcess(0); // elimina il processo correte e la sua progenie
     else
@@ -82,7 +83,7 @@ void ProgramTrapExceptionHandler()
 void syscallHandler()
 {
     // controllo se si è in user mode, altrimenti Trap
-
+    
     int v0, v1, v2, v3;
     // vanno presi dai registri e castati
 

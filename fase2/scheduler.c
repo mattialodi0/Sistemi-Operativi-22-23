@@ -19,7 +19,7 @@ void scheduler()
         // load 5 ms in PLT
         setTIMER(5);
         // load state
-        LDST((STATE_PTR)(&(active_process->p_s))); // causa un B5 che è sbagliato
+        debug_var = LDST((STATE_PTR)(&(active_process->p_s))); // causa un B5 che è sbagliato
         // LDST(&active_process->p_s);  //causa un B5 che è sbagliato
     }
     else

@@ -69,10 +69,6 @@ int main(void) {
     puv->tlb_refill_stackPtr = 0x20001000;
     puv->exception_handler = (memaddr) exceptionHandler;
     puv->exception_stackPtr = 0x20001000;
-    /*unsigned int* puv = (unsigned int*) PASSUPVECTOR; *puv = (memaddr) uTLB_RefillHandler;    //versione altrenativa ma da lo stesso errore
-    puv = PASSUPVECTOR + 0x04; *puv =  0x20001000;
-    puv = PASSUPVECTOR + 0x08; *puv = (memaddr) exceptionHandler;
-    puv = PASSUPVECTOR + 0x0C; *puv =  0x20001000;*/
 
     //iniz. strutture fase 1
     initPcbs();
@@ -87,6 +83,7 @@ int main(void) {
     pcb_t *first_proc = allocPcb();
     process_count++;
     insertProcQ(&ready_queue, first_proc);
+    
     //set dello stato 
     //STST(&first_proc->p_s);
     //interrupt abilitati 

@@ -130,7 +130,7 @@ void print(char *msg) {
     SYSCALL(VERHOGEN, (int)&sem_term_mut, 0, 0); /* V(sem_term_mut) */
 }
 
-
+extern void debug();
 /* TLB-Refill Handler */
 /* One can place debug calls here, but not calls to print */
 void uTLB_RefillHandler() {
@@ -138,7 +138,6 @@ void uTLB_RefillHandler() {
     setENTRYHI(0x80000000);
     setENTRYLO(0x00000000);
     TLBWR();
-
     LDST((state_t *)0x0FFFF000);
 }
 
