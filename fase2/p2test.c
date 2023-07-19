@@ -130,7 +130,6 @@ void print(char *msg) {
     SYSCALL(VERHOGEN, (int)&sem_term_mut, 0, 0); /* V(sem_term_mut) */
 }
 
-extern void debug();
 /* TLB-Refill Handler */
 /* One can place debug calls here, but not calls to print */
 void uTLB_RefillHandler() {
@@ -218,6 +217,9 @@ unsigned int termprint(char *str, unsigned int term) {
     return (!error);
 }
 
+extern void debug();
+extern void debug1();
+extern void debug2();
 
 /* This function placess the specified character string in okbuf and
  *	causes the string to be written out to terminal0 */
@@ -228,7 +230,7 @@ void addokbuf(char *strp) {
     mp--;
     termprint(tstrp, 0);
 }
-void test() {
+void test() {debug2();
 
     SYSCALL(VERHOGEN, (int)&sem_testsem, 0, 0); /* V(sem_testsem)   */
 

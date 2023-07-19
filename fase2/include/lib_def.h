@@ -32,6 +32,8 @@ int IT_sem;     // da verificare se vada inizializzato a 0
 
 //funzione usata per mettere un breakpoint
 void debug();
-void debug();
+void debug1();
+void debug2();
+void debug3();
 
 #endif

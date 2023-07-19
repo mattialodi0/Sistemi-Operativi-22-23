@@ -17,10 +17,11 @@ void scheduler()
         // remove proc from ready queue
         active_process = removeProcQ(&ready_queue);
         // load 5 ms in PLT
-        setTIMER(5);
+        setTIMER(5000);
         // load state
-        debug_var = LDST((STATE_PTR)(&(active_process->p_s))); // causa un B5 che è sbagliato
-        // LDST(&active_process->p_s);  //causa un B5 che è sbagliato
+        debug();
+        LDST((STATE_PTR)(&(active_process->p_s))); 
+        // LDST(&active_process->p_s);  
     }
     else
     {
