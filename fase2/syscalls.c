@@ -147,20 +147,23 @@ void Verhogen(int *semaddr)
  * cmdAddr contiene l'ind del comando e cmdValues è un array di puntatori ai valori 
  * del comando
 */
-int DoIO(int *cmdAddr, int *cmdValues)
+int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
 {
     // capitolo 5 della documentazione
 
-    unsigned int *command = (unsigned int *) cmdAddr;
-    unsigned int *values = (unsigned int *) cmdValues;
-
     // Installed Devices Bit Map 0x1000002C
     // Interrupting Devices Bit Map 0x10000040
-    // devAddrBase = 0x1000.0054 + ((IntlineNo - 3) * 0x80) + (DevNo * 0x10)
+    // devAddrBase = 0x10000054 + ((IntlineNo - 3) * 0x80) + (DevNo * 0x10)
 
+    // (verifica che il disp sia installato)
     // P sul sem indicato in a1 e a2
-    // 
+    // ...
     // ritorna 0 o -1
+
+    // solo per print
+    SYSCALL(PASSEREN, (int)&sem_dev_terminal_w[0], 0, 0);
+    *(cmdAddr + 0x4) = cmdValues[0];
+
 }
 
 int GetCPUTime()

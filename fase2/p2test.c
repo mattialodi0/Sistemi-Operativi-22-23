@@ -26,7 +26,7 @@ typedef unsigned int devregtr;
 
 /* hardware constants */
 #define PRINTCHR 2
-#define RECVD    5
+#define  RECVD    5
 
 #define CLOCKINTERVAL 100000UL /* interval to V clock semaphore */
 
@@ -231,9 +231,11 @@ void addokbuf(char *strp) {
     termprint(tstrp, 0);
 }
 void test() {
-debug();
-    SYSCALL(VERHOGEN, (int)&sem_testsem, 0, 0); /* V(sem_testsem)   */
 
+    SYSCALL(VERHOGEN, (int)&sem_testsem, 0, 0); /* V(sem_testsem)   */
+debug1();
+    print("O");
+debug2();
     print("p1 v(sem_testsem)\n");
 
     /* set up states of the other processes */

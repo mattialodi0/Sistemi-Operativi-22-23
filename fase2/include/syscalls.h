@@ -6,6 +6,12 @@ extern pcb_t *active_process;
 extern int process_count;
 extern int soft_blocked_count;
 extern int IT_sem;
+extern int sem_dev_disk[8];
+extern int sem_dev_flash[8];
+extern int sem_dev_net[8];
+extern int sem_dev_printer[8];
+extern int sem_dev_terminal_r[8];
+extern int sem_dev_terminal_w[8];
 
 
 // crea un nuovo processo come figlio del chiamante
@@ -21,7 +27,7 @@ void Passeren(int *semaddr);
 void Verhogen(int *semaddr);
 
 // effettua un'operazione di I/O
-int DoIO(int *cmdAddr, int *cmdValues);
+int DoIO(unsigned *cmdAddr, unsigned int *cmdValues);
 
 // restituisce il tempo di esecuzione del processo che l'ha chiamata fino a quel momento
 int GetCPUTime();

@@ -5,13 +5,7 @@
 extern void test();
 extern void uTLB_RefillHandler();
 extern void exceptionHandler();
-/*
-extern struct list_head ready_queue; 
-extern pcb_t *active_process;   
-extern int process_count;
-extern int soft_blocked_count;
-extern int IT_sem;
-*/
+
 //processi vivi
 int process_count;
 //processi bloccati
@@ -25,6 +19,15 @@ int pid_count;
 
 //semaforo per lo pseudo clock
 int IT_sem;     // da verificare se vada inizializzato a 0
+
+//array di semafori, uno per dispositivo
+//int sem_disp[DISPNUM];  un unico array
+int sem_dev_disk[8];
+int sem_dev_flash[8];
+int sem_dev_net[8];
+int sem_dev_printer[8];
+int sem_dev_terminal_r[8];
+int sem_dev_terminal_w[8];
 
 int debug_var=0;
 
@@ -44,14 +47,6 @@ int main(void) {
     //setta a 0 il semaforo dello pseudo clock
     IT_sem = 0;
     
-    //array di semafori, uno per dispositivo
-    //int sem_disp[DISPNUM];  un unico array
-    int sem_dev_disk[8];
-    int sem_dev_flash[8];
-    int sem_dev_net[8];
-    int sem_dev_printer[8];
-    int sem_dev_terminal_r[8];
-    int sem_dev_terminal_w[8];
 
     //setta i semafori a 0
     for(int i=0; i<8; i++) {
