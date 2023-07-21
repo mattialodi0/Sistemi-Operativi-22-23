@@ -142,10 +142,25 @@ void Verhogen(int *semaddr)
     }
 }
 
+/* 
+ * Esegue un operazione di I/O sul dispositivo indicato, in modo sincrono
+ * cmdAddr contiene l'ind del comando e cmdValues è un array di puntatori ai valori 
+ * del comando
+*/
 int DoIO(int *cmdAddr, int *cmdValues)
 {
     // capitolo 5 della documentazione
-    
+
+    unsigned int *command = (unsigned int *) cmdAddr;
+    unsigned int *values = (unsigned int *) cmdValues;
+
+    // Installed Devices Bit Map 0x1000002C
+    // Interrupting Devices Bit Map 0x10000040
+    // devAddrBase = 0x1000.0054 + ((IntlineNo - 3) * 0x80) + (DevNo * 0x10)
+
+    // P sul sem indicato in a1 e a2
+    // 
+    // ritorna 0 o -1
 }
 
 int GetCPUTime()
