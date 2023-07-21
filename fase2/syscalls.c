@@ -145,6 +145,7 @@ void Verhogen(int *semaddr)
 int DoIO(int *cmdAddr, int *cmdValues)
 {
     // capitolo 5 della documentazione
+    
 }
 
 int GetCPUTime()

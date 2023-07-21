@@ -19,7 +19,6 @@ void scheduler()
         // load 5 ms in PLT
         setTIMER(5000);
         // load state
-        debug();
         LDST((STATE_PTR)(&(active_process->p_s))); 
         // LDST(&active_process->p_s);  
     }

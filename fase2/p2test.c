@@ -230,8 +230,8 @@ void addokbuf(char *strp) {
     mp--;
     termprint(tstrp, 0);
 }
-void test() {debug2();
-
+void test() {
+debug();
     SYSCALL(VERHOGEN, (int)&sem_testsem, 0, 0); /* V(sem_testsem)   */
 
     print("p1 v(sem_testsem)\n");
