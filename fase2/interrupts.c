@@ -1,7 +1,7 @@
  #include <interrupts.h>
 
 
-extern int debgu_var;
+extern int debug_var;
 
 void interruptHandler() {
     //per trovare la linea di interrupt
@@ -9,6 +9,9 @@ void interruptHandler() {
     cause = getCAUSE();
     cause = cause & 1111111100000000;   //maschera per  avere IP
     cause >>= 8;
+
+    //debug_var = cause;
+    debugInt();
 
     //per trovare anche il numero del device
     if(cause >= 1000000)

@@ -82,7 +82,6 @@ void ProgramTrapExceptionHandler()
 void syscallHandler() 
 {
     state_t state = *(state_t *)0x0FFFF000;
-    debug_var = state.reg_a0;
 
     // controllo se si è in kernel mode, altrimenti Trap
     if(state.status & 2 == 1) PANIC(); //syscall in user mode, non ci va panic ma vabbè
@@ -96,25 +95,28 @@ void syscallHandler()
     v3 = state.reg_a3;
 
     debug_var = state.reg_a0;
-
+    debug4();
     switch (v0)
     {
     case CREATEPROCESS:
+        debugCp();
         CreateProcess((state_t *)v1, (support_t *)v2, (nsd_t *)v3);
         break;
     case TERMPROCESS:
+        debugTp();
         TerminateProcess(v1);
         break;
     case PASSEREN:
+        debugP();
         Passeren((int *)v1);
         break;
     case VERHOGEN:
+        debugV();
         Verhogen((int *)v1);
         break;
     case DOIO:
-        debug1();
+        debugD();
         DoIO((unsigned int *)v1, (unsigned int *)v2);
-        debug4();
         break;
     case GETTIME:
         GetCPUTime();

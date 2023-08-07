@@ -158,10 +158,10 @@ int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
     // ...
     // ritorna 0 o -1
     // solo per print
-    debug2();
+    debug1();
     SYSCALL(PASSEREN, (int)&sem_dev_terminal_w[0], 0, 0);   // bisogna caapire quale è l'ind del semaforo
     *(cmdAddr + 0xc) = cmdValues[0];
-    debug3();
+    debug2();
 
     return 0;
     // unsigned int status = *(unsigned int *)(cmdAddr + 0x8);
