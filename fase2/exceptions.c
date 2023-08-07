@@ -81,7 +81,7 @@ void ProgramTrapExceptionHandler()
 
 void syscallHandler() 
 {
-    state_t state = *(state_t *)0x0FFFF000;
+    state_t state = *(state_t *)BIOSDATAPAGE;
 
     // controllo se si è in kernel mode, altrimenti Trap
     if(state.status & 2 == 1) PANIC(); //syscall in user mode, non ci va panic ma vabbè
@@ -95,7 +95,6 @@ void syscallHandler()
     v3 = state.reg_a3;
 
     debug_var = state.reg_a0;
-    debug4();
     switch (v0)
     {
     case CREATEPROCESS:
@@ -134,6 +133,7 @@ void syscallHandler()
         GetChildren((int *)v1, v2);
         break;
     default:
+        debug4();
         // HALT(); //per il debug
         break;
     }

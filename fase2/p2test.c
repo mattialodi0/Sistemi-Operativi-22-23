@@ -130,13 +130,13 @@ void print(char *msg) {
     while (*s != EOS) {
         devregtr value[2] = {PRINTCHR | (((devregtr)*s) << 8), 0 };
         status         = SYSCALL(DOIO, (int)command, (int)value, 0);
+    debug5();
         if (status != 0 || (value[0] & TERMSTATMASK) != RECVD) {
             PANIC();
         }
         s++;
     }
     SYSCALL(VERHOGEN, (int)&sem_term_mut, 0, 0); /* V(sem_term_mut) */
-    debug5();
 }
 
 /* TLB-Refill Handler */
