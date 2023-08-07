@@ -79,12 +79,22 @@ void ProgramTrapExceptionHandler()
     }
 }
 
-void syscallHandler()
+void syscallHandler() 
 {
-    // controllo se si è in user mode, altrimenti Trap
-    
-    int v0, v1, v2, v3;
-    // vanno presi dai registri e castati
+    state_t state = *(state_t *)0x0FFFF000;
+    debug_var = state.reg_a0;
+
+    // controllo se si è in kernel mode, altrimenti Trap
+    if(state.status & 2 == 1) PANIC(); //syscall in user mode, non ci va panic ma vabbè
+
+    // i parametri sono presi dai registri e castati
+    int v0, v1, v2, v3; // forse unsigned int
+    v0 = state.reg_a0;
+    v1 = state.reg_a1;
+    v2 = state.reg_a2;
+    v3 = state.reg_a3;
+
+    debug_var = state.reg_a0;
 
     switch (v0)
     {
@@ -101,7 +111,9 @@ void syscallHandler()
         Verhogen((int *)v1);
         break;
     case DOIO:
-        DoIO((int *)v1, (int *)v2);
+        debug1();
+        DoIO((unsigned int *)v1, (unsigned int *)v2);
+        debug4();
         break;
     case GETTIME:
         GetCPUTime();
@@ -118,8 +130,8 @@ void syscallHandler()
     case 10:
         GetChildren((int *)v1, v2);
         break;
-
     default:
+        // HALT(); //per il debug
         break;
     }
 }

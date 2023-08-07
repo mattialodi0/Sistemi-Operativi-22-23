@@ -1,3 +1,10 @@
+extern void debug();
+extern void debug1();
+extern void debug2();
+extern void debug3();
+extern void debug4();
+extern void debug5();
+
 /* File: $Id: p2test.c,v 1.1 1998/01/20 09:28:08 morsiani Exp morsiani $ */
 
 /*********************************P2TEST.C*******************************
@@ -113,6 +120,7 @@ extern void p5mm();
 
 /* a procedure to print on terminal 0 */
 void print(char *msg) {
+    debug();
     char     *s       = msg;
     devregtr *base    = (devregtr *)(TERM0ADDR);
     devregtr *command = base;
@@ -128,6 +136,7 @@ void print(char *msg) {
         s++;
     }
     SYSCALL(VERHOGEN, (int)&sem_term_mut, 0, 0); /* V(sem_term_mut) */
+    debug5();
 }
 
 /* TLB-Refill Handler */
@@ -217,10 +226,6 @@ unsigned int termprint(char *str, unsigned int term) {
     return (!error);
 }
 
-extern void debug();
-extern void debug1();
-extern void debug2();
-
 /* This function placess the specified character string in okbuf and
  *	causes the string to be written out to terminal0 */
 void addokbuf(char *strp) {
@@ -233,9 +238,7 @@ void addokbuf(char *strp) {
 void test() {
 
     SYSCALL(VERHOGEN, (int)&sem_testsem, 0, 0); /* V(sem_testsem)   */
-debug1();
     print("O");
-debug2();
     print("p1 v(sem_testsem)\n");
 
     /* set up states of the other processes */

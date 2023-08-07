@@ -149,8 +149,6 @@ void Verhogen(int *semaddr)
 */
 int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
 {
-    // capitolo 5 della documentazione
-
     // Installed Devices Bit Map 0x1000002C
     // Interrupting Devices Bit Map 0x10000040
     // devAddrBase = 0x10000054 + ((IntlineNo - 3) * 0x80) + (DevNo * 0x10)
@@ -159,11 +157,14 @@ int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
     // P sul sem indicato in a1 e a2
     // ...
     // ritorna 0 o -1
-
     // solo per print
-    SYSCALL(PASSEREN, (int)&sem_dev_terminal_w[0], 0, 0);
-    *(cmdAddr + 0x4) = cmdValues[0];
+    SYSCALL(PASSEREN, (int)&sem_dev_terminal_w[0], 0, 0);   // bisogna caapire quale è l'ind del semaforo
+    *(cmdAddr + 0xc) = cmdValues[0];
 
+    return 0;
+    // unsigned int status = *(unsigned int *)(cmdAddr + 0x8);
+    // if(status == 5) return 0;
+    // else return -1;
 }
 
 int GetCPUTime()
