@@ -88,7 +88,8 @@ void syscallHandler()
     if(state.status & 2 == 1) PANIC(); //syscall in user mode, non ci va panic ma vabbè
 
     // i parametri sono presi dai registri e castati
-    int v0, v1, v2, v3; // forse unsigned int
+    unsigned int v0;
+    int v1, v2, v3; // forse unsigned int
     v0 = state.reg_a0;
     v1 = state.reg_a1;
     v2 = state.reg_a2;
