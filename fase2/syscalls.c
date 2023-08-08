@@ -93,24 +93,22 @@ pcb_PTR findProcess(int pid) {
 // decrementa il semaforo all'ind semaddr, se diventa <= 0 il processo viene bloccato e si chiama lo scheduler
 void Passeren(int *semaddr)
 {
+    // azioni comuni alle syscall bloccanti
+    state_t state = *(state_t *)BIOSDATAPAGE;
+    state.pc_epc += 4;
+    active_process->p_s = state;
+    // aggiornamento del tempo di uso della CPU
+
     if (*semaddr == 0)
     {
-        debug3();
         soft_blocked_count++;
-        // salvataggio dello stato
-        STST((STATE_PTR)(&(active_process->p_s))); // MA setta il PC = 0
 
         insertBlocked(semaddr, active_process);
         
-    // state_t state = *(state_t *)BIOSDATAPAGE;
-    // // aumento di 4 dello SP
-    // state.pc_epc += 4;
-
         scheduler();
     }
     else    
     {
-        debug4();
         *semaddr--;
         pcb_t *waked_proc = removeBlocked(semaddr);
         if (waked_proc != NULL)
@@ -120,23 +118,24 @@ void Passeren(int *semaddr)
             soft_blocked_count--;
         }
     }
+    debug3();
 }
 
 // incrementa il semaforo all'ind semaddr, se diventa >= 1 il processo viene messo nella coda ready
 void Verhogen(int *semaddr)
 {
+    // azioni comuni alle syscall bloccanti
+    state_t state = *(state_t *)BIOSDATAPAGE;
+    state.pc_epc += 4;
+    active_process->p_s = state;
+    // aggiornamento del tempo di uso della CPU
+
     if (*semaddr == 1)
     {
         soft_blocked_count++;
-        // salvataggio dello stato
-        STST(&active_process->p_s); // MA setta il PC = 0
 
         insertBlocked(semaddr, active_process);
-
-    // state_t state = *(state_t *)BIOSDATAPAGE;
-    // // aumento di 4 dello SP
-    // state.pc_epc += 4;
-
+        
         scheduler();
     }
     else
@@ -158,6 +157,13 @@ void Verhogen(int *semaddr)
 */
 int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
 {
+    // azioni comuni alle syscall bloccanti
+    state_t state = *(state_t *)BIOSDATAPAGE;
+    state.pc_epc += 4;
+    active_process->p_s = state;
+    // aggiornamento del tempo di uso della CPU
+
+
     // Installed Devices Bit Map 0x1000002C
     // Interrupting Devices Bit Map 0x10000040
     // devAddrBase = 0x10000054 + ((IntlineNo - 3) * 0x80) + (DevNo * 0x10)
@@ -170,6 +176,7 @@ int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
     debug1();
     SYSCALL(PASSEREN, (int)&sem_dev_terminal_w[0], 0, 0);   // bisogna capire quale è l'ind del semaforo
     *(cmdAddr + 0xc) = cmdValues[0];
+    
     debug2();
 
     return 0;

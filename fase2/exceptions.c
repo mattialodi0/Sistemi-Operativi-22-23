@@ -95,7 +95,7 @@ void syscallHandler(state_t state)
     v2 = state.reg_a2;
     v3 = state.reg_a3;
 
-    // debug_var = state.reg_a0;
+    debug_var = state.reg_a0;
     switch (v0)
     {
     case CREATEPROCESS:
@@ -112,6 +112,7 @@ void syscallHandler(state_t state)
         break;
     case DOIO:
         DoIO((unsigned int *)v1, (unsigned int *)v2);
+        scheduler();
         break;
     case GETTIME:
         GetCPUTime();

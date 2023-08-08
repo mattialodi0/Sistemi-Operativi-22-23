@@ -30,6 +30,7 @@ int sem_dev_terminal_r[8];
 int sem_dev_terminal_w[8];
 
 int debug_var=0;
+char* debug_str="";
 
 int main(void) {
     //processi vivi
