@@ -11,4 +11,4 @@ void TLBExceptionHandler();
 
 void ProgramTrapExceptionHandler();
 
-void syscallHandler();
+void syscallHandler(state_t state);

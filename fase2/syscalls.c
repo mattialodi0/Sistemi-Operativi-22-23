@@ -1,6 +1,7 @@
 #include <syscalls.h>
 
 extern int pid_count;
+extern int debug_var;
 
 // ALLA FINE DELLE SYSCALL CHE NON BLOCCANO O TERMINANO IL PROCESSO:
 // deve essere restituito il controllo al processo aumentando il suo pc di 4
@@ -97,13 +98,17 @@ void Passeren(int *semaddr)
         debug3();
         soft_blocked_count++;
         // salvataggio dello stato
-        STST(&active_process->p_s); // MA setta il PC = 0
+        STST((STATE_PTR)(&(active_process->p_s))); // MA setta il PC = 0
 
         insertBlocked(semaddr, active_process);
+        
+    // state_t state = *(state_t *)BIOSDATAPAGE;
+    // // aumento di 4 dello SP
+    // state.pc_epc += 4;
 
         scheduler();
     }
-    else
+    else    
     {
         debug4();
         *semaddr--;
@@ -127,6 +132,12 @@ void Verhogen(int *semaddr)
         STST(&active_process->p_s); // MA setta il PC = 0
 
         insertBlocked(semaddr, active_process);
+
+    // state_t state = *(state_t *)BIOSDATAPAGE;
+    // // aumento di 4 dello SP
+    // state.pc_epc += 4;
+
+        scheduler();
     }
     else
     {

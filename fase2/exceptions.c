@@ -3,10 +3,13 @@ extern int debug_var;
 
 void exceptionHandler()
 {
+    state_t state = *(state_t *)BIOSDATAPAGE;
+    
     int cause_reg, exc_code;
     cause_reg = getCAUSE();
     exc_code = cause_reg & GETEXECCODE;
     exc_code >>= 2;
+
     switch (exc_code)
     {
     case 0:
@@ -28,7 +31,7 @@ void exceptionHandler()
         ProgramTrapExceptionHandler();
         break;
     case 8:
-        syscallHandler();
+        syscallHandler(state);
         break;
     default:
         // ProgramTrapExceptionHandler();  //se ci possono essere exc_code > 12
@@ -79,10 +82,8 @@ void ProgramTrapExceptionHandler()
     }
 }
 
-void syscallHandler() 
+void syscallHandler(state_t state) 
 {
-    state_t state = *(state_t *)BIOSDATAPAGE;
-
     // controllo se si è in kernel mode, altrimenti Trap
     if(state.status & 2 == 1) PANIC(); //syscall in user mode, non ci va panic ma vabbè
 
@@ -94,7 +95,7 @@ void syscallHandler()
     v2 = state.reg_a2;
     v3 = state.reg_a3;
 
-    debug_var = state.reg_a0;
+    // debug_var = state.reg_a0;
     switch (v0)
     {
     case CREATEPROCESS:
