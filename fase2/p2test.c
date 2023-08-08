@@ -6,7 +6,7 @@ extern void debug4();
 extern void debug5();
 extern void debugE();
 extern int debug_var;
-extern char* debug_str;
+extern char debug_char;
 
 /* File: $Id: p2test.c,v 1.1 1998/01/20 09:28:08 morsiani Exp morsiani $ */
 
@@ -128,8 +128,9 @@ void print(char *msg) {
     devregtr *command = base;
     devregtr  status;
 
-    debug_str = s;
+    debug_char = s[0];
     debug();
+
     SYSCALL(PASSEREN, (int)&sem_term_mut, 0, 0); /* P(sem_term_mut) */
     while (*s != EOS) {
         devregtr value[2] = {PRINTCHR | (((devregtr)*s) << 8), 0 };
