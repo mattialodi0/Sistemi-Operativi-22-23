@@ -89,21 +89,23 @@ pcb_PTR findProcess(int pid) {
 }
 */
 
-// decrementa il semaforo all'ind semaddr, se diventa < 0 il processo viene bloccato e si chiama lo scheduler
+// decrementa il semaforo all'ind semaddr, se diventa <= 0 il processo viene bloccato e si chiama lo scheduler
 void Passeren(int *semaddr)
 {
     if (*semaddr == 0)
     {
+        debug3();
         soft_blocked_count++;
         // salvataggio dello stato
         STST(&active_process->p_s); // MA setta il PC = 0
 
         insertBlocked(semaddr, active_process);
-        // forse va richiamato lo scheduler per selezionare un nuovo processo
-        // scheduler();
+
+        scheduler();
     }
     else
     {
+        debug4();
         *semaddr--;
         pcb_t *waked_proc = removeBlocked(semaddr);
         if (waked_proc != NULL)
@@ -112,12 +114,10 @@ void Passeren(int *semaddr)
             insertProcQ(&ready_queue, waked_proc);
             soft_blocked_count--;
         }
-        else
-            *semaddr--;
     }
 }
 
-// incrementa il semaforo all'ind semaddr, se diventa > 0 il processo viene messo nella coda ready
+// incrementa il semaforo all'ind semaddr, se diventa >= 1 il processo viene messo nella coda ready
 void Verhogen(int *semaddr)
 {
     if (*semaddr == 1)
@@ -137,8 +137,6 @@ void Verhogen(int *semaddr)
             insertProcQ(&ready_queue, waked_proc);
             soft_blocked_count--;
         }
-        else
-            *semaddr++;
     }
 }
 

@@ -98,23 +98,18 @@ void syscallHandler()
     switch (v0)
     {
     case CREATEPROCESS:
-        debugCp();
         CreateProcess((state_t *)v1, (support_t *)v2, (nsd_t *)v3);
         break;
     case TERMPROCESS:
-        debugTp();
         TerminateProcess(v1);
         break;
     case PASSEREN:
-        debugP();
         Passeren((int *)v1);
         break;
     case VERHOGEN:
-        debugV();
         Verhogen((int *)v1);
         break;
     case DOIO:
-        debugD();
         DoIO((unsigned int *)v1, (unsigned int *)v2);
         break;
     case GETTIME:
@@ -133,7 +128,7 @@ void syscallHandler()
         GetChildren((int *)v1, v2);
         break;
     default:
-        debug4();
+        debugE();
         // HALT(); //per il debug
         break;
     }

@@ -6,9 +6,5 @@ void debug2() {}
 void debug3() {}
 void debug4() {}
 void debug5() {}
-void debugCp() {}
-void debugTp() {}
-void debugP() {}
-void debugV() {}
-void debugD() {}
+void debugE() {}
 void debugInt() {}
