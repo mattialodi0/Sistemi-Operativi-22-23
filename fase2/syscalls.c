@@ -124,9 +124,9 @@ void Passeren(int *semaddr)
 void Verhogen(int *semaddr)
 {
     // azioni comuni alle syscall bloccanti
-    state_t state = *(state_t *)BIOSDATAPAGE;
-    state.pc_epc += 4;
-    active_process->p_s = state;
+    // state_t state = *(state_t *)BIOSDATAPAGE;
+    // state.pc_epc += 4;
+    // active_process->p_s = state;
     // aggiornamento del tempo di uso della CPU
 
     if (*semaddr == 1)
@@ -173,8 +173,8 @@ int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
     // ritorna 0 o -1
     // solo per print
     debug1();
-    SYSCALL(PASSEREN, (int)&sem_dev_terminal_w[0], 0, 0);   // bisogna capire quale è l'ind del semaforo
-    *(cmdAddr + 0xc) = cmdValues[0];
+    // SYSCALL(PASSEREN, (int)&sem_dev_terminal_w[0], 0, 0);   // bisogna capire quale è l'ind del semaforo
+    // *(cmdAddr + 0xc) = cmdValues[0];
     
     debug2();
 

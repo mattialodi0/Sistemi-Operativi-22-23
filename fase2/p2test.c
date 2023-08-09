@@ -131,24 +131,22 @@ void print(char *msg) {
     debug_char = *s;
     debug();
 
+    debug_var = (*s == EOS);    // 0
     SYSCALL(PASSEREN, (int)&sem_term_mut, 0, 0); /* P(sem_term_mut) */
-    // while (*s != EOS) {
-    //     debug3();
-    //     devregtr value[2] = {PRINTCHR | (((devregtr)*s) << 8), 0 };
-    //     status         = SYSCALL(DOIO, (int)command, (int)value, 0);
-    //     if (status != 0 || (value[0] & TERMSTATMASK) != RECVD) {
-    //         PANIC();
-    //     }
-    //     s++;
-    // }
-    devregtr value[2] = {PRINTCHR | (((devregtr)*s) << 8), 0 };
-    status         = SYSCALL(DOIO, (int)command, (int)value, 0);
-    if (status != 0 || (value[0] & TERMSTATMASK) != RECVD) {
-        PANIC();
+    debug_var = (*s == EOS);    // 1
+
+    while (*s != EOS) {
+        debug3();
+        devregtr value[2] = {PRINTCHR | (((devregtr)*s) << 8), 0 };
+        status         = SYSCALL(DOIO, (int)command, (int)value, 0);
+        if (status != 0 || (value[0] & TERMSTATMASK) != RECVD) {
+            PANIC();
+        }
+        s++;
     }
 
-    debug5();
     SYSCALL(VERHOGEN, (int)&sem_term_mut, 0, 0); /* V(sem_term_mut) */
+    debug5();
 }
 
 /* TLB-Refill Handler */
@@ -248,10 +246,6 @@ void addokbuf(char *strp) {
     termprint(tstrp, 0);
 }
 void test() {
-    while(1) {
-        int i=0, j=0;
-        for(i; i<1000; i++) j++;
-    }
 
     SYSCALL(VERHOGEN, (int)&sem_testsem, 0, 0); /* V(sem_testsem)   */
 
