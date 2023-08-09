@@ -146,7 +146,7 @@ void print(char *msg) {
     if (status != 0 || (value[0] & TERMSTATMASK) != RECVD) {
         PANIC();
     }
-    
+
     debug5();
     SYSCALL(VERHOGEN, (int)&sem_term_mut, 0, 0); /* V(sem_term_mut) */
 }
@@ -248,6 +248,10 @@ void addokbuf(char *strp) {
     termprint(tstrp, 0);
 }
 void test() {
+    while(1) {
+        int i=0, j=0;
+        for(i; i<1000; i++) j++;
+    }
 
     SYSCALL(VERHOGEN, (int)&sem_testsem, 0, 0); /* V(sem_testsem)   */
 

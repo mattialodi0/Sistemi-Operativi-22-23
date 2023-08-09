@@ -7,38 +7,39 @@ void interruptHandler() {
     //per trovare la linea di interrupt
     unsigned int line, cause, dev_num;
     cause = getCAUSE();
-    cause = cause & 1111111100000000;   //maschera per  avere IP
+    cause &= 0x0000FF00 ;   //maschera per  avere IP
     cause >>= 8;
 
-    //debug_var = cause;
+    debug_var = cause;
     debugInt();
 
     //per trovare anche il numero del device
-    if(cause >= 1000000)
-        line = 1;
-    else if(cause >= 100000)
-        line = 2;
-    else if(cause >= 10000) {
-        line = 3;
-        dev_num = find_dev_num(0x10000040);
-    }
-    else if(cause >= 1000) {
-        line = 4;
-        dev_num = find_dev_num(0x10000040 + 0x04);
-    }
-    else if(cause >= 100) {
-        line = 5;
-        dev_num = find_dev_num(0x10000040 + 0x08);
-    }
-    else if(cause >= 10) {
-        line = 6;
-        dev_num = find_dev_num(0x10000040 + 0x0C);
-    }
-    else if(cause >= 1) {
+    if(cause >= 64) {
         line = 7;
         dev_num = find_dev_num(0x10000040 + 0x10);
     }
-
+    else if(cause >= 32) {
+        line = 6;
+        dev_num = find_dev_num(0x10000040 + 0x0C);
+    }
+    else if(cause >= 16) {
+        line = 5;
+        dev_num = find_dev_num(0x10000040 + 0x08);
+    }
+    else if(cause >= 8) {
+        line = 4;
+        dev_num = find_dev_num(0x10000040 + 0x04);
+    }
+    else if(cause >= 4) {
+        line = 3;
+        dev_num = find_dev_num(0x10000040);
+    }
+    else if(cause >= 2) {
+        line = 2;
+    }
+    else if(cause >= 1) {
+        line = 1;
+    }
 
     //in caso di più interrupt si risolve quello con priorità più alta (switch)
     switch (line)
@@ -68,9 +69,9 @@ void interruptHandler() {
         nonTimerInterrupt(line, dev_num);
         break;
     default:
+        debugE();
         break;
     }
-
 }
 
 //è scaduto il quanto di tempo a disposizione del processo corrente e questo va messo da running a ready
@@ -84,7 +85,6 @@ void PLTInterrupt() {
     insertProcQ(&ready_queue, active_process);
 
     scheduler();
-
 }
 
 void ITInterrupt() {
