@@ -96,6 +96,7 @@ void syscallHandler(state_t state)
     v3 = state.reg_a3;
 
     debug_var = state.reg_a0;
+
     switch (v0)
     {
     case CREATEPROCESS:

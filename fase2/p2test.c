@@ -128,18 +128,25 @@ void print(char *msg) {
     devregtr *command = base;
     devregtr  status;
 
-    debug_char = s[0];
+    debug_char = *s;
     debug();
 
     SYSCALL(PASSEREN, (int)&sem_term_mut, 0, 0); /* P(sem_term_mut) */
-    while (*s != EOS) {
-        devregtr value[2] = {PRINTCHR | (((devregtr)*s) << 8), 0 };
-        status         = SYSCALL(DOIO, (int)command, (int)value, 0);
-        if (status != 0 || (value[0] & TERMSTATMASK) != RECVD) {
-            PANIC();
-        }
-        s++;
+    // while (*s != EOS) {
+    //     debug3();
+    //     devregtr value[2] = {PRINTCHR | (((devregtr)*s) << 8), 0 };
+    //     status         = SYSCALL(DOIO, (int)command, (int)value, 0);
+    //     if (status != 0 || (value[0] & TERMSTATMASK) != RECVD) {
+    //         PANIC();
+    //     }
+    //     s++;
+    // }
+    devregtr value[2] = {PRINTCHR | (((devregtr)*s) << 8), 0 };
+    status         = SYSCALL(DOIO, (int)command, (int)value, 0);
+    if (status != 0 || (value[0] & TERMSTATMASK) != RECVD) {
+        PANIC();
     }
+    
     debug5();
     SYSCALL(VERHOGEN, (int)&sem_term_mut, 0, 0); /* V(sem_term_mut) */
 }
@@ -243,7 +250,7 @@ void addokbuf(char *strp) {
 void test() {
 
     SYSCALL(VERHOGEN, (int)&sem_testsem, 0, 0); /* V(sem_testsem)   */
-    print("O");
+
     print("p1 v(sem_testsem)\n");
 
     /* set up states of the other processes */

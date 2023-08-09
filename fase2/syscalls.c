@@ -118,7 +118,6 @@ void Passeren(int *semaddr)
             soft_blocked_count--;
         }
     }
-    debug3();
 }
 
 // incrementa il semaforo all'ind semaddr, se diventa >= 1 il processo viene messo nella coda ready
