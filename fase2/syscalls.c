@@ -1,6 +1,7 @@
 #include <syscalls.h>
 
 extern int pid_count;
+extern cpu_t timer_start;
 extern int debug_var;
 
 // ALLA FINE DELLE SYSCALL CHE NON BLOCCANO O TERMINANO IL PROCESSO:
@@ -93,19 +94,9 @@ pcb_PTR findProcess(int pid) {
 // decrementa il semaforo all'ind semaddr, se diventa <= 0 il processo viene bloccato e si chiama lo scheduler
 void Passeren(int *semaddr)
 {
-    // azioni comuni alle syscall bloccanti
-    state_t state = *(state_t *)BIOSDATAPAGE;
-    state.pc_epc += 4;
-    active_process->p_s = state;
-    // aggiornamento del tempo di uso della CPU
-
     if (*semaddr == 0)
     {
-        soft_blocked_count++;
-
-        insertBlocked(semaddr, active_process);
-        
-        scheduler();
+        BlockingExceptEnd(semaddr);
     }
     else    
     {
@@ -117,25 +108,16 @@ void Passeren(int *semaddr)
             insertProcQ(&ready_queue, waked_proc);
             soft_blocked_count--;
         }
+        NonBlockingExceptEnd();
     }
 }
 
 // incrementa il semaforo all'ind semaddr, se diventa >= 1 il processo viene messo nella coda ready
 void Verhogen(int *semaddr)
 {
-    // azioni comuni alle syscall bloccanti
-    // state_t state = *(state_t *)BIOSDATAPAGE;
-    // state.pc_epc += 4;
-    // active_process->p_s = state;
-    // aggiornamento del tempo di uso della CPU
-
     if (*semaddr == 1)
     {
-        soft_blocked_count++;
-
-        insertBlocked(semaddr, active_process);
-        
-        scheduler();
+        BlockingExceptEnd();
     }
     else
     {
@@ -146,6 +128,7 @@ void Verhogen(int *semaddr)
             insertProcQ(&ready_queue, waked_proc);
             soft_blocked_count--;
         }
+        NonBlockingExceptEnd();
     }
 }
 
@@ -156,13 +139,6 @@ void Verhogen(int *semaddr)
 */
 int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
 {
-    // azioni comuni alle syscall bloccanti
-    state_t state = *(state_t *)BIOSDATAPAGE;
-    state.pc_epc += 4;
-    active_process->p_s = state;
-    // aggiornamento del tempo di uso della CPU
-
-
     // Installed Devices Bit Map 0x1000002C
     // Interrupting Devices Bit Map 0x10000040
     // devAddrBase = 0x10000054 + ((IntlineNo - 3) * 0x80) + (DevNo * 0x10)
@@ -173,20 +149,25 @@ int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
     // ritorna 0 o -1
     // solo per print
     debug1();
-    // SYSCALL(PASSEREN, (int)&sem_dev_terminal_w[0], 0, 0);   // bisogna capire quale è l'ind del semaforo
-    // *(cmdAddr + 0xc) = cmdValues[0];
+    *(cmdAddr + 0xc) = cmdValues[0];
+    SYSCALL(PASSEREN, (int)&sem_dev_terminal_w[0], 0, 0);   // bisogna capire quale è l'ind del semaforo
     
     debug2();
 
-    return 0;
-    // unsigned int status = *(unsigned int *)(cmdAddr + 0x8);
-    // if(status == 5) return 0;
-    // else return -1;
+    // copia dei valori dei registri in cmdValues
+
+    unsigned int status = *(unsigned int *)(cmdAddr + 0x8);
+    if(status == 5) return 0;
+    else return -1;
+
+    BlockingExceptEnd();    //  a quale ind ?
 }
 
 int GetCPUTime()
 {
-    return active_process->p_time;
+    cpu_t time;
+    STCK(time);
+    return active_process->p_time + (time - timer_start);
     // STCK(); //potrebbe servire il timer TOD e questa macro serve per leggerlo
     // bisogna sommargli il tempo accumulato nel quanto corrente
 }

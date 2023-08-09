@@ -245,10 +245,10 @@ void addokbuf(char *strp) {
     mp--;
     termprint(tstrp, 0);
 }
-void test() {
+void test() {    
 
     SYSCALL(VERHOGEN, (int)&sem_testsem, 0, 0); /* V(sem_testsem)   */
-
+    
     print("p1 v(sem_testsem)\n");
 
     /* set up states of the other processes */

@@ -1,4 +1,6 @@
 #include <exceptions.h>
+
+extern cpu_t timer_start;
 extern int debug_var;
 
 void exceptionHandler()
@@ -135,4 +137,25 @@ void syscallHandler(state_t state)
         // HALT(); //per il debug
         break;
     }
+}
+
+void NonBlockingExceptEnd() {
+    state_t state = *(state_t *)BIOSDATAPAGE;
+    state.pc_epc += 4;
+    LDST(&state);
+}
+
+void BlockingExceptEnd(int *semaddr) {
+    state_t state = *(state_t *)BIOSDATAPAGE;
+    state.pc_epc += 4;
+    active_process->p_s = state;
+    
+    // aggiornamento del tempo di uso della CPU
+    cpu_t time;
+    STCK(time);
+    active_process->p_time + (time - timer_start);
+
+    soft_blocked_count++;
+    insertBlocked(semaddr, active_process);    
+    scheduler();
 }

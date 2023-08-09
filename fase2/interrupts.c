@@ -14,31 +14,31 @@ void interruptHandler() {
     debugInt();
 
     //per trovare anche il numero del device
-    if(cause >= 64) {
-        line = 7;
-        dev_num = find_dev_num(0x10000040 + 0x10);
+    if(cause & 1 == 1) {
+        line = 1;
     }
-    else if(cause >= 32) {
-        line = 6;
-        dev_num = find_dev_num(0x10000040 + 0x0C);
+    else if(cause & 2 == 1) {
+        line = 2;
     }
-    else if(cause >= 16) {
-        line = 5;
-        dev_num = find_dev_num(0x10000040 + 0x08);
-    }
-    else if(cause >= 8) {
-        line = 4;
-        dev_num = find_dev_num(0x10000040 + 0x04);
-    }
-    else if(cause >= 4) {
+    else if(cause & 4 == 1) {
         line = 3;
         dev_num = find_dev_num(0x10000040);
     }
-    else if(cause >= 2) {
-        line = 2;
+    else if(cause & 8 == 1) {
+        line = 4;
+        dev_num = find_dev_num(0x10000040 + 0x04);
     }
-    else if(cause >= 1) {
-        line = 1;
+    else if(cause & 16 == 1) {
+        line = 5;
+        dev_num = find_dev_num(0x10000040 + 0x08);
+    }
+    else if(cause & 32 == 1) {
+        line = 6;
+        dev_num = find_dev_num(0x10000040 + 0x0C);
+    }
+    else if(cause & 64 == 1) {
+        line = 7;
+        dev_num = find_dev_num(0x10000040 + 0x10);
     }
 
     //in caso di più interrupt si risolve quello con priorità più alta (switch)
