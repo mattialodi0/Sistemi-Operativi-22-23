@@ -94,49 +94,74 @@ pcb_PTR findProcess(int pid) {
 // decrementa il semaforo all'ind semaddr, se diventa <= 0 il processo viene bloccato e si chiama lo scheduler
 void Passeren(int *semaddr)
 {
-    if (*semaddr == 0)
+    *semaddr--;
+
+    if (*semaddr <= 0)
     {
+        if (insertBlocked(semaddr, active_process))
+            PANIC(); // errore nei semafori
+        soft_blocked_count++;
         BlockingExceptEnd(semaddr);
     }
-    else    
+    else
     {
-        *semaddr--;
-        pcb_t *waked_proc = removeBlocked(semaddr);
-        if (waked_proc != NULL)
-        {
-            // wakeup proc
-            insertProcQ(&ready_queue, waked_proc);
-            soft_blocked_count--;
-        }
         NonBlockingExceptEnd();
     }
+    // per semafori binari
+    // if (*semaddr == 0)
+    // {
+    //     BlockingExceptEnd(semaddr);
+    // }
+    // else
+    // {
+    //     *semaddr--;
+    //     pcb_t *waked_proc = removeBlocked(semaddr);
+    //     if (waked_proc != NULL)
+    //     {
+    //         // wakeup proc
+    //         insertProcQ(&ready_queue, waked_proc);
+    //         soft_blocked_count--;
+    //     }
+    //     NonBlockingExceptEnd();
+    // }
 }
 
 // incrementa il semaforo all'ind semaddr, se diventa >= 1 il processo viene messo nella coda ready
 void Verhogen(int *semaddr)
 {
-    if (*semaddr == 1)
+    semaddr++;
+
+    pcb_t *waked_proc = removeBlocked(semaddr);
+    if (waked_proc != NULL)
     {
-        BlockingExceptEnd();
+        // wakeup proc
+        insertProcQ(&ready_queue, waked_proc);
+        soft_blocked_count--;
     }
-    else
-    {
-        *semaddr++;
-        pcb_t *waked_proc = removeBlocked(semaddr);
-        if (waked_proc != NULL)
-        {
-            insertProcQ(&ready_queue, waked_proc);
-            soft_blocked_count--;
-        }
-        NonBlockingExceptEnd();
-    }
+    NonBlockingExceptEnd();
+    // per semafori binari
+    // if (*semaddr == 1)
+    // {
+    //     BlockingExceptEnd();
+    // }
+    // else
+    // {
+    //     *semaddr++;
+    //     pcb_t *waked_proc = removeBlocked(semaddr);
+    //     if (waked_proc != NULL)
+    //     {
+    //         insertProcQ(&ready_queue, waked_proc);
+    //         soft_blocked_count--;
+    //     }
+    //     NonBlockingExceptEnd();
+    // }
 }
 
-/* 
+/*
  * Esegue un operazione di I/O sul dispositivo indicato, in modo sincrono
- * cmdAddr contiene l'ind del comando e cmdValues è un array di puntatori ai valori 
+ * cmdAddr contiene l'ind del comando e cmdValues è un array di puntatori ai valori
  * del comando
-*/
+ */
 int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
 {
     // Installed Devices Bit Map 0x1000002C
@@ -150,17 +175,19 @@ int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
     // solo per print
     debug1();
     *(cmdAddr + 0xc) = cmdValues[0];
-    SYSCALL(PASSEREN, (int)&sem_dev_terminal_w[0], 0, 0);   // bisogna capire quale è l'ind del semaforo
-    
+    SYSCALL(PASSEREN, (int)&sem_dev_terminal_w[0], 0, 0); // bisogna capire quale è l'ind del semaforo
+
     debug2();
 
     // copia dei valori dei registri in cmdValues
 
     unsigned int status = *(unsigned int *)(cmdAddr + 0x8);
-    if(status == 5) return 0;
-    else return -1;
+    if (status == 5)
+        return 0;
+    else
+        return -1;
 
-    BlockingExceptEnd();    //  a quale ind ?
+    BlockingExceptEnd(); //  a quale ind ?
 }
 
 int GetCPUTime()
