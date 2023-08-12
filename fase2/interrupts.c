@@ -10,7 +10,7 @@ void interruptHandler() {
     cause &= 0x0000FF00 ;   //maschera per  avere IP
     cause >>= 8;
 
-    // debug_var = cause;
+    debug_var = cause;
     debugInt();
 
     //per trovare anche il numero del device
@@ -91,12 +91,12 @@ void ITInterrupt() {
     LDIT(100000/timescale); // carica nell'interval timer  T * la timescale del processore
 
     //sbloccare tutti i processi fermi al semaforo dello pseudo clock
-    while(headBlocked(&IT_sem) != NULL) {
-        if(IT_sem == 1) 
-            Passeren(&IT_sem);
-        else if(IT_sem == 0)
-            Verhogen(&IT_sem);
-    }
+    // while(headBlocked(&IT_sem) != NULL) {
+    //     if(IT_sem == 1) 
+    //         Passeren(&IT_sem);
+    //     else if(IT_sem == 0)
+    //         Verhogen(&IT_sem);
+    // }
 
     //settare il semaforo a 0
     IT_sem = 0;

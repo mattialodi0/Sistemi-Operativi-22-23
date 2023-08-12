@@ -246,9 +246,9 @@ void addokbuf(char *strp) {
     termprint(tstrp, 0);
 }
 void test() {  
-    
+
     SYSCALL(VERHOGEN, (int)&sem_testsem, 0, 0); /* V(sem_testsem)   */
-    
+    debug();
     print("p1 v(sem_testsem)\n");
 
     /* set up states of the other processes */

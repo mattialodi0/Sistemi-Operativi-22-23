@@ -130,7 +130,6 @@ void Passeren(int *semaddr)
 void Verhogen(int *semaddr)
 {
     semaddr++;
-
     pcb_t *waked_proc = removeBlocked(semaddr);
     if (waked_proc != NULL)
     {
