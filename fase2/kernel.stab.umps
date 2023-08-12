@@ -39,7 +39,7 @@ sem_endcreate                    :OBJ:0x200092DC:0x00000010:GLB
 child2state                      :OBJ:0x20009564:0x0000008C:GLB
 initPcbs                         :FUN:0x20002254:0x000000E8:GLB
 getENTRYHI                       :FUN:0x20007198:0x00000014:GLB
-WaitForClock                     :FUN:0x2000400C:0x00000044:GLB
+WaitForClock                     :FUN:0x20004004:0x00000044:GLB
 emptyProcQ                       :FUN:0x200024DC:0x00000038:GLB
 onesem                           :OBJ:0x200095F0:0x00000004:GLB
 p5gen                            :FUN:0x20005E64:0x000001EC:GLB
@@ -87,7 +87,7 @@ debug2                           :FUN:0x200074D8:0x00000024:GLB
 p7state                          :OBJ:0x20009980:0x0000008C:GLB
 debug4                           :FUN:0x20007520:0x00000024:GLB
 removeBlocked                    :FUN:0x20001574:0x00000198:GLB
-GetSupportData                   :FUN:0x20004050:0x00000030:GLB
+GetSupportData                   :FUN:0x20004048:0x00000030:GLB
 p3state                          :OBJ:0x20009A0C:0x0000008C:GLB
 initASH                          :FUN:0x20001918:0x000000EC:GLB
 freeNamespace                    :FUN:0x20001DE0:0x0000012C:GLB
@@ -100,7 +100,7 @@ getNamespace                     :FUN:0x20001AF4:0x00000080:GLB
 pid_count                        :OBJ:0x20009374:0x00000004:GLB
 removeChild                      :FUN:0x200027FC:0x000000AC:GLB
 nonTimerInterrupt                :FUN:0x2000386C:0x000000AC:GLB
-DoIO                             :FUN:0x20003ED8:0x000000B4:GLB
+DoIO                             :FUN:0x20003ED0:0x000000B4:GLB
 p9pid                            :OBJ:0x20009B24:0x00000004:GLB
 ready_queue                      :OBJ:0x20009378:0x00000008:GLB
 p8inc                            :OBJ:0x20009B28:0x00000004:GLB
@@ -108,7 +108,7 @@ allocNamespace                   :FUN:0x20001B74:0x00000140:GLB
 WAIT                             :FUN:0x20007308:0x00000014:GLB
 timer_start                      :OBJ:0x20009380:0x00000004:GLB
 __start                          :FUN:0x200070E0:0x0000003C:GLB
-Verhogen                         :FUN:0x20003E44:0x00000094:GLB
+Verhogen                         :FUN:0x20003E44:0x0000008C:GLB
 find_dev_num                     :FUN:0x20003918:0x00000144:GLB
 LDST                             :FUN:0x20007434:0x00000018:GLB
 p6                               :FUN:0x20006438:0x0000006C:GLB
@@ -151,7 +151,7 @@ SYSCALL                          :FUN:0x20007120:0x00000014:GLB
 midproc                          :OBJ:0x2000A8B4:0x00000004:GLB
 main                             :FUN:0x20002920:0x00000304:GLB
 p4inc                            :OBJ:0x2000801C:0x00000004:GLB
-GetProcessId                     :FUN:0x20004080:0x00000034:GLB
+GetProcessId                     :FUN:0x20004078:0x00000034:GLB
 soft_blocked_count               :OBJ:0x200093A8:0x00000004:GLB
 debug1                           :FUN:0x200074B4:0x00000024:GLB
 firstproc                        :OBJ:0x2000A8B8:0x00000004:GLB
@@ -179,7 +179,7 @@ interruptHandler                 :FUN:0x200034D0:0x00000270:GLB
 Passeren                         :FUN:0x20003D8C:0x000000B8:GLB
 sem_endp4                        :OBJ:0x200092D0:0x00000004:GLB
 debugE                           :FUN:0x20007568:0x00000024:GLB
-GetChildren                      :FUN:0x200040B4:0x00000030:GLB
+GetChildren                      :FUN:0x200040AC:0x00000030:GLB
 allocPcb                         :FUN:0x20002384:0x0000011C:GLB
 p5b                              :FUN:0x200062A8:0x00000190:GLB
 p11                              :FUN:0x20006DCC:0x00000314:GLB
@@ -198,9 +198,9 @@ uTLB_RefillHandler               :FUN:0x2000433C:0x0000005C:GLB
 p8pid                            :OBJ:0x2000ABC0:0x00000004:GLB
 p8leaf1                          :FUN:0x200067E4:0x0000007C:GLB
 p3pid                            :OBJ:0x2000ABC4:0x00000004:GLB
-eqNS                             :FUN:0x200040E4:0x000000AC:GLB
+eqNS                             :FUN:0x200040DC:0x000000AC:GLB
 getTIMER                         :FUN:0x20007184:0x00000014:GLB
-GetCPUTime                       :FUN:0x20003F8C:0x00000080:GLB
+GetCPUTime                       :FUN:0x20003F84:0x00000080:GLB
 q                                :OBJ:0x2000ABC8:0x00000004:GLB
 IT_sem                           :OBJ:0x200093CC:0x00000004:GLB
 mp                               :OBJ:0x20008020:0x00000004:GLB
