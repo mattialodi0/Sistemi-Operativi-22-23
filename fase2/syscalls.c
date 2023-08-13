@@ -101,11 +101,11 @@ void Passeren(int *semaddr)
         if (insertBlocked(semaddr, active_process))
             PANIC(); // errore nei semafori
         soft_blocked_count++;
-        BlockingExceptEnd(semaddr);
+        //BlockingExceptEnd(semaddr);
     }
     else
     {
-        NonBlockingExceptEnd();
+        //NonBlockingExceptEnd();
     }
     // per semafori binari
     // if (*semaddr == 0)
@@ -137,7 +137,8 @@ void Verhogen(int *semaddr)
         insertProcQ(&ready_queue, waked_proc);
         soft_blocked_count--;
     }
-    NonBlockingExceptEnd();
+    //NonBlockingExceptEnd();
+
     // per semafori binari
     // if (*semaddr == 1)
     // {
