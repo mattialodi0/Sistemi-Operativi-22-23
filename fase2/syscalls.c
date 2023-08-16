@@ -91,7 +91,7 @@ pcb_PTR findProcess(int pid) {
 }
 */
 
-state_t *cached_exceptionState; /* salviamo l'exception state */
+state_t *cached_exceptionState = (state_t *)BIOSDATAPAGE; /* salviamo l'exception state */
 
 // decrementa il semaforo all'ind semaddr, se diventa <= 0 il processo viene bloccato e si chiama lo scheduler
 void Passeren(int *semaddr)
@@ -100,14 +100,16 @@ void Passeren(int *semaddr)
 
     if (*semaddr <= 0)
     {
-        if (insertBlocked(semaddr, active_process))
+        if (insertBlocked(semaddr, active_process)) {
             PANIC(); // errore nei semafori
-        scheduler();
-        // BlockingExceptEnd(semaddr);
+        }
+        soft_blocked_count++;
+        //scheduler();
+        BlockingExceptEnd(semaddr);
     }
     else
         LDST(cached_exceptionState); /* in case the process doesn't become blocked, we return control to the current process */
-        // NonBlockingExceptEnd(semaddr)
+        // NonBlockingExceptEnd(semaddr);
 
     // per semafori binari
     // if (*semaddr == 0)
