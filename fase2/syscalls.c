@@ -91,22 +91,24 @@ pcb_PTR findProcess(int pid) {
 }
 */
 
+state_t *cached_exceptionState; /* salviamo l'exception state */
+
 // decrementa il semaforo all'ind semaddr, se diventa <= 0 il processo viene bloccato e si chiama lo scheduler
 void Passeren(int *semaddr)
 {
-    *semaddr--;
+    *semaddr --;
 
     if (*semaddr <= 0)
     {
         if (insertBlocked(semaddr, active_process))
             PANIC(); // errore nei semafori
-        soft_blocked_count++;
-        //BlockingExceptEnd(semaddr);
+        scheduler();
+        // BlockingExceptEnd(semaddr);
     }
     else
-    {
-        //NonBlockingExceptEnd();
-    }
+        LDST(cached_exceptionState); /* in case the process doesn't become blocked, we return control to the current process */
+        // NonBlockingExceptEnd(semaddr)
+
     // per semafori binari
     // if (*semaddr == 0)
     // {
@@ -129,7 +131,7 @@ void Passeren(int *semaddr)
 // incrementa il semaforo all'ind semaddr, se diventa >= 1 il processo viene messo nella coda ready
 void Verhogen(int *semaddr)
 {
-    semaddr++;
+    *semaddr++;
     pcb_t *waked_proc = removeBlocked(semaddr);
     if (waked_proc != NULL)
     {
@@ -137,7 +139,7 @@ void Verhogen(int *semaddr)
         insertProcQ(&ready_queue, waked_proc);
         soft_blocked_count--;
     }
-    //NonBlockingExceptEnd();
+    // NonBlockingExceptEnd();
 
     // per semafori binari
     // if (*semaddr == 1)

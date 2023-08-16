@@ -8,12 +8,13 @@ extern void debugE();
 extern int debug_var;
 extern char debug_char;
 
+
 /* File: $Id: p2test.c,v 1.1 1998/01/20 09:28:08 morsiani Exp morsiani $ */
 
 /*********************************P2TEST.C*******************************
  *
  *	Test program for the Panda+ Kernel: phase 2.
- *      v.0.1: April 08, 2023
+ *      v.0.2: April 18, 2023
  *
  *	Produces progress messages on Terminal0.
  *
@@ -21,22 +22,21 @@ extern char debug_char;
  *
  *		Aborts as soon as an error is detected.
  *
- *    Modified by Michael Goldweber on May 15, 2004
+ *      Modified by Michael Goldweber on May 15, 2004
  *		Modified by Michael Goldweber on June 19, 2020
- *		Modified by Davide Berardi on April 05, 2023
+ *		Modified by Davide Berardi on April 18, 2023
  */
 
 #include <pandos_const.h>
 #include <pandos_types.h>
-#include <umps3/umps/libumps.h>
-#include <ash.h>
-
+#include <ns.h>
+#include <umps/libumps.h>
 
 typedef unsigned int devregtr;
 
 /* hardware constants */
 #define PRINTCHR 2
-#define  RECVD    5
+#define RECVD    5
 
 #define CLOCKINTERVAL 100000UL /* interval to V clock semaphore */
 
@@ -76,6 +76,8 @@ typedef unsigned int devregtr;
 
 #define NS_MAXCHILDREN 5
 
+#define USERSYSCALL 11
+
 
 int sem_term_mut = 1,              /* for mutual exclusion on terminal */
     s[MAXSEM + 1],                 /* semaphore array */
@@ -91,14 +93,23 @@ int sem_term_mut = 1,              /* for mutual exclusion on terminal */
     sem_endcreate[NOLEAVES] = {0}, /* for a p8 leaf to signal its creation */
     sem_blkp8               = 0,   /* to block p8 */
     sem_blkp9               = 0,   /* to block p9 */
-    sem_ns                  = 0;   /* to block p11 children and check for namespaces */
+    sem_p11                 = 0,   /* to block p11 */
+    sem_l_ns1_a             = 0,   /* to block p11 children */
+    sem_l_ns1_b             = 0,   /* to block p11 children */
+    sem_l_ns2_a             = 0,   /* to block p11 children */
+    sem_l_ns2_b             = 0,   /* to block p11 children */
+    sem_r_ns1_a             = 0,   /* to block p11 children */
+    sem_r_ns1_b             = 0,   /* to block p11 children */
+    sem_r_ns2_a             = 0,   /* to block p11 children */
+    sem_r_ns2_b             = 0;   /* to block p11 children */
 
 state_t p2state, p3state, p4state, p5state, p6state, p7state, p8rootstate,
 	child1state, child2state, gchild1state, gchild2state, gchild3state,
 	gchild4state, p9state, p10state, p11state, ns1_a_state, ns1_b_state,
 	ns2_a_state, ns2_b_state, hp_p1state, hp_p2state;
 
-int p2pid, p3pid, p4pid, p8pid, p9pid, p11pid;
+int p2pid, p3pid, p4pid, p8pid, p9pid, p11pid,
+    ns1_a_pid, ns1_b_pid, ns2_a_pid, ns2_b_pid;
 
 /* support structure for p5 */
 support_t pFiveSupport;
@@ -115,7 +126,8 @@ memaddr *p5MemLocation = 0; /* To cause a p5 trap */
 
 void p2(), p3(), p4(), p5(), p5a(), p5b(), p6(), p7(), p7a(), p5prog(), p5mm();
 void p5sys(), p8root(), child1(), child2(), p8leaf1(), p8leaf2(), p8leaf3(),
-     p8leaf4(), p9(), p10(), hp_p1(), hp_p2(), p11(), ns_p_parent_ns(), ns_p_new_ns();
+p8leaf4(), p9(), p10(), hp_p1(), hp_p2(), p11(), ns_p_parent_ns(),
+ns_p_new_ns();
 
 extern void p5gen();
 extern void p5mm();
@@ -125,29 +137,21 @@ extern void p5mm();
 void print(char *msg) {
     char     *s       = msg;
     devregtr *base    = (devregtr *)(TERM0ADDR);
-    devregtr *command = base;
+    devregtr *command = base + 2;
     devregtr  status;
 
-    debug_char = *s;
-    debug();
-
-    debug_var = (*s == EOS);    // 0
     SYSCALL(PASSEREN, (int)&sem_term_mut, 0, 0); /* P(sem_term_mut) */
-    debug_var = (*s == EOS);    // 1
-
     while (*s != EOS) {
-        debug3();
-        devregtr value[2] = {PRINTCHR | (((devregtr)*s) << 8), 0 };
+        devregtr value[2] = {0, PRINTCHR | (((devregtr)*s) << 8)};
         status         = SYSCALL(DOIO, (int)command, (int)value, 0);
         if (status != 0 || (value[0] & TERMSTATMASK) != RECVD) {
             PANIC();
         }
         s++;
     }
-
     SYSCALL(VERHOGEN, (int)&sem_term_mut, 0, 0); /* V(sem_term_mut) */
-    debug5();
 }
+
 
 /* TLB-Refill Handler */
 /* One can place debug calls here, but not calls to print */
@@ -156,6 +160,7 @@ void uTLB_RefillHandler() {
     setENTRYHI(0x80000000);
     setENTRYLO(0x00000000);
     TLBWR();
+
     LDST((state_t *)0x0FFFF000);
 }
 
@@ -164,94 +169,13 @@ void uTLB_RefillHandler() {
 /*                                                                   */
 /*                 p1 -- the root process                            */
 /*                                                                   */
-
-char   okbuf[2048]; /* sequence of progress messages */
-char   errbuf[128]; /* contains reason for failing */
-char   msgbuf[128]; /* nonrecoverable error message before shut down */
-int    sem[MAXSEM];
-int    onesem;
-pcb_t *procp[MAXPROC], *p, *q, *firstproc, *lastproc, *midproc;
-nsd_t *pid_ns, *pid_ns2;
-char  *mp = okbuf;
-
-
-#define TRANSMITTED 5
-#define ACK         1
-#define PRINTCHR    2
-#define CHAROFFSET  8
-#define STATUSMASK  0xFF
-#define TERM0ADDR   0x10000254
-
-typedef unsigned int devreg;
-
-/* This function returns the terminal transmitter status value given its address */
-devreg termstat(memaddr *stataddr) {
-    return ((*stataddr) & STATUSMASK);
-}
-
-/* This function prints a string on specified terminal and returns TRUE if
- * print was successful, FALSE if not   */
-unsigned int termprint(char *str, unsigned int term) {
-    memaddr     *statusp;
-    memaddr     *commandp;
-    devreg       stat;
-    devreg       cmd;
-    unsigned int error = FALSE;
-
-    if (term < DEVPERINT) {
-        /* terminal is correct */
-        /* compute device register field addresses */
-        statusp  = (devreg *)(TERM0ADDR + (term * DEVREGSIZE) + (TRANSTATUS * DEVREGLEN));
-        commandp = (devreg *)(TERM0ADDR + (term * DEVREGSIZE) + (TRANCOMMAND * DEVREGLEN));
-
-        /* test device status */
-        stat = termstat(statusp);
-        if (stat == READY || stat == TRANSMITTED) {
-            /* device is available */
-
-            /* print cycle */
-            while (*str != EOS && !error) {
-                cmd       = (*str << CHAROFFSET) | PRINTCHR;
-                *commandp = cmd;
-
-                /* busy waiting */
-                stat = termstat(statusp);
-                while (stat == BUSY)
-                    stat = termstat(statusp);
-
-                /* end of wait */
-                if (stat != TRANSMITTED)
-                    error = TRUE;
-                else
-                    /* move to next char */
-                    str++;
-            }
-        } else
-            /* device is not available */
-            error = TRUE;
-    } else
-        /* wrong terminal device number */
-        error = TRUE;
-
-    return (!error);
-}
-
-/* This function placess the specified character string in okbuf and
- *	causes the string to be written out to terminal0 */
-void addokbuf(char *strp) {
-    char *tstrp = strp;
-    while ((*mp++ = *strp++) != '\0')
-        ;
-    mp--;
-    termprint(tstrp, 0);
-}
-void test() {  
-
+void test() {
     SYSCALL(VERHOGEN, (int)&sem_testsem, 0, 0); /* V(sem_testsem)   */
-    
+
     print("p1 v(sem_testsem)\n");
 
     /* set up states of the other processes */
+
     STST(&hp_p1state);
     hp_p1state.reg_sp = hp_p1state.reg_sp - QPAGE;
     hp_p1state.pc_epc = hp_p1state.reg_t9 = (memaddr)hp_p1;
@@ -423,8 +347,8 @@ void test() {
         SYSCALL(PASSEREN, (int)&sem_endp8, 0, 0);
     }
 
-    /* Check for namespace creation */
-    p11pid = SYSCALL(CREATEPROCESS, (int)&p11state, (int)NULL, (int)NULL);
+    SYSCALL(CREATEPROCESS, (int)&p11state, (int)NULL, (int)NULL); /* start p7		*/
+    SYSCALL(PASSEREN, (int)&sem_p11, 0, 0);
 
     print("p1 finishes OK -- TTFN\n");
     *((memaddr *)BADADDR) = 0; /* terminate p1 */
@@ -432,7 +356,6 @@ void test() {
     /* should not reach this point, since p1 just got a program trap */
     print("error: p1 still alive after progtrap & no trap vector\n");
     PANIC(); /* PANIC !!!     */
-
 }
 
 
@@ -457,9 +380,9 @@ void p2() {
 
     /* V, then P, all of the semaphores in the s[] array */
     for (i = 0; i <= MAXSEM; i++) {
-        SYSCALL(VERHOGEN, (int)&s[i], 0, 0); /* V(S[I]) */ 
-        SYSCALL(PASSEREN, (int)&s[i], 0, 0); /* P(S[I]) */ 
-       if (s[i] != 0)
+        SYSCALL(VERHOGEN, (int)&s[i], 0, 0); /* V(S[I]) */
+        SYSCALL(PASSEREN, (int)&s[i], 0, 0); /* P(S[I]) */
+        if (s[i] != 0)
             print("error: p2 bad v/p pairs\n");
     }
     print("p2 v's successfully\n");
@@ -467,8 +390,8 @@ void p2() {
     /* test of SYS6 */
     STCK(now1);                         /* time of day   */
     cpu_t1 = SYSCALL(GETTIME, 0, 0, 0); /* CPU time used */
-    
-	/* delay for several milliseconds */
+
+    /* delay for several milliseconds */
     for (i = 1; i < LOOPNUM; i++)
         ;
 
@@ -565,10 +488,9 @@ void p4() {
         PANIC();
     }
 
+
     SYSCALL(VERHOGEN, (int)&sem_synp4, 0, 0); /* V(sem_synp4)     */
-
     SYSCALL(PASSEREN, (int)&sem_blkp4, 0, 0); /* P(sem_blkp4)     */
-
     SYSCALL(PASSEREN, (int)&sem_synp4, 0, 0); /* P(sem_synp4)     */
 
     /* start another incarnation of p4 running, and wait for  */
@@ -578,15 +500,13 @@ void p4() {
 
     p4state.reg_sp -= QPAGE; /* give another page  */
 
-    p4pid = SYSCALL(CREATEPROCESS, (int)&p4state, (int)NULL, (int)NULL); /* start a new p4    */
-
+    p4pid = SYSCALL(CREATEPROCESS, (int)&p4state, (int)NULL, 0); /* start a new p4    */
 
     SYSCALL(PASSEREN, (int)&sem_synp4, 0, 0); /* wait for it       */
 
-    print("p4 is OK\n");
-
     SYSCALL(VERHOGEN, (int)&sem_endp4, 0, 0); /* V(sem_endp4)          */
 
+    print("p4 incarnation terminating\n");
     SYSCALL(TERMPROCESS, 0, 0, 0); /* terminate p4      */
 
     /* just did a SYS2, so should not get to this point */
@@ -689,7 +609,7 @@ void p5a() {
 void p5b() {
     cpu_t time1, time2;
 
-    SYSCALL(1, 0, 0, 0);
+    SYSCALL(USERSYSCALL, 0, 0, 0);
     SYSCALL(PASSEREN, (int)&sem_endp4, 0, 0); /* P(sem_endp4)*/
 
     /* do some delay to be reasonably sure p4 and its offspring are dead */
@@ -722,7 +642,7 @@ void p5b() {
 void p6() {
     print("p6 starts\n");
 
-    SYSCALL(1, 0, 0, 0); /* should cause termination because p6 has no
+    SYSCALL(USERSYSCALL, 0, 0, 0); /* should cause termination because p6 has no
            trap vector */
 
     print("error: p6 alive after SYS9() with no trap vector\n");
@@ -745,7 +665,7 @@ void p7() {
 /* create a subtree of processes, wait for the leaves to block, signal*/
 /* the root process, and then terminate                               */
 void p8root() {
-    int grandchild;
+    int grandchild = 0;
 
     print("p8root starts\n");
     SYSCALL(CREATEPROCESS, (int)&child1state, (int)NULL, (int)NULL);
@@ -757,7 +677,6 @@ void p8root() {
     }
 
     SYSCALL(VERHOGEN, (int)&sem_endp8, 0, 0);
-
     SYSCALL(TERMPROCESS, 0, 0, 0);
 }
 
@@ -784,7 +703,7 @@ void child2() {
 
     int ppid = SYSCALL(GETPROCESSID, 1, 0, 0);
     if (ppid != p8pid) {
-        print("Inconsistent (parent) process id for p8's first child\n");
+        print("Inconsistent (parent) process id for p8's second child\n");
         PANIC();
     }
 
@@ -827,9 +746,7 @@ void p8leaf4() {
 
 void p9() {
     print("p9 starts\n");
-
     SYSCALL(CREATEPROCESS, (int)&p10state, (int)NULL, (int)NULL); /* start p7		*/
-
     SYSCALL(PASSEREN, (int)&sem_blkp9, 0, 0);
 }
 
@@ -874,16 +791,35 @@ void hp_p2() {
 /* Namespace management */
 
 void ns_p_parent_ns() {
+    int *sem_ns = NULL;
+    int *sem_child_ns = NULL;
+    int pid = 0;
     int ppid = SYSCALL(GETPROCESSID, 1, 0 ,0);
     print("ns pid in parent namespace\n");
+
+    pid = SYSCALL(GETPROCESSID, 0, 0, 0);
 
     if (ppid == 0) {
         print("Inconsistent (parent) namespace management\n");
         PANIC();
     }
 
-    /* Wait for parent semaphore */
-    SYSCALL(PASSEREN, (int)&sem_ns, 0, 0);
+    if (pid == ns1_a_pid) {
+        sem_ns = &sem_r_ns1_a;
+        sem_child_ns = &sem_l_ns1_a;
+    } else if (pid == ns1_b_pid) {
+        sem_ns = &sem_r_ns1_b;
+        sem_child_ns = &sem_l_ns1_b;
+    } else {
+        print("ns1 wrong semaphore selected\n");
+        PANIC();
+    }
+
+    print("Locking parent ns\n");
+    SYSCALL(PASSEREN, (int)sem_child_ns, 0, 0);
+    print("Unlocked parent ns\n");
+    /* Unlock parent semaphore */
+    SYSCALL(VERHOGEN, (int)sem_ns, 0, 0);
 
     SYSCALL(TERMPROCESS, 0, 0, 0);
     print("Error: n_p_parent_ns didn't die!\n");
@@ -891,16 +827,36 @@ void ns_p_parent_ns() {
 }
 
 void ns_p_new_ns() {
+    int *sem_ns = NULL;
+    int *sem_child_ns = NULL;
+    int pid = 0;
     int ppid = SYSCALL(GETPROCESSID, 1, 0 ,0);
     print("ns pid not in parent namespace\n");
+
+    pid = SYSCALL(GETPROCESSID, 0, 0, 0);
 
     if (ppid != 0) {
         print("Inconsistent (parent) namespace management\n");
         PANIC();
     }
 
-    /* Wait for parent semaphore */
-    SYSCALL(PASSEREN, (int)&sem_ns, 0, 0);
+    if (pid == ns2_a_pid) {
+        sem_ns = &sem_r_ns2_a;
+        sem_child_ns = &sem_l_ns2_a;
+    } else if (pid == ns2_b_pid) {
+        sem_ns = &sem_r_ns2_b;
+        sem_child_ns = &sem_l_ns2_b;
+    } else {
+        print("ns2 wrong semaphore selected\n");
+        PANIC();
+    }
+
+    print("Locking child ns\n");
+    SYSCALL(PASSEREN, (int)sem_child_ns, 0, 0);
+
+    /* Unlock parent semaphore */
+    print("Unlocked child ns\n");
+    SYSCALL(VERHOGEN, (int)sem_ns, 0, 0);
 
     SYSCALL(TERMPROCESS, 0, 0, 0);
     print("Error: n_p_new_ns didn't die!\n");
@@ -911,54 +867,71 @@ void p11() {
     int i;
     int children_number = 0;
     int children_pids[NS_MAXCHILDREN];
-    nsd_t ns2 = {};
+    nsd_t *ns2 = NULL;
     int found[2] = {};
-    int ns1_a_pid, ns1_b_pid;
 
     print("p11 starts\n");
 
-    /* Wait before terminate children */
-    SYSCALL(PASSEREN, (int)&sem_ns, 0, 0);
+    ns2 = allocNamespace(NS_PID);
+    if (ns2 == NULL) {
+        print("failed namespace management\n");
+        PANIC();
+    }
 
     /* Create two process in the same PID space of this one */
     ns1_a_pid = SYSCALL(CREATEPROCESS, (int)&ns1_a_state, (int)NULL, (int)NULL);
     ns1_b_pid = SYSCALL(CREATEPROCESS, (int)&ns1_b_state, (int)NULL, (int)NULL);
 
     /* Create two process in the a different PID space of this one */
-    SYSCALL(CREATEPROCESS, (int)&ns2_a_state, (int)NULL, (int)&ns2);
-    SYSCALL(CREATEPROCESS, (int)&ns2_b_state, (int)NULL, (int)&ns2);
+    ns2_a_pid = SYSCALL(CREATEPROCESS, (int)&ns2_a_state, (int)NULL, (int)ns2);
+    ns2_b_pid = SYSCALL(CREATEPROCESS, (int)&ns2_b_state, (int)NULL, (int)ns2);
 
     /* Get children should return only the number of children in our namespace */
     children_number = SYSCALL(GETCHILDREN, (int)NULL, 0, 0);
     if (children_number != 2) {
-        print("Inconsistent GETCHILDREN namespace management\n");
+        print("Inconsistent GETCHILDREN namespace management 1\n");
         PANIC();
     }
 
     /* Get children should return only the number of children in our namespace */
-    children_number = SYSCALL(GETCHILDREN, (memaddr)children_pids, NS_MAXCHILDREN, 0);
+    children_number = SYSCALL(GETCHILDREN, (memaddr)&children_pids, NS_MAXCHILDREN, 0);
     if (children_number != 2) {
-        print("Inconsistent GETCHILDREN namespace management\n");
+        print("Inconsistent GETCHILDREN namespace management 2\n");
         PANIC();
     }
 
     for (i = 0 ; i < children_number ; ++i) {
-        if (children_pids[i] == ns1_a_pid)
+        if (children_pids[i] == ns1_a_pid) {
             found[0] = 1;
-        if (children_pids[i] == ns1_b_pid)
+        } else if (children_pids[i] == ns1_b_pid) {
             found[1] = 1;
-    }
-
-    for (i = 0 ; i < children_number ; ++i) {
-        if (found[i] != 1) {
-            print("Inconsistent GETCHILDREN namespace management (pid return)\n");
+        } else {
+            print("Inconsistent GETCHILDREN namespace management (pid return 1)\n");
             PANIC();
         }
     }
 
-    /* Unlock all children to terminate them */
-    for (i = 0 ; i < 4 ; ++i)
-        SYSCALL(VERHOGEN, (int)&sem_ns, 0, 0);
+    for (i = 0 ; i < children_number ; ++i) {
+        if (found[i] != 1) {
+            print("Inconsistent GETCHILDREN namespace management (pid return 2)\n");
+            PANIC();
+        }
+    }
+
+    print("p11, waiting for children\n");
+    /* Unlock all childrens */
+    SYSCALL(VERHOGEN, (int)&sem_l_ns1_a, 0, 0);
+    SYSCALL(VERHOGEN, (int)&sem_l_ns1_b, 0, 0);
+    SYSCALL(VERHOGEN, (int)&sem_l_ns2_a, 0, 0);
+    SYSCALL(VERHOGEN, (int)&sem_l_ns2_b, 0, 0);
+
+    /* Lock on all children to wait for termination */
+    SYSCALL(PASSEREN, (int)&sem_r_ns1_a, 0, 0);
+    SYSCALL(PASSEREN, (int)&sem_r_ns1_b, 0, 0);
+    SYSCALL(PASSEREN, (int)&sem_r_ns2_a, 0, 0);
+    SYSCALL(PASSEREN, (int)&sem_r_ns2_b, 0, 0);
+
+    SYSCALL(VERHOGEN, (int)&sem_p11, 0, 0);
 
     /* Terminate all process */
     SYSCALL(TERMPROCESS, 0, 0, 0);
