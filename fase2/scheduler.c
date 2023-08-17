@@ -39,6 +39,7 @@ void scheduler()
                 mask = ~TEBITON;
                 status &= mask;         // disabilita il PLT
                 status |= ~DISABLEINTS; // abilita gli interrupt
+
                 // abilita gli interrupt, disabilita PLT
                 LDCXT(active_process->p_s.reg_sp, status, active_process->p_s.pc_epc); // il valore che ci interessa settare è il secondo
                 debug();
