@@ -38,5 +38,6 @@ void debug3();
 void debug4();
 void debugE();
 void debugInt();
+void debugX();
 
 #endif

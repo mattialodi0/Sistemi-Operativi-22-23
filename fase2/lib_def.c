@@ -8,3 +8,4 @@ void debug4() {}
 void debug5() {}
 void debugE() {}
 void debugInt() {}
+void debugX() {}

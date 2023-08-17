@@ -11,7 +11,7 @@ void interruptHandler() {
     cause >>= 8;
 
     debug_var = cause;
-    debugInt();
+    // debugInt();
 
     //per trovare anche il numero del device
     if((cause & 1) == 1) {
@@ -69,7 +69,6 @@ void interruptHandler() {
         nonTimerInterrupt(line, dev_num);
         break;
     default:
-        debugE();
         break;
     }
 }
