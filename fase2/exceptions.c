@@ -12,6 +12,8 @@ void exceptionHandler()
     exc_code = cause_reg & GETEXECCODE;
     exc_code >>= 2;
 
+    debug_var = exc_code;
+
     switch (exc_code)
     {
     case 0:
@@ -30,6 +32,7 @@ void exceptionHandler()
     case 10:
     case 11:
     case 12:
+        debugE();
         ProgramTrapExceptionHandler();
         break;
     case 8:
@@ -44,8 +47,9 @@ void exceptionHandler()
 // standard Pass Up or Die operation con PGFAULTEXCEPT come index value:
 void TLBExceptionHandler()
 {
-    if (active_process->p_supportStruct == NULL)
+    if (active_process->p_supportStruct == NULL) {
         TerminateProcess(0); // elimina il processo correte e la sua progenie
+    }
     else
     {
         /*  copy the saved exception state into a location accessible to the Support Level,
@@ -66,8 +70,9 @@ void TLBExceptionHandler()
 // standard Pass Up or Die operation con GENERALEXCEPT come index value
 void ProgramTrapExceptionHandler()
 {
-    if (active_process->p_supportStruct == NULL)
+    if (active_process->p_supportStruct == NULL){
         TerminateProcess(0); // elimina il processo correte e la sua progenie
+    }
     else
     {
         /*  copy the saved exception state into a location accessible to the Support Level,
@@ -88,10 +93,10 @@ void syscallHandler(state_t state)
 {
     // controllo se si è in kernel mode, altrimenti Trap
     if(state.status & 2 == 1) {
-        PANIC();    //non va bene
         state_t *s = (state_t *)BIOSDATAPAGE;
         s->cause = (PRIVINSTR << 2);
-        // bisogna lanciare una program trap 
+        // lancia una program trap 
+        ProgramTrapExceptionHandler();
     }
 
     // i parametri sono presi dai registri e castati
@@ -145,13 +150,13 @@ void syscallHandler(state_t state)
 }
 
 void NonBlockingExceptEnd() {
-    state_t state = *(state_t *)BIOSDATAPAGE;
+    state_t state = *((state_t *)BIOSDATAPAGE);
     state.pc_epc += 4;
     LDST(&state);
 }
 
 void BlockingExceptEnd(int *semaddr) {
-    state_t state = *(state_t *)BIOSDATAPAGE;
+    state_t state = *((state_t *)BIOSDATAPAGE);
     state.pc_epc += 4;
     active_process->p_s = state;
     

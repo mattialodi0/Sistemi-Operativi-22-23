@@ -177,6 +177,7 @@ void test() {
     SYSCALL(VERHOGEN, (int)&sem_testsem, 0, 0); /* V(sem_testsem)   */
 
     print("p1 v(sem_testsem)\n");
+debug3();
 
     /* set up states of the other processes */
 
@@ -184,7 +185,6 @@ void test() {
     hp_p1state.reg_sp = hp_p1state.reg_sp - QPAGE;
     hp_p1state.pc_epc = hp_p1state.reg_t9 = (memaddr)hp_p1;
     hp_p1state.status                     = hp_p1state.status | IEPBITON | CAUSEINTMASK | TEBITON;
-
     STST(&hp_p2state);
     hp_p2state.reg_sp = hp_p1state.reg_sp - QPAGE;
     hp_p2state.pc_epc = hp_p2state.reg_t9 = (memaddr)hp_p2;

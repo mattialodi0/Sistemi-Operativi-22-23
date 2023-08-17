@@ -104,7 +104,7 @@ void Passeren(int *semaddr)
             PANIC(); // errore nei semafori
         }
         soft_blocked_count++;
-        //scheduler();
+        //sceduler();
         BlockingExceptEnd(semaddr);
     }
     else
