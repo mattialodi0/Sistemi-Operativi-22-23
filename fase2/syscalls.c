@@ -95,14 +95,13 @@ pcb_PTR findProcess(int pid) {
 // decrementa il semaforo all'ind semaddr, se diventa <= 0 il processo viene bloccato e si chiama lo scheduler
 void Passeren(int *semaddr)
 {
-    *semaddr --;
-
+    (*semaddr)--;
     if (*semaddr <= 0)
     {
         if (insertBlocked(semaddr, active_process)) {
             PANIC(); // errore nei semafori
         }
-        soft_blocked_count++;
+        else soft_blocked_count++;
         BlockingExceptEnd(semaddr);
     }
     else
@@ -130,7 +129,7 @@ void Passeren(int *semaddr)
 // incrementa il semaforo all'ind semaddr, se diventa >= 1 il processo viene messo nella coda ready
 void Verhogen(int *semaddr)
 {
-    *semaddr++;
+    (*semaddr)++;
     pcb_t *waked_proc = removeBlocked(semaddr);
     if (waked_proc != NULL)
     {
@@ -173,12 +172,24 @@ int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
     // P sul sem indicato in a1 e a2
     // ...
     // ritorna 0 o -1
-    // solo per print
-    debug1();
-    SYSCALL(PASSEREN, (int)&sem_dev_terminal_w[0], 0, 0); // bisogna capire quale è l'ind del semaforo
-    *(cmdAddr + 0xc) = cmdValues[0];
 
-    debug2();
+    // solo per print:
+
+    // P 
+    Passeren(&sem_dev_terminal_w[0]);
+    // unsigned int *semaddr = &sem_dev_terminal_w[0];
+    // (*semaddr) --;
+    // if (*semaddr <= 0)
+    // {
+    //     if (insertBlocked(semaddr, active_process)) {
+    //         PANIC(); // errore nei semafori
+    //     }
+    //     else soft_blocked_count++;
+
+    // } 
+    // else PANIC();
+
+    *(cmdAddr + 0xc) = cmdValues[0];
 
     // copia dei valori dei registri in cmdValues
 

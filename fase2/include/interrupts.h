@@ -16,4 +16,4 @@ void nonTimerInterrupt(unsigned int line, unsigned int dev_num);
 
 void nonTimerInterruptT(unsigned int line, unsigned int dev_num);
 
-unsigned int find_dev_num(unsigned int  bit_map_word);
+unsigned int find_dev_num(unsigned int  bitmap_ind);

@@ -223,7 +223,7 @@ unsigned int find_dev_num(unsigned int bitmap_ind)
     unsigned int num;
     unsigned int *bitmap = (unsigned int*) bitmap_ind;
     
-    // debug_var = *bitmap;
+    debug_var = *bitmap;
     debug4();
     
     if ((*bitmap & 128) == 128)

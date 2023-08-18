@@ -164,8 +164,5 @@ void BlockingExceptEnd(int *semaddr) {
     STCK(time);
     active_process->p_time + (time - timer_start);
 
-    soft_blocked_count++;
-    insertBlocked(semaddr, active_process);
-
     scheduler();
 }
