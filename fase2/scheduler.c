@@ -42,7 +42,6 @@ void scheduler()
 
                 // abilita gli interrupt, disabilita PLT
                 LDCXT(active_process->p_s.reg_sp, status, active_process->p_s.pc_epc); // il valore che ci interessa settare è il secondo
-                debug();
                 WAIT();
             }
             else if (soft_blocked_count == 0)

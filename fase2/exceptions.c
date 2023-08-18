@@ -5,7 +5,6 @@ extern int debug_var;
 
 void exceptionHandler()
 {
-    debugX();
     state_t state = *((state_t *)BIOSDATAPAGE);
     
     int cause_reg, exc_code;
@@ -14,6 +13,7 @@ void exceptionHandler()
     exc_code >>= 2;
 
     debug_var = exc_code;
+    debugX();
 
     switch (exc_code)
     {

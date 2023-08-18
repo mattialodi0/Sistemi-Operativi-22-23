@@ -66,7 +66,7 @@ void interruptHandler() {
         break;
     case 7:     //prima in scrittura poi in lettura
         //terminal devices
-        nonTimerInterrupt(line, dev_num);
+        nonTimerInterruptT(line, dev_num);
         break;
     default:
         break;
@@ -105,31 +105,103 @@ void ITInterrupt() {
     LDST(state);
 }
 
-void nonTimerInterrupt(int int_line_no, int dev_num) {
+void nonTimerInterrupt(unsigned int int_line_no, unsigned int dev_num) {
     //calcolare l'ind. per il device register
-    unsigned int dev_reg_addr =  0x10000054 + ((int_line_no - 3) * 0x80) + (dev_num * 0x10);
+    dtpreg_t *dev_reg = (dtpreg_t *) (0x10000054 + ((int_line_no - 3) * 0x80) + (dev_num * 0x10));
 
     //salvare lo status code del device register 
-    unsigned int status_code = 0;       //????????????????????? da cambiare  
+    unsigned int status_code = dev_reg->status;
 
     //ack dell'interrupt: ACKN del device register
-    dev_reg_addr = ACK;         //??????????????????????????????????? sicuramente sbagliato
+    dev_reg->command = ACK;
 
     //V sul semaforo associato al device dell'interrupt per sbloccare il processo che sta aspettando la fine dell'I/O
     //se la V non ritorna il pcb salta le prossime due operazioni
     pcb_t* proc;
+    int *ind;
+
+    switch (int_line_no) {
+        case 0:
+            ind = &sem_dev_disk[dev_num];
+            break;
+        case 1:
+            ind = &sem_dev_flash[dev_num];
+            break;
+        case 2:
+            ind = &sem_dev_net[dev_num];
+            break;
+        case 3:
+            ind = &sem_dev_printer[dev_num];
+            break;
+        default:
+            break;
+    }
+    
+    (*ind)++;
+    proc = removeBlocked(ind);
+    if (proc != NULL)
+    {
+        // wakeup proc
+        insertProcQ(&ready_queue, proc);
+        soft_blocked_count--;
+    }
 
     //mettere lo status code nel reg. v0 del pcb del processo sbloccato
     proc->p_s.reg_v0 = status_code;
-
-    //mettere il processo nella redy queue
-    insertProcQ(&ready_queue, proc);
 
     //LDST per tornare il controllo al processo corrente
     state_t* state = (state_t*) BIOSDATAPAGE; //costante definita in umps
     LDST(state);
 }
 
+void nonTimerInterruptT(unsigned int int_line_no, unsigned int dev_num) {
+    //calcolare l'ind. per il device register
+    dtpreg_t *dev_reg = (dtpreg_t *) (0x10000054 + ((int_line_no - 3) * 0x80) + (dev_num * 0x10));
+
+    //salvare lo status code del device register 
+    unsigned int status_code = dev_reg->status;
+
+    //ack dell'interrupt: ACKN del device register
+    dev_reg->command = ACK;
+
+    //V sul semaforo associato al device dell'interrupt per sbloccare il processo che sta aspettando la fine dell'I/O
+    //se la V non ritorna il pcb salta le prossime due operazioni
+    pcb_t* proc;
+    int *ind;
+
+    switch (int_line_no) {
+        case 0:
+            ind = &sem_dev_disk[dev_num];
+            break;
+        case 1:
+            ind = &sem_dev_flash[dev_num];
+            break;
+        case 2:
+            ind = &sem_dev_net[dev_num];
+            break;
+        case 3:
+            ind = &sem_dev_printer[dev_num];
+            break;
+        default:
+            break;
+    }
+    
+    (*ind)++;
+    proc = removeBlocked(ind);
+    if (proc != NULL)
+    {
+        // wakeup proc
+        insertProcQ(&ready_queue, proc);
+        soft_blocked_count--;
+    }
+
+    //mettere lo status code nel reg. v0 del pcb del processo sbloccato
+    proc->p_s.reg_v0 = status_code;
+
+    //LDST per tornare il controllo al processo corrente
+    state_t* state = (state_t*) BIOSDATAPAGE; //costante definita in umps
+    LDST(state);
+}
 
 
 unsigned int find_dev_num(unsigned int  bit_map_word) {
