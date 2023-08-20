@@ -12,7 +12,7 @@ void exceptionHandler()
     exc_code = cause_reg & GETEXECCODE;
     exc_code >>= 2;
 
-    // debug_var = exc_code;
+    debug_var = exc_code;
     debugX();
 
     switch (exc_code)
@@ -93,7 +93,7 @@ void ProgramTrapExceptionHandler()
 void syscallHandler(state_t state) 
 {
     // controllo se si è in kernel mode, altrimenti Trap
-    if(state.status & 2 == 1) {
+    if((state.status & 2) == 2) {
         state_t *s = (state_t *)BIOSDATAPAGE;
         s->cause = (PRIVINSTR << 2);
         // lancia una program trap 
@@ -162,7 +162,7 @@ void BlockingExceptEnd(int *semaddr) {
     // aggiornamento del tempo di uso della CPU
     cpu_t time;
     STCK(time);
-    active_process->p_time + (time - timer_start);
-
+    active_process->p_time += (time - timer_start);
+    
     scheduler();
 }

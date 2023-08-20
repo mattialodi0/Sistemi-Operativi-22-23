@@ -98,14 +98,14 @@ void Passeren(int *semaddr)
     (*semaddr)--;
     if (*semaddr <= 0)
     {
+        soft_blocked_count++;
         if (insertBlocked(semaddr, active_process)) {
             PANIC(); // errore nei semafori
         }
-        else soft_blocked_count++;
         BlockingExceptEnd(semaddr);
     }
     else
-        NonBlockingExceptEnd(semaddr);
+        NonBlockingExceptEnd();
 
     // per semafori binari
     // if (*semaddr == 0)
@@ -199,7 +199,7 @@ int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
     else
         return -1;
 
-    BlockingExceptEnd(); //  a quale ind ?
+    BlockingExceptEnd(&sem_dev_terminal_w[0]); //  a quale ind ?
 }
 
 int GetCPUTime()

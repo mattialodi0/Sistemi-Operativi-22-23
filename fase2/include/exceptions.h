@@ -12,7 +12,3 @@ void TLBExceptionHandler();
 void ProgramTrapExceptionHandler();
 
 void syscallHandler(state_t state);
-
-void NonBlockingExceptEnd();
-
-void BlockingExceptEnd(int *semaddr);

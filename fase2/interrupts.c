@@ -10,39 +10,88 @@ void interruptHandler()
     cause &= 0x0000FF00; // maschera per  avere IP
     cause >>= 8;
 
-    // debug_var = cause;
+    debug_var = cause;
+    int *addr3 = (int*) 0x10000040;
+    int *addr4 = (int*) (0x10000040 + 0x04);
+    int *addr5 = (int*) (0x10000040 + 0x08);
+    int *addr6 = (int*) (0x10000040 + 0x0C);
+    int *addr7 = (int*) (0x10000040 + 0x10);
+    if((*addr3) > 0) debug_var = 3;
+    else if((*addr4) > 0) debug_var = 4;
+    else if((*addr5) > 0) debug_var = 6;
+    else if((*addr6) > 0) debug_var = 6;
+    else if((*addr7) > 0) debug_var = 7;
     debugInt();
 
     // per trovare anche il numero del device
+    // if ((cause & 1) == 1)
+    // {
+    //     line = 1;
+    // }
+    // else if ((cause & 2) == 2)
+    // {
+    //     line = 2;
+    // }
+    // else if ((cause & 4) == 4)
+    // {
+    //     line = 3;
+    //     dev_num = find_dev_num(0x10000040);
+    // }
+    // else if ((cause & 8) == 8)
+    // {
+    //     line = 4;
+    //     dev_num = find_dev_num(0x10000040 + 0x04);
+    // }
+    // else if ((cause & 16) == 16)
+    // {
+    //     line = 5;
+    //     dev_num = find_dev_num(0x10000040 + 0x08);
+    // }
+    // else if ((cause & 32) == 32)
+    // {
+    //     line = 6;
+    //     dev_num = find_dev_num(0x10000040 + 0x0C);
+    // }
+    // else if ((cause & 64) == 64)
+    // {
+    //     line = 7;
+    //     dev_num = find_dev_num(0x10000040 + 0x10);
+    // }
+
+    // non so quale di due if sia giusto
     if ((cause & 1) == 1)
     {
-        line = 1;
+        line = 0;
     }
     else if ((cause & 2) == 2)
     {
-        line = 2;
+        line = 1;
     }
     else if ((cause & 4) == 4)
+    {
+        line = 2;
+    }
+    else if ((cause & 8) == 8)
     {
         line = 3;
         dev_num = find_dev_num(0x10000040);
     }
-    else if ((cause & 8) == 8)
+    else if ((cause & 16) == 16)
     {
         line = 4;
         dev_num = find_dev_num(0x10000040 + 0x04);
     }
-    else if ((cause & 16) == 16)
+    else if ((cause & 32) == 32)
     {
         line = 5;
         dev_num = find_dev_num(0x10000040 + 0x08);
     }
-    else if ((cause & 32) == 32)
+    else if ((cause & 64) == 64)
     {
         line = 6;
         dev_num = find_dev_num(0x10000040 + 0x0C);
     }
-    else if ((cause & 64) == 64)
+    else if ((cause & 128) == 128)
     {
         line = 7;
         dev_num = find_dev_num(0x10000040 + 0x10);
@@ -94,38 +143,40 @@ void PLTInterrupt()
     scheduler();
 }
 
+extern int on_wait;
 void ITInterrupt()
 {
     LDIT(100000 / timescale); // carica nell'interval timer  T * la timescale del processore
 
+    pcb_t *waked_proc;
     // sbloccare tutti i processi fermi al semaforo dello pseudo clock
-    //  while(headBlocked(&IT_sem) != NULL) {
-    //      if(IT_sem == 1)
-    //          Passeren(&IT_sem);
-    //      else if(IT_sem == 0)
-    //          Verhogen(&IT_sem);
-    //  }
+    while((waked_proc = headBlocked(&IT_sem)) != NULL) {
+        insertProcQ(&ready_queue, waked_proc);
+        soft_blocked_count--;
+    }
 
     // settare il semaforo a 0
     IT_sem = 0;
 
     // LDST per tornare il controllo al processo corrente
-    state_t *state = (state_t *)BIOSDATAPAGE; // costante definita in umps
-    LDST(state);
+    if(!on_wait) 
+    {
+        state_t *state = (state_t *)BIOSDATAPAGE; // costante definita in umps
+        LDST(state);
+    }
 }
 
 void nonTimerInterrupt(unsigned int int_line_no, unsigned int dev_num)
 {
     // calcolare l'ind. per il device register
-    dtpreg_t *dev_reg = (dtpreg_t *)(0x10000054 + ((int_line_no - 3) * 0x80) + (dev_num * 0x10));
+    dtpreg_t *dev_reg = (dtpreg_t *)(0x10000054 + ((7 - 3) * 0x80) + (0 * 0x10)); //int_line_no, dev_num
 
     // salvare lo status code del device register
-    unsigned int status_code = dev_reg->status;
+    unsigned int status_code = dev_reg->status;         // errore IBE
 
     // ack dell'interrupt: ACKN del device register
     dev_reg->command = ACK;
-    // V sul semaforo associato al device dell'interrupt per sbloccare il processo che sta aspettando la fine dell'I/O
-    // se la V non ritorna il pcb salta le prossime due operazioni
+    
     pcb_t *proc;
     int *ind;
 
@@ -147,6 +198,8 @@ void nonTimerInterrupt(unsigned int int_line_no, unsigned int dev_num)
         break;
     }
 
+    // V sul semaforo associato al device dell'interrupt per sbloccare il processo che sta aspettando la fine dell'I/O
+    // se la V non ritorna il pcb salta le prossime due operazioni
     (*ind)++;
     proc = removeBlocked(ind);
 

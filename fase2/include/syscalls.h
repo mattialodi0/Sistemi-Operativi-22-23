@@ -50,3 +50,7 @@ bool eqNS(nsd_t *a[], nsd_t *b[]);
 
 pcb_PTR findProcess(int pid);
 
+
+void NonBlockingExceptEnd();
+
+void BlockingExceptEnd(int *semaddr);

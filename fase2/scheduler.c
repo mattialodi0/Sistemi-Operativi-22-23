@@ -11,8 +11,10 @@
 extern int debug_var;
 extern cpu_t timer_start;
 
+int on_wait = false;
+
 void scheduler()
-{
+{  
     if (!emptyProcQ(&ready_queue))
     {
         // remove proc from ready queue
