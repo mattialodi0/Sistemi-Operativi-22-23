@@ -155,14 +155,15 @@ void NonBlockingExceptEnd() {
     LDST(state);
 }
 
-void BlockingExceptEnd(int *semaddr) {
+void BlockingExceptEnd() {
     state_t *state = (state_t *)BIOSDATAPAGE;
     state->pc_epc += 4;
     active_process->p_s = *state;
+
     // aggiornamento del tempo di uso della CPU
     cpu_t time;
     STCK(time);
     active_process->p_time += (time - timer_start);
-    
+
     scheduler();
 }

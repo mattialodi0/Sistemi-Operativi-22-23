@@ -146,7 +146,7 @@ void PLTInterrupt()
 extern int on_wait;
 void ITInterrupt()
 {
-    LDIT(100000 / timescale); // carica nell'interval timer  T * la timescale del processore
+    LDIT(100000/timescale); // carica nell'interval timer  T * la timescale del processore
 
     pcb_t *waked_proc;
     // sbloccare tutti i processi fermi al semaforo dello pseudo clock

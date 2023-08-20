@@ -53,4 +53,4 @@ pcb_PTR findProcess(int pid);
 
 void NonBlockingExceptEnd();
 
-void BlockingExceptEnd(int *semaddr);
+void BlockingExceptEnd();

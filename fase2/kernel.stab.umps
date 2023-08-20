@@ -36,7 +36,7 @@ child2state                      :OBJ:0x2000A52C:0x0000008C:GLB
 initPcbs                         :FUN:0x20002254:0x000000E8:GLB
 nonTimerInterruptT               :FUN:0x20003C3C:0x0000021C:GLB
 getENTRYHI                       :FUN:0x200077A8:0x00000014:GLB
-WaitForClock                     :FUN:0x200045BC:0x00000044:GLB
+WaitForClock                     :FUN:0x200045B8:0x00000044:GLB
 emptyProcQ                       :FUN:0x200024DC:0x00000038:GLB
 p5gen                            :FUN:0x20006148:0x000001EC:GLB
 p2                               :FUN:0x2000588C:0x0000042C:GLB
@@ -79,7 +79,7 @@ active_process                   :OBJ:0x2000A370:0x00000004:GLB
 getENTRYLO                       :FUN:0x2000776C:0x00000014:GLB
 debug                            :FUN:0x20007AA0:0x00000024:GLB
 setENTRYHI                       :FUN:0x20007860:0x0000001C:GLB
-BlockingExceptEnd                :FUN:0x20003404:0x000000FC:GLB
+BlockingExceptEnd                :FUN:0x20003404:0x000000F8:GLB
 p5                               :FUN:0x200064F0:0x0000005C:GLB
 hp_p1                            :FUN:0x20006DF4:0x0000006C:GLB
 debug2                           :FUN:0x20007AE8:0x00000024:GLB
@@ -87,7 +87,7 @@ p7state                          :OBJ:0x2000A878:0x0000008C:GLB
 debug4                           :FUN:0x20007B30:0x00000024:GLB
 ns1_a_pid                        :OBJ:0x2000A904:0x00000004:GLB
 removeBlocked                    :FUN:0x20001574:0x00000198:GLB
-GetSupportData                   :FUN:0x20004600:0x00000030:GLB
+GetSupportData                   :FUN:0x200045FC:0x00000030:GLB
 p3state                          :OBJ:0x2000A908:0x0000008C:GLB
 initASH                          :FUN:0x20001918:0x000000EC:GLB
 freeNamespace                    :FUN:0x20001DE0:0x0000012C:GLB
@@ -101,7 +101,7 @@ getNamespace                     :FUN:0x20001AF4:0x00000080:GLB
 pid_count                        :OBJ:0x2000A394:0x00000004:GLB
 removeChild                      :FUN:0x200027FC:0x000000AC:GLB
 nonTimerInterrupt                :FUN:0x20003A34:0x00000208:GLB
-DoIO                             :FUN:0x200044A8:0x00000094:GLB
+DoIO                             :FUN:0x200044A4:0x00000094:GLB
 p9pid                            :OBJ:0x2000AA20:0x00000004:GLB
 ready_queue                      :OBJ:0x2000A398:0x00000008:GLB
 p8inc                            :OBJ:0x2000AA24:0x00000004:GLB
@@ -109,7 +109,7 @@ allocNamespace                   :FUN:0x20001B74:0x00000140:GLB
 WAIT                             :FUN:0x20007918:0x00000014:GLB
 timer_start                      :OBJ:0x2000A3A0:0x00000004:GLB
 __start                          :FUN:0x200076F0:0x0000003C:GLB
-Verhogen                         :FUN:0x20004404:0x000000A4:GLB
+Verhogen                         :FUN:0x20004400:0x000000A4:GLB
 find_dev_num                     :FUN:0x20003E58:0x000001B4:GLB
 LDST                             :FUN:0x20007A44:0x00000018:GLB
 p6                               :FUN:0x2000671C:0x0000006C:GLB
@@ -151,7 +151,7 @@ p5mm                             :FUN:0x20006334:0x000000EC:GLB
 SYSCALL                          :FUN:0x20007730:0x00000014:GLB
 main                             :FUN:0x20002920:0x00000304:GLB
 p4inc                            :OBJ:0x2000901C:0x00000004:GLB
-GetProcessId                     :FUN:0x20004630:0x00000034:GLB
+GetProcessId                     :FUN:0x2000462C:0x00000034:GLB
 soft_blocked_count               :OBJ:0x2000A3C8:0x00000004:GLB
 debug1                           :FUN:0x20007AC4:0x00000024:GLB
 TLBWI                            :FUN:0x200078C8:0x00000014:GLB
@@ -177,12 +177,12 @@ TLBP                             :FUN:0x200078DC:0x00000014:GLB
 mkEmptyProcQ                     :FUN:0x200024A0:0x0000003C:GLB
 s                                :OBJ:0x2000B158:0x00000054:GLB
 interruptHandler                 :FUN:0x20003500:0x0000039C:GLB
-Passeren                         :FUN:0x2000433C:0x000000C8:GLB
+Passeren                         :FUN:0x2000433C:0x000000C4:GLB
 sem_l_ns1_a                      :OBJ:0x2000A2F8:0x00000004:GLB
 debugX                           :FUN:0x20007BC0:0x00000024:GLB
 sem_endp4                        :OBJ:0x2000A2D0:0x00000004:GLB
 debugE                           :FUN:0x20007B78:0x00000024:GLB
-GetChildren                      :FUN:0x20004664:0x00000030:GLB
+GetChildren                      :FUN:0x20004660:0x00000030:GLB
 allocPcb                         :FUN:0x20002384:0x0000011C:GLB
 p5b                              :FUN:0x2000658C:0x00000190:GLB
 p11                              :FUN:0x20007284:0x00000464:GLB
@@ -200,9 +200,9 @@ p8pid                            :OBJ:0x2000B238:0x00000004:GLB
 p8leaf1                          :FUN:0x20006ACC:0x0000007C:GLB
 p3pid                            :OBJ:0x2000B23C:0x00000004:GLB
 sem_r_ns2_b                      :OBJ:0x2000A314:0x00000004:GLB
-eqNS                             :FUN:0x20004694:0x000000AC:GLB
+eqNS                             :FUN:0x20004690:0x000000AC:GLB
 getTIMER                         :FUN:0x20007794:0x00000014:GLB
-GetCPUTime                       :FUN:0x2000453C:0x00000080:GLB
+GetCPUTime                       :FUN:0x20004538:0x00000080:GLB
 ns2_b_pid                        :OBJ:0x2000B240:0x00000004:GLB
 IT_sem                           :OBJ:0x2000A3EC:0x00000004:GLB
 sem_dev_net                      :OBJ:0x2000A3F0:0x00000020:GLB
