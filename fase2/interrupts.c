@@ -150,7 +150,7 @@ void ITInterrupt()
 
     pcb_t *waked_proc;
     // sbloccare tutti i processi fermi al semaforo dello pseudo clock
-    while((waked_proc = headBlocked(&IT_sem)) != NULL) {
+    while((waked_proc = removeBlocked(&IT_sem)) != NULL) {
         insertProcQ(&ready_queue, waked_proc);
         soft_blocked_count--;
     }
@@ -182,16 +182,16 @@ void nonTimerInterrupt(unsigned int int_line_no, unsigned int dev_num)
 
     switch (int_line_no)
     {
-    case 0:
+    case 3:
         ind = &sem_dev_disk[dev_num];
         break;
-    case 1:
+    case 4:
         ind = &sem_dev_flash[dev_num];
         break;
-    case 2:
+    case 5:
         ind = &sem_dev_net[dev_num];
         break;
-    case 3:
+    case 6:
         ind = &sem_dev_printer[dev_num];
         break;
     default:
@@ -211,13 +211,11 @@ void nonTimerInterrupt(unsigned int int_line_no, unsigned int dev_num)
         insertProcQ(&ready_queue, proc);
         soft_blocked_count--;
     }
-    else
-    {
-        debug2();
-        // LDST per tornare il controllo al processo corrente
-        state_t *state = (state_t *)BIOSDATAPAGE;
-        LDST(state);
-    }
+
+    // LDST per tornare il controllo al processo corrente
+    state_t *state = (state_t *)BIOSDATAPAGE;
+    LDST(state);
+
 }
 
 void nonTimerInterruptT(unsigned int int_line_no, unsigned int dev_num)
@@ -231,43 +229,25 @@ void nonTimerInterruptT(unsigned int int_line_no, unsigned int dev_num)
     // ack dell'interrupt: ACKN del device register
     dev_reg->command = ACK;
 
+    pcb_t *proc;
+    int *ind = &sem_dev_terminal_w[dev_num];  // non va bene  
+
     // V sul semaforo associato al device dell'interrupt per sbloccare il processo che sta aspettando la fine dell'I/O
     // se la V non ritorna il pcb salta le prossime due operazioni
-    pcb_t *proc;
-    int *ind;
-
-    switch (int_line_no)
-    {
-    case 0:
-        ind = &sem_dev_disk[dev_num];
-        break;
-    case 1:
-        ind = &sem_dev_flash[dev_num];
-        break;
-    case 2:
-        ind = &sem_dev_net[dev_num];
-        break;
-    case 3:
-        ind = &sem_dev_printer[dev_num];
-        break;
-    default:
-        break;
-    }
-
     (*ind)++;
     proc = removeBlocked(ind);
+
     if (proc != NULL)
     {
+        // mettere lo status code nel reg. v0 del pcb del processo sbloccato
+        proc->p_s.reg_v0 = status_code;
         // wakeup proc
         insertProcQ(&ready_queue, proc);
         soft_blocked_count--;
     }
 
-    // mettere lo status code nel reg. v0 del pcb del processo sbloccato
-    proc->p_s.reg_v0 = status_code;
-
     // LDST per tornare il controllo al processo corrente
-    state_t *state = (state_t *)BIOSDATAPAGE; // costante definita in umps
+    state_t *state = (state_t *)BIOSDATAPAGE;
     LDST(state);
 }
 

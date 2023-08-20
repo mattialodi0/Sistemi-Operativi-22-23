@@ -176,18 +176,16 @@ int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
     // solo per print:
 
     // P 
-    Passeren(&sem_dev_terminal_w[0]);
-    // unsigned int *semaddr = &sem_dev_terminal_w[0];
-    // (*semaddr) --;
-    // if (*semaddr <= 0)
-    // {
-    //     if (insertBlocked(semaddr, active_process)) {
-    //         PANIC(); // errore nei semafori
-    //     }
-    //     else soft_blocked_count++;
-
-    // } 
-    // else PANIC();
+    int *semaddr = &sem_dev_terminal_w[0];
+    (*semaddr) --;
+    if (*semaddr < 0)
+    {
+        soft_blocked_count++;
+        if (insertBlocked(semaddr, active_process)) {
+            PANIC(); // errore nei semafori
+        }
+    } 
+    else PANIC();
 
     *(cmdAddr + 0xc) = cmdValues[0];
 
@@ -199,7 +197,7 @@ int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
     else
         return -1;
 
-    BlockingExceptEnd(); //  a quale ind ?
+    BlockingExceptEnd();
 }
 
 int GetCPUTime()

@@ -150,9 +150,9 @@ debug1();
         }
         s++;
     }
-    debug2();
+debug2();
     SYSCALL(VERHOGEN, (int)&sem_term_mut, 0, 0); /* V(sem_term_mut) */
-    debug5();
+debug5();
 }
 
 

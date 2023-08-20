@@ -74,7 +74,7 @@ int main(void) {
 
     //iniz. interval timer 100ms
     //unsigned int timescale = 0x1000.0024;     //per leggere il valore della timescale
-    LDIT(100000/timescale); // carica nell'interval timer  T * la timescale del processore
+    LDIT(1000000/timescale); // carica nell'interval timer  T * la timescale del processore
 
     //creazione di un processo      cap. 2.2 della documentazione
     pcb_t *first_proc = allocPcb();
