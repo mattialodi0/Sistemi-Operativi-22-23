@@ -145,12 +145,13 @@ debug1();
     while (*s != EOS) {
         devregtr value[2] = {0, PRINTCHR | (((devregtr)*s) << 8)};
         status         = SYSCALL(DOIO, (int)command, (int)value, 0);
-        if (status != 0 || (value[0] & TERMSTATMASK) != RECVD) {
+        if (status != 0){// || (value[0] & TERMSTATMASK) != RECVD) {
             PANIC();
         }
+        else {HALT();}
         s++;
     }
-debug2();
+debug3();
     SYSCALL(VERHOGEN, (int)&sem_term_mut, 0, 0); /* V(sem_term_mut) */
 debug5();
 }

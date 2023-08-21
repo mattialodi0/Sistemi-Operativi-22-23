@@ -163,6 +163,7 @@ void Verhogen(int *semaddr)
  * cmdAddr contiene l'ind del comando e cmdValues è un array di puntatori ai valori
  * del comando
  */
+int *mem;
 int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
 {
     // Installed Devices Bit Map 0x1000002C
@@ -194,9 +195,10 @@ int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
     // debug_char = base->transm_command;  debug3();
     // debug_var = *(unsigned int *)(cmdAddr + 0x8); debug3();
 
-    // copia dei valori dei registri in cmdValues
+    // copia dei valori in cmdValues
 
-    unsigned int status = *(unsigned int *)(cmdAddr + 0x8);
+
+    // unsigned int status = *(unsigned int *)(cmdAddr + 0x8);
     // if (status == 5)
     //     return 0;
     // else

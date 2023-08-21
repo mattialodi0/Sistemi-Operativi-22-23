@@ -20,7 +20,7 @@ void interruptHandler()
     // else if((*addr5) > 0) debug_var = 6;
     // else if((*addr6) > 0) debug_var = 6;
     // else if((*addr7) > 0) debug_var = 7;
-    debug_var = cause;
+    // debug_var = cause;
     debugInt();
 
     // per trovare anche il numero del device
@@ -111,23 +111,24 @@ void PLTInterrupt()
 extern int on_wait;
 void ITInterrupt()
 {
-    LDIT(100000/timescale); // carica nell'interval timer  T * la timescale del processore
+    LDIT(100000 / timescale); // carica nell'interval timer  T * la timescale del processore
 
     pcb_t *waked_proc;
     // sbloccare tutti i processi fermi al semaforo dello pseudo clock
-    while((waked_proc = removeBlocked(&IT_sem)) != NULL) {
+    while ((waked_proc = removeBlocked(&IT_sem)) != NULL)
+    {
         insertProcQ(&ready_queue, waked_proc);
         soft_blocked_count--;
     }
 
     // settare il semaforo a 0
     IT_sem = 0;
-    // // debug 
+    // // debug
     // termreg_t *base = (termreg_t *)(0x10000254);
     // debug_var = base->transm_status;  debug3();
 
     // LDST per tornare il controllo al processo corrente
-    if(!on_wait) 
+    if (!on_wait)
     {
         state_t *state = (state_t *)BIOSDATAPAGE; // costante definita in umps
         LDST(state);
@@ -137,14 +138,14 @@ void ITInterrupt()
 void nonTimerInterrupt(unsigned int int_line_no, unsigned int dev_num)
 {
     // calcolare l'ind. per il device register
-    dtpreg_t *dev_reg = (dtpreg_t *)(0x10000054 + ((7 - 3) * 0x80) + (0 * 0x10)); //int_line_no, dev_num
+    dtpreg_t *dev_reg = (dtpreg_t *)(0x10000054 + ((7 - 3) * 0x80) + (0 * 0x10)); // int_line_no, dev_num
 
     // salvare lo status code del device register
     unsigned int status_code = dev_reg->status;
 
     // ack dell'interrupt: ACKN del device register
     dev_reg->command = ACK;
-    
+
     pcb_t *proc;
     int *ind;
 
@@ -183,34 +184,37 @@ void nonTimerInterrupt(unsigned int int_line_no, unsigned int dev_num)
     // LDST per tornare il controllo al processo corrente
     state_t *state = (state_t *)BIOSDATAPAGE;
     LDST(state);
-
 }
 
 void nonTimerInterruptT(unsigned int int_line_no, unsigned int dev_num)
 {
-    // da distinguere R e W 
+    // da distinguere R e W
 
     // calcolare l'ind. per il device register
     // dtpreg_t *dev_reg = (dtpreg_t *)(0x10000054 + ((int_line_no - 3) * 0x80) + (dev_num * 0x10));
     termreg_t *dev_reg = (termreg_t *)(0x10000254);
 
     // salvare lo status code del device register
-    unsigned int status_code = dev_reg->transm_status; 
+    unsigned int status_code = dev_reg->transm_status;
 
     // ack dell'interrupt: ACKN del device register
     dev_reg->transm_command = ACK;
 
-    pcb_t *proc;
-    int *semaddr = &sem_dev_terminal_w[dev_num];  // non va bene  
-
     // V sul semaforo associato al device dell'interrupt per sbloccare il processo che sta aspettando la fine dell'I/O
     // se la V non ritorna il pcb salta le prossime due operazioni
+    pcb_t *proc;
+    int *semaddr = &sem_dev_terminal_w[dev_num]; // non va bene
+
     (*semaddr)++;
     proc = removeBlocked(semaddr);
     if (proc != NULL)
     {
-        // mettere lo status code nel reg. v0 del pcb del processo sbloccato
-        proc->p_s.reg_v0 = status_code;
+        // mette il valore di ritorno nel reg. v0 del pcb del processo sbloccato
+        if ((status_code & 0x000000FF) == 5)
+            proc->p_s.reg_v0 = 0;
+        else
+            proc->p_s.reg_v0 = -1;
+
         // wakeup proc
         insertProcQ(&ready_queue, proc);
         soft_blocked_count--;
@@ -224,11 +228,11 @@ void nonTimerInterruptT(unsigned int int_line_no, unsigned int dev_num)
 unsigned int find_dev_num(unsigned int bitmap_ind)
 {
     unsigned int num;
-    unsigned int *bitmap = (unsigned int*) bitmap_ind;
-    
+    unsigned int *bitmap = (unsigned int *)bitmap_ind;
+
     // debug_var = *bitmap;
     // debug4();
-    
+
     if ((*bitmap & 128) == 128)
         num = 7;
     else if ((*bitmap & 64) == 64)
