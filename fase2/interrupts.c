@@ -10,7 +10,6 @@ void interruptHandler()
     cause &= 0x0000FF00; // maschera per  avere IP
     cause >>= 8;
 
-    // debug_var = cause;
     // int *addr3 = (int*) 0x10000040;
     // int *addr4 = (int*) (0x10000040 + 0x04);
     // int *addr5 = (int*) (0x10000040 + 0x08);
@@ -21,44 +20,10 @@ void interruptHandler()
     // else if((*addr5) > 0) debug_var = 6;
     // else if((*addr6) > 0) debug_var = 6;
     // else if((*addr7) > 0) debug_var = 7;
+    debug_var = cause;
     debugInt();
 
     // per trovare anche il numero del device
-    // if ((cause & 1) == 1)
-    // {
-    //     line = 1;
-    // }
-    // else if ((cause & 2) == 2)
-    // {
-    //     line = 2;
-    // }
-    // else if ((cause & 4) == 4)
-    // {
-    //     line = 3;
-    //     dev_num = find_dev_num(0x10000040);
-    // }
-    // else if ((cause & 8) == 8)
-    // {
-    //     line = 4;
-    //     dev_num = find_dev_num(0x10000040 + 0x04);
-    // }
-    // else if ((cause & 16) == 16)
-    // {
-    //     line = 5;
-    //     dev_num = find_dev_num(0x10000040 + 0x08);
-    // }
-    // else if ((cause & 32) == 32)
-    // {
-    //     line = 6;
-    //     dev_num = find_dev_num(0x10000040 + 0x0C);
-    // }
-    // else if ((cause & 64) == 64)
-    // {
-    //     line = 7;
-    //     dev_num = find_dev_num(0x10000040 + 0x10);
-    // }
-
-    // non so quale di due if sia giusto
     if ((cause & 1) == 1)
     {
         line = 0;
@@ -157,10 +122,9 @@ void ITInterrupt()
 
     // settare il semaforo a 0
     IT_sem = 0;
-
-    // debug 
-    termreg_t *base = (termreg_t *)(0x10000254);
-    debug_var = base->transm_status;  debug3();
+    // // debug 
+    // termreg_t *base = (termreg_t *)(0x10000254);
+    // debug_var = base->transm_status;  debug3();
 
     // LDST per tornare il controllo al processo corrente
     if(!on_wait) 
@@ -224,23 +188,25 @@ void nonTimerInterrupt(unsigned int int_line_no, unsigned int dev_num)
 
 void nonTimerInterruptT(unsigned int int_line_no, unsigned int dev_num)
 {
+    // da distinguere R e W 
+
     // calcolare l'ind. per il device register
-    dtpreg_t *dev_reg = (dtpreg_t *)(0x10000054 + ((int_line_no - 3) * 0x80) + (dev_num * 0x10));
+    // dtpreg_t *dev_reg = (dtpreg_t *)(0x10000054 + ((int_line_no - 3) * 0x80) + (dev_num * 0x10));
+    termreg_t *dev_reg = (termreg_t *)(0x10000254);
 
     // salvare lo status code del device register
-    unsigned int status_code = dev_reg->status;
+    unsigned int status_code = dev_reg->transm_status; 
 
     // ack dell'interrupt: ACKN del device register
-    dev_reg->command = ACK;
+    dev_reg->transm_command = ACK;
 
     pcb_t *proc;
-    int *ind = &sem_dev_terminal_w[dev_num];  // non va bene  
+    int *semaddr = &sem_dev_terminal_w[dev_num];  // non va bene  
 
     // V sul semaforo associato al device dell'interrupt per sbloccare il processo che sta aspettando la fine dell'I/O
     // se la V non ritorna il pcb salta le prossime due operazioni
-    (*ind)++;
-    proc = removeBlocked(ind);
-
+    (*semaddr)++;
+    proc = removeBlocked(semaddr);
     if (proc != NULL)
     {
         // mettere lo status code nel reg. v0 del pcb del processo sbloccato

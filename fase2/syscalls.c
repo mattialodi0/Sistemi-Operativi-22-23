@@ -187,8 +187,8 @@ int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
     } 
     else PANIC();
 
-    termreg_t *base = (termreg_t *)(0x10000254);
-    base->transm_command = 2 | (((unsigned int)'O') << 8);
+    termreg_t *dev_reg = (termreg_t *)(0x10000254);
+    dev_reg->transm_command = 2 | (((unsigned int)'O') << 8);
 
     // *(cmdAddr + 0xC) = cmdValues[0];
     // debug_char = base->transm_command;  debug3();
