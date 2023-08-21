@@ -10,17 +10,17 @@ void interruptHandler()
     cause &= 0x0000FF00; // maschera per  avere IP
     cause >>= 8;
 
-    debug_var = cause;
-    int *addr3 = (int*) 0x10000040;
-    int *addr4 = (int*) (0x10000040 + 0x04);
-    int *addr5 = (int*) (0x10000040 + 0x08);
-    int *addr6 = (int*) (0x10000040 + 0x0C);
-    int *addr7 = (int*) (0x10000040 + 0x10);
-    if((*addr3) > 0) debug_var = 3;
-    else if((*addr4) > 0) debug_var = 4;
-    else if((*addr5) > 0) debug_var = 6;
-    else if((*addr6) > 0) debug_var = 6;
-    else if((*addr7) > 0) debug_var = 7;
+    // debug_var = cause;
+    // int *addr3 = (int*) 0x10000040;
+    // int *addr4 = (int*) (0x10000040 + 0x04);
+    // int *addr5 = (int*) (0x10000040 + 0x08);
+    // int *addr6 = (int*) (0x10000040 + 0x0C);
+    // int *addr7 = (int*) (0x10000040 + 0x10);
+    // if((*addr3) > 0) debug_var = 3;
+    // else if((*addr4) > 0) debug_var = 4;
+    // else if((*addr5) > 0) debug_var = 6;
+    // else if((*addr6) > 0) debug_var = 6;
+    // else if((*addr7) > 0) debug_var = 7;
     debugInt();
 
     // per trovare anche il numero del device
@@ -158,6 +158,10 @@ void ITInterrupt()
     // settare il semaforo a 0
     IT_sem = 0;
 
+    // debug 
+    termreg_t *base = (termreg_t *)(0x10000254);
+    debug_var = base->transm_status;  debug3();
+
     // LDST per tornare il controllo al processo corrente
     if(!on_wait) 
     {
@@ -172,7 +176,7 @@ void nonTimerInterrupt(unsigned int int_line_no, unsigned int dev_num)
     dtpreg_t *dev_reg = (dtpreg_t *)(0x10000054 + ((7 - 3) * 0x80) + (0 * 0x10)); //int_line_no, dev_num
 
     // salvare lo status code del device register
-    unsigned int status_code = dev_reg->status;         // errore IBE
+    unsigned int status_code = dev_reg->status;
 
     // ack dell'interrupt: ACKN del device register
     dev_reg->command = ACK;
@@ -256,8 +260,8 @@ unsigned int find_dev_num(unsigned int bitmap_ind)
     unsigned int num;
     unsigned int *bitmap = (unsigned int*) bitmap_ind;
     
-    debug_var = *bitmap;
-    debug4();
+    // debug_var = *bitmap;
+    // debug4();
     
     if ((*bitmap & 128) == 128)
         num = 7;

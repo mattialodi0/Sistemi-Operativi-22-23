@@ -3,6 +3,7 @@
 extern int pid_count;
 extern cpu_t timer_start;
 extern int debug_var;
+extern int debug_char;
 
 // ALLA FINE DELLE SYSCALL CHE NON BLOCCANO O TERMINANO IL PROCESSO:
 // deve essere restituito il controllo al processo aumentando il suo pc di 4
@@ -174,7 +175,6 @@ int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
     // ritorna 0 o -1
 
     // solo per print:
-
     // P 
     int *semaddr = &sem_dev_terminal_w[0];
     (*semaddr) --;
@@ -187,15 +187,20 @@ int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
     } 
     else PANIC();
 
-    *(cmdAddr + 0xc) = cmdValues[0];
+    termreg_t *base = (termreg_t *)(0x10000254);
+    base->transm_command = 2 | (((unsigned int)'O') << 8);
+
+    // *(cmdAddr + 0xC) = cmdValues[0];
+    // debug_char = base->transm_command;  debug3();
+    // debug_var = *(unsigned int *)(cmdAddr + 0x8); debug3();
 
     // copia dei valori dei registri in cmdValues
 
     unsigned int status = *(unsigned int *)(cmdAddr + 0x8);
-    if (status == 5)
-        return 0;
-    else
-        return -1;
+    // if (status == 5)
+    //     return 0;
+    // else
+    //     return -1;
 
     BlockingExceptEnd();
 }

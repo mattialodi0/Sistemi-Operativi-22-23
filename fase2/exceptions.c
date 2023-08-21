@@ -12,7 +12,7 @@ void exceptionHandler()
     exc_code = cause_reg & GETEXECCODE;
     exc_code >>= 2;
 
-    debug_var = exc_code;
+    // debug_var = exc_code;
     debugX();
 
     switch (exc_code)
@@ -144,7 +144,6 @@ void syscallHandler(state_t state)
         GetChildren((int *)v1, v2);
         break;
     default:
-        // HALT(); //per il debug
         break;
     }
 }
