@@ -1,12 +1,11 @@
 #include <syscalls.h>
 
-extern int pid_count;
 extern cpu_t timer_start;
+extern int pid_count;
 extern int debug_var;
 extern int debug_char;
 
-// ALLA FINE DELLE SYSCALL CHE NON BLOCCANO O TERMINANO IL PROCESSO:
-// deve essere restituito il controllo al processo aumentando il suo pc di 4
+
 int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
 {
     pcb_t *new_proc = allocPcb(); // inizializza new_proc, allocPcb la mette == NULL se vuota, quindi va direttamente nell'else?
@@ -37,12 +36,19 @@ int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
                 new_proc->namespaces[i] = active_process->namespaces[i];
             }
         }
-        return new_proc->p_pid;
+
+        // return new_proc->p_pid;
+        state_t *state = (state_t *)BIOSDATAPAGE;
+        state->reg_v0 = 0;     // non ha senso ma è richiesto
+        state->reg_v0 = new_proc->p_pid;
     }
     else
     {
-        return (-1);
+        // return (-1);
+        state_t *state = (state_t *)BIOSDATAPAGE;
+        state->reg_v0 = -1;
     }
+    NonBlockingExceptEnd();
 }
 
 // termina il processo indicato da pid insieme ai suoi figli
