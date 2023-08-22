@@ -198,7 +198,9 @@ int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
     // debug_char = base->transm_command;  debug3();
     // debug_var = *(unsigned int *)(cmdAddr + 0x8); debug3();
 
-    // copia dei valori in cmdValues
+    // copia dei valori in cmdValues,  probabilmente va fatto nel nonTimerInterruptT
+    // cmdValues[0] = 5;
+    mem = cmdValues;
 
 
     // unsigned int status = *(unsigned int *)(cmdAddr + 0x8);

@@ -182,7 +182,7 @@ void nonTimerInterrupt(unsigned int int_line_no, unsigned int dev_num)
     state_t *state = (state_t *)BIOSDATAPAGE;
     LDST(state);
 }
-
+extern int * mem;
 void nonTimerInterruptT(unsigned int int_line_no, unsigned int dev_num)
 {
     // da distinguere R e W
@@ -211,7 +211,7 @@ void nonTimerInterruptT(unsigned int int_line_no, unsigned int dev_num)
             proc->p_s.reg_v0 = 0;
         else
             proc->p_s.reg_v0 = -1;
-        // proc->p_s.reg_v0 = status_code & 0x000000FF;
+        mem[0] = status_code & 0x000000FF;
 
 
         // wakeup proc

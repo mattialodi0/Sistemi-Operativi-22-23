@@ -145,12 +145,11 @@ debug1();
     while (*s != EOS) {
         devregtr value[2] = {0, PRINTCHR | (((devregtr)*s) << 8)};
         status         = SYSCALL(DOIO, (int)command, (int)value, 0);
-        debug_var = status; debug2();
+        debug_var = value[0]; debug2();
         if (status != 0 || (value[0] & TERMSTATMASK) != RECVD) {
             debugE();
             PANIC();
         }
-        else {HALT();}
         s++;
     }
 debug3();
