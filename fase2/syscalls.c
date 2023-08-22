@@ -116,16 +116,15 @@ void Passeren(int *semaddr)
     //     NonBlockingExceptEnd();
 
     // per semafori binari
-    if (*semaddr == 0)
+    if (*semaddr <= 0)
     {
         soft_blocked_count++;
         if (insertBlocked(semaddr, active_process)) {
             PANIC(); // errore nei semafori
         }
-        debug5();
         BlockingExceptEnd(semaddr);
     }
-    else if(*semaddr == 1)
+    else if(*semaddr >= 1)
     {
         pcb_t *waked_proc = removeBlocked(semaddr);
         if (waked_proc != NULL)
@@ -155,16 +154,15 @@ void Verhogen(int *semaddr)
     // NonBlockingExceptEnd();
 
     // per semafori binari
-    if (*semaddr == 1)
+    if (*semaddr >= 1)
     {
         soft_blocked_count++;
         if (insertBlocked(semaddr, active_process)) {
             PANIC(); // errore nei semafori
         }
-        debug5();
         BlockingExceptEnd();
     }
-    else if(*semaddr == 0)
+    else if(*semaddr <= 0)
     {
         pcb_t *waked_proc = removeBlocked(semaddr);
         if (waked_proc != NULL)
@@ -236,9 +234,12 @@ int GetCPUTime()
 {
     cpu_t time;
     STCK(time);
-    return active_process->p_time + (time - timer_start);
-    // STCK(); //potrebbe servire il timer TOD e questa macro serve per leggerlo
-    // bisogna sommargli il tempo accumulato nel quanto corrente
+
+    // return active_process->p_time + (time - timer_start);
+    state_t *state = (state_t *)BIOSDATAPAGE;
+    state->reg_v0 = (int) active_process->p_time + (time - timer_start);
+
+    NonBlockingExceptEnd();
 }
 
 int WaitForClock()
@@ -250,13 +251,21 @@ int WaitForClock()
 // ritorna un puntatore alla struttura di supporto del chiamante
 support_t *GetSupportData()
 {
-    return active_process->p_supportStruct;
+    // return active_process->p_supportStruct;
+    state_t *state = (state_t *)BIOSDATAPAGE;
+    state->reg_v0 = (int) active_process->p_supportStruct;
+
+    NonBlockingExceptEnd();
 }
 
 // ritorna il pid del chiamante
 int GetProcessId(int parent)
 {
-    return active_process->p_pid;
+    // return active_process->p_pid;
+    state_t *state = (state_t *)BIOSDATAPAGE;
+    state->reg_v0 = active_process->p_pid;
+
+    NonBlockingExceptEnd();
 }
 
 // cerca i primi size figli con lo stesso NS del chiamante e li ritorna nell'array children

@@ -295,11 +295,11 @@ debug();
 
     // print("p2 was started\n");
 
-debug1();
+print("V1\n");
     SYSCALL(VERHOGEN, (int)&sem_startp2, 0, 0); /* V(sem_startp2)   */  // V sbloccante
-debug1();
+
+print("V2\n");
     SYSCALL(VERHOGEN, (int)&sem_endp2, 0, 0); /* V(sem_endp2) (blocking V!)     */
-debug_var = sem_endp2; debug1();
     
     /* make sure we really blocked */
     if (p1p2synch == 0) {
@@ -356,12 +356,12 @@ debug_var = sem_endp2; debug1();
     // SYSCALL(CREATEPROCESS, (int)&p11state, (int)NULL, (int)NULL); /* start p7		*/
     // SYSCALL(PASSEREN, (int)&sem_p11, 0, 0);
 
-    // print("p1 finishes OK -- TTFN\n");
-    // *((memaddr *)BADADDR) = 0; /* terminate p1 */
+    print("p1 finishes OK -- TTFN\n");
+    *((memaddr *)BADADDR) = 0; /* terminate p1 */
 
-    // /* should not reach this point, since p1 just got a program trap */
-    // print("error: p1 still alive after progtrap & no trap vector\n");
-    // PANIC(); /* PANIC !!!     */
+    /* should not reach this point, since p1 just got a program trap */
+    print("error: p1 still alive after progtrap & no trap vector\n");
+    PANIC(); /* PANIC !!!     */
 }
 
 
@@ -370,7 +370,8 @@ void p2() {
     int   i;              /* just to waste time  */
     cpu_t now1, now2;     /* times of day        */
     cpu_t cpu_t1, cpu_t2; /* cpu time used       */
-debug2();
+
+print("P1\n");
     SYSCALL(PASSEREN, (int)&sem_startp2, 0, 0); /* P(sem_startp2)   */ // P bloccante
 
     print("p2 starts\n");
@@ -394,9 +395,9 @@ debug2();
             print("error: p2 bad v/p pairs\n");
         }
     }
-    // debug2();
+print("ok\n");
+
     print("p2 v's successfully\n");     // LOOP QUI !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // debug3();
 
     /* test of SYS6 */
     STCK(now1);                         /* time of day   */
@@ -405,7 +406,6 @@ debug2();
     /* delay for several milliseconds */
     for (i = 1; i < LOOPNUM; i++)
         ;
-
     cpu_t2 = SYSCALL(GETTIME, 0, 0, 0); /* CPU time used */
     STCK(now2);                         /* time of day  */
 
@@ -420,9 +420,9 @@ debug2();
     }
 
     p1p2synch = 1; /* p1 will check this */
-debug2();
+
+print("P2\n");
     SYSCALL(PASSEREN, (int)&sem_endp2, 0, 0); /* P(sem_endp2)    unblocking P ! */
-debug_var = sem_endp2; debug2();
 
     SYSCALL(TERMPROCESS, 0, 0, 0); /* terminate p2 */
 

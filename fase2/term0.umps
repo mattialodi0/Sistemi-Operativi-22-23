@@ -1,0 +1,7 @@
+p1 v(sem_testsem)
+P1
+V1
+p2 starts
+V2
+error: p1/p2 synchronization bad
+p1 finishes OK -- TTFN
