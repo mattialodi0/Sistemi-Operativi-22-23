@@ -93,7 +93,7 @@ pcb_PTR findProcess(int pid) {
 */
 
 
-// decrementa il semaforo all'ind semaddr, se diventa <= 0 il processo viene bloccato e si chiama lo scheduler
+// decrementa il semaforo all'ind semaddr, se diventa < 0 il processo viene bloccato e si chiama lo scheduler
 void Passeren(int *semaddr)
 {
     (*semaddr)--;
@@ -127,7 +127,7 @@ void Passeren(int *semaddr)
     // }
 }
 
-// incrementa il semaforo all'ind semaddr, se diventa >= 1 il processo viene messo nella coda ready
+// incrementa il semaforo all'ind semaddr, se diventa >= 0 il processo viene messo nella coda ready
 void Verhogen(int *semaddr)
 {
     (*semaddr)++;
@@ -188,8 +188,11 @@ int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
     } 
     else PANIC();
 
-    termreg_t *dev_reg = (termreg_t *)(0x10000254);
-    dev_reg->transm_command = 2 | (((unsigned int)'O') << 8);
+    termreg_t *dev_reg = (termreg_t *)(cmdAddr-2);
+    dev_reg->transm_command = cmdValues[1]; // 2 | (((unsigned int)'O') << 8);
+
+    // *cmdAddr = cmdValues[0];
+    // *(cmdAddr++) = cmdValues[1];
 
     // *(cmdAddr + 0xC) = cmdValues[0];
     // debug_char = base->transm_command;  debug3();

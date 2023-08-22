@@ -101,7 +101,7 @@ void PLTInterrupt()
     setTIMER(5); // non è specificato quanto mettere ma credo 5
 
     // copiare lo stato del processore (all'inizio della BIOS data page) nel pcb del processo corrente
-    active_process->p_s = *(state_t *)0x0FFFF000; // non so se sia giusto il cast                                  **************************
+    active_process->p_s = *((state_t *)0x0FFFF000); // non so se sia giusto il cast                                  **************************
 
     insertProcQ(&ready_queue, active_process);
 
@@ -123,9 +123,6 @@ void ITInterrupt()
 
     // settare il semaforo a 0
     IT_sem = 0;
-    // // debug
-    // termreg_t *base = (termreg_t *)(0x10000254);
-    // debug_var = base->transm_status;  debug3();
 
     // LDST per tornare il controllo al processo corrente
     if (!on_wait)
@@ -214,15 +211,23 @@ void nonTimerInterruptT(unsigned int int_line_no, unsigned int dev_num)
             proc->p_s.reg_v0 = 0;
         else
             proc->p_s.reg_v0 = -1;
+        // proc->p_s.reg_v0 = status_code & 0x000000FF;
+
 
         // wakeup proc
         insertProcQ(&ready_queue, proc);
         soft_blocked_count--;
     }
 
-    // LDST per tornare il controllo al processo corrente
-    state_t *state = (state_t *)BIOSDATAPAGE;
-    LDST(state);
+    if (on_wait)
+    {
+        scheduler();
+    }
+    else
+    {
+        state_t *state = (state_t *)BIOSDATAPAGE; // costante definita in umps
+        LDST(state);
+    }
 }
 
 unsigned int find_dev_num(unsigned int bitmap_ind)

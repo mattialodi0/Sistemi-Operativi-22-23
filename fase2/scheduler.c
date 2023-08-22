@@ -15,6 +15,7 @@ int on_wait = false;
 
 void scheduler()
 {  
+    on_wait = false;
     if (!emptyProcQ(&ready_queue))
     {
         // remove proc from ready queue
@@ -36,6 +37,7 @@ void scheduler()
         {
             if (soft_blocked_count > 0)
             {
+                on_wait = true;
                 unsigned int mask = 0;
                 unsigned int status = getSTATUS();
                 mask = ~TEBITON;
