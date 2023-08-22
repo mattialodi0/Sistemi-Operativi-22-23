@@ -139,9 +139,10 @@ void print(char *msg) {
     devregtr *base    = (devregtr *)(TERM0ADDR);
     devregtr *command = base + 2;
     devregtr  status;
-
+debug1();
     SYSCALL(PASSEREN, (int)&sem_term_mut, 0, 0); /* P(sem_term_mut) */
-    while (*s != EOS) {
+debug2();
+    while (*s != EOS) {debug2();
         devregtr value[2] = {0, PRINTCHR | (((devregtr)*s) << 8)};
         status         = SYSCALL(DOIO, (int)command, (int)value, 0);
         if (status != 0 || (value[0] & TERMSTATMASK) != RECVD) {
@@ -150,7 +151,10 @@ void print(char *msg) {
         }
         s++;
     }
+debug3();
     SYSCALL(VERHOGEN, (int)&sem_term_mut, 0, 0); /* V(sem_term_mut) */
+debug4();
+debug5();
 }
 
 
@@ -174,8 +178,8 @@ void test() {
 
     SYSCALL(VERHOGEN, (int)&sem_testsem, 0, 0); /* V(sem_testsem)   */
 debug();
-    print("p1 v(sem_testsem)\n");
-debug1();
+    // print("p1 v(sem_testsem)\n");
+// debug();
 
     /* set up states of the other processes */
 
@@ -287,12 +291,12 @@ debug1();
     ns2_b_state.reg_sp = ns2_a_state.reg_sp - QPAGE;
     ns2_b_state.pc_epc = ns2_b_state.reg_t9 = (memaddr)ns_p_new_ns;
     ns2_b_state.status                      = ns2_b_state.status | IEPBITON | CAUSEINTMASK | TEBITON;
-debug2();
+debug();
     /* create process p2 */
     p2pid = SYSCALL(CREATEPROCESS, (int)&p2state, (int)NULL, (int)NULL); /* start p2     */
-debug3();
+debug();
     print("p2 was started\n");
-debug4();
+debug();
 
     SYSCALL(VERHOGEN, (int)&sem_startp2, 0, 0); /* V(sem_startp2)   */
     
