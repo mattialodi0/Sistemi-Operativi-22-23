@@ -245,7 +245,7 @@ int GetCPUTime()
 int WaitForClock()
 {
     Passeren(&IT_sem);
-    scheduler();
+    BlockingExceptEnd();
 }
 
 // ritorna un puntatore alla struttura di supporto del chiamante

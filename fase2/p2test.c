@@ -297,7 +297,7 @@ debug();
 
 print("V1\n");
     SYSCALL(VERHOGEN, (int)&sem_startp2, 0, 0); /* V(sem_startp2)   */  // V sbloccante
-
+int i= 0;for(i;i<100000;i++) {int a=0;}
 print("V2\n");
     SYSCALL(VERHOGEN, (int)&sem_endp2, 0, 0); /* V(sem_endp2) (blocking V!)     */
     
