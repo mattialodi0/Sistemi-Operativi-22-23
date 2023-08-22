@@ -102,8 +102,59 @@ pcb_PTR findProcess(int pid) {
 // decrementa il semaforo all'ind semaddr, se diventa < 0 il processo viene bloccato e si chiama lo scheduler
 void Passeren(int *semaddr)
 {
-    (*semaddr)--;
-    if (*semaddr < 0)
+    // per semafori semplici
+    // (*semaddr)--;
+    // if (*semaddr < 0)
+    // {
+    //     soft_blocked_count++;
+    //     if (insertBlocked(semaddr, active_process)) {
+    //         PANIC(); // errore nei semafori
+    //     }
+    //     BlockingExceptEnd();
+    // }
+    // else
+    //     NonBlockingExceptEnd();
+
+    // per semafori binari
+    if (*semaddr == 0)
+    {
+        soft_blocked_count++;
+        if (insertBlocked(semaddr, active_process)) {
+            PANIC(); // errore nei semafori
+        }
+        BlockingExceptEnd(semaddr);
+    }
+    else if(*semaddr == 1)
+    {
+        (*semaddr)--;
+        pcb_t *waked_proc = removeBlocked(semaddr);
+        if (waked_proc != NULL)
+        {
+            // wakeup proc
+            insertProcQ(&ready_queue, waked_proc);
+            soft_blocked_count--;
+        }
+        NonBlockingExceptEnd();
+    }
+    else PANIC();
+}
+
+// incrementa il semaforo all'ind semaddr, se diventa >= 0 il processo viene messo nella coda ready
+void Verhogen(int *semaddr)
+{
+    // per semafori semplici
+    // (*semaddr)++;
+    // pcb_t *waked_proc = removeBlocked(semaddr);
+    // if (waked_proc != NULL)
+    // {
+    //     // wakeup proc
+    //     insertProcQ(&ready_queue, waked_proc);
+    //     soft_blocked_count--;
+    // }
+    // NonBlockingExceptEnd();
+
+    // per semafori binari
+    if (*semaddr == 1)
     {
         soft_blocked_count++;
         if (insertBlocked(semaddr, active_process)) {
@@ -111,57 +162,18 @@ void Passeren(int *semaddr)
         }
         BlockingExceptEnd();
     }
-    else
-        NonBlockingExceptEnd();
-
-    // per semafori binari
-    // if (*semaddr == 0)
-    // {
-    //     BlockingExceptEnd(semaddr);
-    // }
-    // else
-    // {
-    //     *semaddr--;
-    //     pcb_t *waked_proc = removeBlocked(semaddr);
-    //     if (waked_proc != NULL)
-    //     {
-    //         // wakeup proc
-    //         insertProcQ(&ready_queue, waked_proc);
-    //         soft_blocked_count--;
-    //     }
-    //     NonBlockingExceptEnd();
-    // }
-}
-
-// incrementa il semaforo all'ind semaddr, se diventa >= 0 il processo viene messo nella coda ready
-void Verhogen(int *semaddr)
-{
-    (*semaddr)++;
-    pcb_t *waked_proc = removeBlocked(semaddr);
-    if (waked_proc != NULL)
+    else if(*semaddr == 0)
     {
-        // wakeup proc
-        insertProcQ(&ready_queue, waked_proc);
-        soft_blocked_count--;
+        (*semaddr)++;
+        pcb_t *waked_proc = removeBlocked(semaddr);
+        if (waked_proc != NULL)
+        {
+            insertProcQ(&ready_queue, waked_proc);
+            soft_blocked_count--;
+        }
+        NonBlockingExceptEnd();
     }
-    NonBlockingExceptEnd();
-
-    // per semafori binari
-    // if (*semaddr == 1)
-    // {
-    //     BlockingExceptEnd();
-    // }
-    // else
-    // {
-    //     *semaddr++;
-    //     pcb_t *waked_proc = removeBlocked(semaddr);
-    //     if (waked_proc != NULL)
-    //     {
-    //         insertProcQ(&ready_queue, waked_proc);
-    //         soft_blocked_count--;
-    //     }
-    //     NonBlockingExceptEnd();
-    // }
+    else PANIC();
 }
 
 /*

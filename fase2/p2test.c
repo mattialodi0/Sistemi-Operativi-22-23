@@ -139,10 +139,11 @@ void print(char *msg) {
     devregtr *base    = (devregtr *)(TERM0ADDR);
     devregtr *command = base + 2;
     devregtr  status;
-debug1();
+// debug1();
     SYSCALL(PASSEREN, (int)&sem_term_mut, 0, 0); /* P(sem_term_mut) */
-debug2();
-    while (*s != EOS) {debug2();
+//     debug_var = sem_term_mut;
+// debug2();
+    while (*s != EOS) {
         devregtr value[2] = {0, PRINTCHR | (((devregtr)*s) << 8)};
         status         = SYSCALL(DOIO, (int)command, (int)value, 0);
         if (status != 0 || (value[0] & TERMSTATMASK) != RECVD) {
@@ -151,10 +152,10 @@ debug2();
         }
         s++;
     }
-debug3();
+// debug3();
     SYSCALL(VERHOGEN, (int)&sem_term_mut, 0, 0); /* V(sem_term_mut) */
-debug4();
-debug5();
+//     debug_var = sem_term_mut;
+// debug4();
 }
 
 
@@ -177,9 +178,8 @@ void uTLB_RefillHandler() {
 void test() {
 
     SYSCALL(VERHOGEN, (int)&sem_testsem, 0, 0); /* V(sem_testsem)   */
-debug();
-    // print("p1 v(sem_testsem)\n");
-// debug();
+
+    print("p1 v(sem_testsem)\n");
 
     /* set up states of the other processes */
 
@@ -291,78 +291,82 @@ debug();
     ns2_b_state.reg_sp = ns2_a_state.reg_sp - QPAGE;
     ns2_b_state.pc_epc = ns2_b_state.reg_t9 = (memaddr)ns_p_new_ns;
     ns2_b_state.status                      = ns2_b_state.status | IEPBITON | CAUSEINTMASK | TEBITON;
-debug();
+
     /* create process p2 */
     p2pid = SYSCALL(CREATEPROCESS, (int)&p2state, (int)NULL, (int)NULL); /* start p2     */
 debug();
+
     print("p2 was started\n");
-debug();
 
     SYSCALL(VERHOGEN, (int)&sem_startp2, 0, 0); /* V(sem_startp2)   */
+    debug_var = sem_startp2;
+debug1();
     
     SYSCALL(VERHOGEN, (int)&sem_endp2, 0, 0); /* V(sem_endp2) (blocking V!)     */
+    debug_var = sem_endp2;
+debug2();
     
     /* make sure we really blocked */
     if (p1p2synch == 0) {
         print("error: p1/p2 synchronization bad\n");
     }
     
-    p3pid = SYSCALL(CREATEPROCESS, (int)&p3state, (int)NULL, (int)NULL); /* start p3     */
+    // p3pid = SYSCALL(CREATEPROCESS, (int)&p3state, (int)NULL, (int)NULL); /* start p3     */
 
-    print("p3 is started\n");
+    // print("p3 is started\n");
 
-    SYSCALL(PASSEREN, (int)&sem_endp3, 0, 0); /* P(sem_endp3)     */
+    // SYSCALL(PASSEREN, (int)&sem_endp3, 0, 0); /* P(sem_endp3)     */
 
-    SYSCALL(CREATEPROCESS, (int)&hp_p1state, (int)NULL, (int)NULL);
+    // SYSCALL(CREATEPROCESS, (int)&hp_p1state, (int)NULL, (int)NULL);
     
-    SYSCALL(CREATEPROCESS, (int)&hp_p2state, (int)NULL, (int)NULL);
+    // SYSCALL(CREATEPROCESS, (int)&hp_p2state, (int)NULL, (int)NULL);
 
-    p4pid = SYSCALL(CREATEPROCESS, (int)&p4state, (int)NULL, (int)NULL); /* start p4     */
+    // p4pid = SYSCALL(CREATEPROCESS, (int)&p4state, (int)NULL, (int)NULL); /* start p4     */
 
-    pFiveSupport.sup_exceptContext[GENERALEXCEPT].stackPtr = (int)p5Stack;
-    pFiveSupport.sup_exceptContext[GENERALEXCEPT].status   = ALLOFF | IEPBITON | CAUSEINTMASK | TEBITON;
-    pFiveSupport.sup_exceptContext[GENERALEXCEPT].pc       = (memaddr)p5gen;
-    pFiveSupport.sup_exceptContext[PGFAULTEXCEPT].stackPtr = p5Stack;
-    pFiveSupport.sup_exceptContext[PGFAULTEXCEPT].status   = ALLOFF | IEPBITON | CAUSEINTMASK | TEBITON;
-    pFiveSupport.sup_exceptContext[PGFAULTEXCEPT].pc       = (memaddr)p5mm;
+    // pFiveSupport.sup_exceptContext[GENERALEXCEPT].stackPtr = (int)p5Stack;
+    // pFiveSupport.sup_exceptContext[GENERALEXCEPT].status   = ALLOFF | IEPBITON | CAUSEINTMASK | TEBITON;
+    // pFiveSupport.sup_exceptContext[GENERALEXCEPT].pc       = (memaddr)p5gen;
+    // pFiveSupport.sup_exceptContext[PGFAULTEXCEPT].stackPtr = p5Stack;
+    // pFiveSupport.sup_exceptContext[PGFAULTEXCEPT].status   = ALLOFF | IEPBITON | CAUSEINTMASK | TEBITON;
+    // pFiveSupport.sup_exceptContext[PGFAULTEXCEPT].pc       = (memaddr)p5mm;
 
-    SYSCALL(CREATEPROCESS, (int)&p5state, (int)&(pFiveSupport), (int)NULL); /* start p5     */
+    // SYSCALL(CREATEPROCESS, (int)&p5state, (int)&(pFiveSupport), (int)NULL); /* start p5     */
 
-    SYSCALL(CREATEPROCESS, (int)&p6state, (int)NULL, (int)NULL); /* start p6		*/
+    // SYSCALL(CREATEPROCESS, (int)&p6state, (int)NULL, (int)NULL); /* start p6		*/
 
-    SYSCALL(CREATEPROCESS, (int)&p7state, (int)NULL, (int)NULL); /* start p7		*/
+    // SYSCALL(CREATEPROCESS, (int)&p7state, (int)NULL, (int)NULL); /* start p7		*/
 
-    p9pid = SYSCALL(CREATEPROCESS, (int)&p9state, (int)NULL, (int)NULL); /* start p7		*/
+    // p9pid = SYSCALL(CREATEPROCESS, (int)&p9state, (int)NULL, (int)NULL); /* start p7		*/
 
-    SYSCALL(PASSEREN, (int)&sem_endp5, 0, 0); /* P(sem_endp5)		*/
+    // SYSCALL(PASSEREN, (int)&sem_endp5, 0, 0); /* P(sem_endp5)		*/
 
-    print("p1 knows p5 ended\n");
+    // print("p1 knows p5 ended\n");
 
-    SYSCALL(PASSEREN, (int)&sem_blkp4, 0, 0); /* P(sem_blkp4)		*/
+    // SYSCALL(PASSEREN, (int)&sem_blkp4, 0, 0); /* P(sem_blkp4)		*/
 
-    /* now for a more rigorous check of process termination */
-    for (p8inc = 0; p8inc < 4; p8inc++) {
-        /* Reset semaphores */ 
-        sem_blkp8 = 0;
-        sem_endp8 = 0;
-        for (int i = 0; i < NOLEAVES; i++) {
-            sem_endcreate[i] = 0;
-        }
+    // /* now for a more rigorous check of process termination */
+    // for (p8inc = 0; p8inc < 4; p8inc++) {
+    //     /* Reset semaphores */ 
+    //     sem_blkp8 = 0;
+    //     sem_endp8 = 0;
+    //     for (int i = 0; i < NOLEAVES; i++) {
+    //         sem_endcreate[i] = 0;
+    //     }
 
-        p8pid = SYSCALL(CREATEPROCESS, (int)&p8rootstate, (int)NULL, (int)NULL);
+    //     p8pid = SYSCALL(CREATEPROCESS, (int)&p8rootstate, (int)NULL, (int)NULL);
 
-        SYSCALL(PASSEREN, (int)&sem_endp8, 0, 0);
-    }
+    //     SYSCALL(PASSEREN, (int)&sem_endp8, 0, 0);
+    // }
 
-    SYSCALL(CREATEPROCESS, (int)&p11state, (int)NULL, (int)NULL); /* start p7		*/
-    SYSCALL(PASSEREN, (int)&sem_p11, 0, 0);
+    // SYSCALL(CREATEPROCESS, (int)&p11state, (int)NULL, (int)NULL); /* start p7		*/
+    // SYSCALL(PASSEREN, (int)&sem_p11, 0, 0);
 
-    print("p1 finishes OK -- TTFN\n");
-    *((memaddr *)BADADDR) = 0; /* terminate p1 */
+    // print("p1 finishes OK -- TTFN\n");
+    // *((memaddr *)BADADDR) = 0; /* terminate p1 */
 
-    /* should not reach this point, since p1 just got a program trap */
-    print("error: p1 still alive after progtrap & no trap vector\n");
-    PANIC(); /* PANIC !!!     */
+    // /* should not reach this point, since p1 just got a program trap */
+    // print("error: p1 still alive after progtrap & no trap vector\n");
+    // PANIC(); /* PANIC !!!     */
 }
 
 
@@ -375,6 +379,7 @@ void p2() {
     print("p2 starts\n");
 
     int pid = SYSCALL(GETPROCESSID, 0, 0, 0);
+    debug_var = pid; debug1();
     if (pid != p2pid) {
         print("Inconsistent process id for p2!\n");
         PANIC();
