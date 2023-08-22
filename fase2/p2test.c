@@ -139,22 +139,18 @@ void print(char *msg) {
     devregtr *base    = (devregtr *)(TERM0ADDR);
     devregtr *command = base + 2;
     devregtr  status;
-debug();
+
     SYSCALL(PASSEREN, (int)&sem_term_mut, 0, 0); /* P(sem_term_mut) */
-debug1();
     while (*s != EOS) {
         devregtr value[2] = {0, PRINTCHR | (((devregtr)*s) << 8)};
         status         = SYSCALL(DOIO, (int)command, (int)value, 0);
-        debug_var = value[0]; debug2();
         if (status != 0 || (value[0] & TERMSTATMASK) != RECVD) {
             debugE();
             PANIC();
         }
         s++;
     }
-debug3();
     SYSCALL(VERHOGEN, (int)&sem_term_mut, 0, 0); /* V(sem_term_mut) */
-debug5();
 }
 
 
@@ -177,9 +173,9 @@ void uTLB_RefillHandler() {
 void test() {
 
     SYSCALL(VERHOGEN, (int)&sem_testsem, 0, 0); /* V(sem_testsem)   */
-
+debug();
     print("p1 v(sem_testsem)\n");
-debug3();
+debug1();
 
     /* set up states of the other processes */
 
@@ -291,11 +287,12 @@ debug3();
     ns2_b_state.reg_sp = ns2_a_state.reg_sp - QPAGE;
     ns2_b_state.pc_epc = ns2_b_state.reg_t9 = (memaddr)ns_p_new_ns;
     ns2_b_state.status                      = ns2_b_state.status | IEPBITON | CAUSEINTMASK | TEBITON;
-
+debug2();
     /* create process p2 */
     p2pid = SYSCALL(CREATEPROCESS, (int)&p2state, (int)NULL, (int)NULL); /* start p2     */
-
+debug3();
     print("p2 was started\n");
+debug4();
 
     SYSCALL(VERHOGEN, (int)&sem_startp2, 0, 0); /* V(sem_startp2)   */
     
