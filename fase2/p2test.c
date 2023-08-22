@@ -139,22 +139,19 @@ void print(char *msg) {
     devregtr *base    = (devregtr *)(TERM0ADDR);
     devregtr *command = base + 2;
     devregtr  status;
-// debug1();
+// debug();
     SYSCALL(PASSEREN, (int)&sem_term_mut, 0, 0); /* P(sem_term_mut) */
-//     debug_var = sem_term_mut;
-// debug2();
+// debug1();
     while (*s != EOS) {
         devregtr value[2] = {0, PRINTCHR | (((devregtr)*s) << 8)};
         status         = SYSCALL(DOIO, (int)command, (int)value, 0);
         if (status != 0 || (value[0] & TERMSTATMASK) != RECVD) {
-            debugE();
             PANIC();
         }
         s++;
     }
 // debug3();
     SYSCALL(VERHOGEN, (int)&sem_term_mut, 0, 0); /* V(sem_term_mut) */
-//     debug_var = sem_term_mut;
 // debug4();
 }
 
@@ -293,18 +290,16 @@ void test() {
     ns2_b_state.status                      = ns2_b_state.status | IEPBITON | CAUSEINTMASK | TEBITON;
 
     /* create process p2 */
-    p2pid = SYSCALL(CREATEPROCESS, (int)&p2state, (int)NULL, (int)NULL); /* start p2     */
 debug();
+    p2pid = SYSCALL(CREATEPROCESS, (int)&p2state, (int)NULL, (int)NULL); /* start p2     */
 
-    print("p2 was started\n");
+    // print("p2 was started\n");
 
-    SYSCALL(VERHOGEN, (int)&sem_startp2, 0, 0); /* V(sem_startp2)   */
-    debug_var = sem_startp2;
 debug1();
-    
+    SYSCALL(VERHOGEN, (int)&sem_startp2, 0, 0); /* V(sem_startp2)   */  // V sbloccante
+debug1();
     SYSCALL(VERHOGEN, (int)&sem_endp2, 0, 0); /* V(sem_endp2) (blocking V!)     */
-    debug_var = sem_endp2;
-debug2();
+debug_var = sem_endp2; debug1();
     
     /* make sure we really blocked */
     if (p1p2synch == 0) {
@@ -375,11 +370,13 @@ void p2() {
     int   i;              /* just to waste time  */
     cpu_t now1, now2;     /* times of day        */
     cpu_t cpu_t1, cpu_t2; /* cpu time used       */
-    SYSCALL(PASSEREN, (int)&sem_startp2, 0, 0); /* P(sem_startp2)   */
+debug2();
+    SYSCALL(PASSEREN, (int)&sem_startp2, 0, 0); /* P(sem_startp2)   */ // P bloccante
+
     print("p2 starts\n");
 
     int pid = SYSCALL(GETPROCESSID, 0, 0, 0);
-    debug_var = pid; debug1();
+    
     if (pid != p2pid) {
         print("Inconsistent process id for p2!\n");
         PANIC();
@@ -389,15 +386,17 @@ void p2() {
     for (i = 0; i <= MAXSEM; i++) {
         s[i] = 0;
     }
-
     /* V, then P, all of the semaphores in the s[] array */
     for (i = 0; i <= MAXSEM; i++) {
         SYSCALL(VERHOGEN, (int)&s[i], 0, 0); /* V(S[I]) */
         SYSCALL(PASSEREN, (int)&s[i], 0, 0); /* P(S[I]) */
-        if (s[i] != 0)
+        if (s[i] != 0) {
             print("error: p2 bad v/p pairs\n");
+        }
     }
-    print("p2 v's successfully\n");
+    // debug2();
+    print("p2 v's successfully\n");     // LOOP QUI !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // debug3();
 
     /* test of SYS6 */
     STCK(now1);                         /* time of day   */
@@ -421,8 +420,9 @@ void p2() {
     }
 
     p1p2synch = 1; /* p1 will check this */
-
+debug2();
     SYSCALL(PASSEREN, (int)&sem_endp2, 0, 0); /* P(sem_endp2)    unblocking P ! */
+debug_var = sem_endp2; debug2();
 
     SYSCALL(TERMPROCESS, 0, 0, 0); /* terminate p2 */
 

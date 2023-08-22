@@ -122,11 +122,11 @@ void Passeren(int *semaddr)
         if (insertBlocked(semaddr, active_process)) {
             PANIC(); // errore nei semafori
         }
+        debug5();
         BlockingExceptEnd(semaddr);
     }
     else if(*semaddr == 1)
     {
-        (*semaddr)--;
         pcb_t *waked_proc = removeBlocked(semaddr);
         if (waked_proc != NULL)
         {
@@ -134,6 +134,7 @@ void Passeren(int *semaddr)
             insertProcQ(&ready_queue, waked_proc);
             soft_blocked_count--;
         }
+        else (*semaddr)--;
         NonBlockingExceptEnd();
     }
     else PANIC();
@@ -160,17 +161,18 @@ void Verhogen(int *semaddr)
         if (insertBlocked(semaddr, active_process)) {
             PANIC(); // errore nei semafori
         }
+        debug5();
         BlockingExceptEnd();
     }
     else if(*semaddr == 0)
     {
-        (*semaddr)++;
         pcb_t *waked_proc = removeBlocked(semaddr);
         if (waked_proc != NULL)
         {
             insertProcQ(&ready_queue, waked_proc);
             soft_blocked_count--;
         }
+        else (*semaddr)++;
         NonBlockingExceptEnd();
     }
     else PANIC();
