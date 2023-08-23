@@ -6,6 +6,7 @@ extern void debug4();
 extern void debug5();
 extern void debugE();
 extern int debug_var;
+extern int debug_var1;
 extern char debug_char;
 
 
@@ -298,14 +299,15 @@ debug();
 print("V1\n"); debug();
     SYSCALL(VERHOGEN, (int)&sem_startp2, 0, 0); /* V(sem_startp2)   */  // V sbloccante
 
+int i= 0;for(i;i<100000;i++) {int a=0;}  
+
 print("V2\n"); debug();
     SYSCALL(VERHOGEN, (int)&sem_endp2, 0, 0); /* V(sem_endp2) (blocking V!)     */
-print("1 not blocked\n");
+
     /* make sure we really blocked */
     if (p1p2synch == 0) {
         print("error: p1/p2 synchronization bad\n");
     }
-int i= 0;for(i;i<100000;i++) {int a=0;}  
     // p3pid = SYSCALL(CREATEPROCESS, (int)&p3state, (int)NULL, (int)NULL); /* start p3     */
 
     // print("p3 is started\n");
@@ -396,17 +398,20 @@ print("P1\n"); debug();
         }
     }
 
-    print("p2 v's successfully\n");     // LOOP QUI !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    print("p2 v's successfully\n");
 
     /* test of SYS6 */
     STCK(now1);                         /* time of day   */
     cpu_t1 = SYSCALL(GETTIME, 0, 0, 0); /* CPU time used */
+    debug_var = cpu_t1; debug1();
 
     /* delay for several milliseconds */
     for (i = 1; i < LOOPNUM; i++)
         ;
-    cpu_t2 = SYSCALL(GETTIME, 0, 0, 0); /* CPU time used */
+
     STCK(now2);                         /* time of day  */
+    cpu_t2 = SYSCALL(GETTIME, 0, 0, 0); /* CPU time used */
+    debug_var1 = cpu_t2; debug1();
 
     if (((now2 - now1) >= (cpu_t2 - cpu_t1)) && ((cpu_t2 - cpu_t1) >= (MINLOOPTIME / (*((cpu_t *)TIMESCALEADDR))))) {
         print("p2 is OK\n");

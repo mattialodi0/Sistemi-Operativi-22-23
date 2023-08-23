@@ -16,4 +16,11 @@ void nonTimerInterrupt(unsigned int line, unsigned int dev_num);
 
 void nonTimerInterruptT(unsigned int line, unsigned int dev_num);
 
+
 unsigned int find_dev_num(unsigned int  bitmap_ind);
+
+// aggiornamento del tempo di uso della CPU
+void update_time();
+void update_time_exc(pcb_t * proc);
+// elimina il tempo usato nella gestione dell'eccezione da quello del proc
+void remove_time();

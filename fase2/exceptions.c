@@ -2,9 +2,11 @@
 
 extern cpu_t timer_start;
 extern int debug_var;
+cpu_t exc_timer_start;
 
 void exceptionHandler()
 {
+    STCK(exc_timer_start);
     state_t state = *((state_t *)BIOSDATAPAGE);
     
     int cause_reg, exc_code;
@@ -126,7 +128,6 @@ void syscallHandler(state_t state)
         break;
     case DOIO:
         DoIO((unsigned int *)v1, (unsigned int *)v2);
-        scheduler();
         break;
     case GETTIME:
         GetCPUTime();
@@ -160,9 +161,7 @@ void BlockingExceptEnd() {
     active_process->p_s = *state;
 
     // aggiornamento del tempo di uso della CPU
-    cpu_t time;
-    STCK(time);
-    active_process->p_time += (time - timer_start);
+    update_time();
 
     scheduler();
 }

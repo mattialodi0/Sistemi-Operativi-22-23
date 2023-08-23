@@ -263,7 +263,7 @@ int GetCPUTime()
 
     // return active_process->p_time + (time - timer_start);
     state_t *state = (state_t *)BIOSDATAPAGE;
-    state->reg_v0 = (int)active_process->p_time + (time - timer_start);
+    state->reg_v0 = (int) (active_process->p_time + (time - timer_start)); 
 
     NonBlockingExceptEnd();
 }

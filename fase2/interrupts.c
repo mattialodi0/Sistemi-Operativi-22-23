@@ -1,6 +1,8 @@
 #include <interrupts.h>
 
 extern int debug_var;
+extern cpu_t timer_start;
+extern cpu_t exc_timer_start;
 
 void interruptHandler()
 {
@@ -105,6 +107,8 @@ void PLTInterrupt()
 
     insertProcQ(&ready_queue, active_process);
 
+    update_time();
+
     scheduler();
 }
 
@@ -124,9 +128,12 @@ void ITInterrupt()
     // settare il semaforo a 0
     IT_sem = 0;
 
+    remove_time();
+
     // LDST per tornare il controllo al processo corrente
     // if (!on_wait)
     // {
+
         state_t *state = (state_t *)BIOSDATAPAGE; // costante definita in umps
         LDST(state);
     // }
@@ -173,10 +180,14 @@ void nonTimerInterrupt(unsigned int int_line_no, unsigned int dev_num)
     {
         // mettere lo status code nel reg. v0 del pcb del processo sbloccato
         proc->p_s.reg_v0 = status_code;
+
+        update_time_exc(proc);
         // wakeup proc
         insertProcQ(&ready_queue, proc);
         soft_blocked_count--;
     }
+
+    remove_time();
 
     // LDST per tornare il controllo al processo corrente
     state_t *state = (state_t *)BIOSDATAPAGE;
@@ -213,7 +224,7 @@ void nonTimerInterruptT(unsigned int int_line_no, unsigned int dev_num)
             proc->p_s.reg_v0 = -1;
         mem[0] = status_code & 0x000000FF;
 
-
+        update_time_exc(proc);
         // wakeup proc
         insertProcQ(&ready_queue, proc);
         soft_blocked_count--;
@@ -221,10 +232,12 @@ void nonTimerInterruptT(unsigned int int_line_no, unsigned int dev_num)
 
     if (on_wait)
     {
+        remove_time();
         scheduler();
     }
     else
     {
+        remove_time();
         state_t *state = (state_t *)BIOSDATAPAGE; // costante definita in umps
         LDST(state);
     }
@@ -256,4 +269,22 @@ unsigned int find_dev_num(unsigned int bitmap_ind)
         num = 0;
 
     return num;
+}
+
+void update_time() {
+    cpu_t time;
+    STCK(time);
+    active_process->p_time += (time - timer_start);
+}
+
+void update_time_exc(pcb_t * proc) {    // dovrebbero servire ma funziona solo senza
+    // cpu_t time;
+    // STCK(time);
+    // proc->p_time += (time - exc_timer_start);
+}
+
+void remove_time() {
+    // cpu_t time;
+    // timer_start += (time - exc_timer_start);
+    // // active_process->p_time -= (time - exc_timer_start);
 }
