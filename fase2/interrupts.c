@@ -133,7 +133,6 @@ void ITInterrupt()
     // LDST per tornare il controllo al processo corrente
     // if (!on_wait)
     // {
-
         state_t *state = (state_t *)BIOSDATAPAGE; // costante definita in umps
         LDST(state);
     // }

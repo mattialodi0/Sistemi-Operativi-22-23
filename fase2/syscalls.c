@@ -211,7 +211,6 @@ int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
 {
     // Installed Devices Bit Map 0x1000002C
     // Interrupting Devices Bit Map 0x10000040
-    // devAddrBase = 0x10000054 + ((IntlineNo - 3) * 0x80) + (DevNo * 0x10)
 
     // (verifica che il disp sia installato)
     // P sul sem indicato in a1 e a2
@@ -250,7 +249,7 @@ int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
     // unsigned int status = *(unsigned int *)(cmdAddr + 0x8);
     // if (status == 5)
     //     return 0;
-    // else
+    // else                     
     //     return -1;
 
     BlockingExceptEnd();

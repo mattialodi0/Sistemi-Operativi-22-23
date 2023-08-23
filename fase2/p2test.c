@@ -294,7 +294,7 @@ void test() {
 debug();
     p2pid = SYSCALL(CREATEPROCESS, (int)&p2state, (int)NULL, (int)NULL); /* start p2     */
 
-    // print("p2 was started\n");
+    print("p2 was started\n");
 
 print("V1\n"); debug();
     SYSCALL(VERHOGEN, (int)&sem_startp2, 0, 0); /* V(sem_startp2)   */  // V sbloccante
@@ -308,6 +308,7 @@ print("V2\n"); debug();
     if (p1p2synch == 0) {
         print("error: p1/p2 synchronization bad\n");
     }
+    
     // p3pid = SYSCALL(CREATEPROCESS, (int)&p3state, (int)NULL, (int)NULL); /* start p3     */
 
     // print("p3 is started\n");
