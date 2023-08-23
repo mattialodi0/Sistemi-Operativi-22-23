@@ -295,17 +295,17 @@ debug();
 
     // print("p2 was started\n");
 
-print("V1\n");
+print("V1\n"); debug();
     SYSCALL(VERHOGEN, (int)&sem_startp2, 0, 0); /* V(sem_startp2)   */  // V sbloccante
-int i= 0;for(i;i<100000;i++) {int a=0;}
-print("V2\n");
+
+print("V2\n"); debug();
     SYSCALL(VERHOGEN, (int)&sem_endp2, 0, 0); /* V(sem_endp2) (blocking V!)     */
-    
+print("1 not blocked\n");
     /* make sure we really blocked */
     if (p1p2synch == 0) {
         print("error: p1/p2 synchronization bad\n");
     }
-    
+int i= 0;for(i;i<100000;i++) {int a=0;}  
     // p3pid = SYSCALL(CREATEPROCESS, (int)&p3state, (int)NULL, (int)NULL); /* start p3     */
 
     // print("p3 is started\n");
@@ -371,7 +371,7 @@ void p2() {
     cpu_t now1, now2;     /* times of day        */
     cpu_t cpu_t1, cpu_t2; /* cpu time used       */
 
-print("P1\n");
+print("P1\n"); debug();
     SYSCALL(PASSEREN, (int)&sem_startp2, 0, 0); /* P(sem_startp2)   */ // P bloccante
 
     print("p2 starts\n");
@@ -395,7 +395,6 @@ print("P1\n");
             print("error: p2 bad v/p pairs\n");
         }
     }
-print("ok\n");
 
     print("p2 v's successfully\n");     // LOOP QUI !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -421,7 +420,7 @@ print("ok\n");
 
     p1p2synch = 1; /* p1 will check this */
 
-print("P2\n");
+print("P2\n"); debug();
     SYSCALL(PASSEREN, (int)&sem_endp2, 0, 0); /* P(sem_endp2)    unblocking P ! */
 
     SYSCALL(TERMPROCESS, 0, 0, 0); /* terminate p2 */

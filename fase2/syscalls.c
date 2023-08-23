@@ -5,7 +5,6 @@ extern int pid_count;
 extern int debug_var;
 extern int debug_char;
 
-
 int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
 {
     pcb_t *new_proc = allocPcb(); // inizializza new_proc, allocPcb la mette == NULL se vuota, quindi va direttamente nell'else?
@@ -39,7 +38,7 @@ int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
 
         // return new_proc->p_pid;
         state_t *state = (state_t *)BIOSDATAPAGE;
-        state->reg_v0 = 0;     // non ha senso ma è richiesto
+        state->reg_v0 = 0; // non ha senso ma è richiesto
         state->reg_v0 = new_proc->p_pid;
     }
     else
@@ -54,49 +53,53 @@ int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
 // termina il processo indicato da pid insieme ai suoi figli
 void TerminateProcess(int pid)
 {
-    if (pid == 0)
-    {                             // pid == 0, bisogna terminare active_process (processo invocante), e i suoi figli
-        outChild(active_process); // outChild per eliminare i figli dal padre
-        if (active_process->p_semAdd < 0)
-        { // if semaphor < 0 deve essere incrementato (controllare su 3.9 del libro)
-            if (headBlocked(active_process->p_semAdd) == NULL)
-            {
-                active_process->p_semAdd++;
-            }
-        }
-        active_process = NULL;
+    pcb_t *proc, *f_proc;
+
+    if (pid == 0) // pid == 0, bisogna terminare active_process (processo invocante), e i suoi figli
+    {
+        proc = active_process;
+        f_proc = active_process;
     }
     else
-    { /*
-     //cercare processo con stesso pid
-     pcb_PTR target_process = findProcess(pid);
+    { 
      //stessa cosa dell'if ma con il processo del pid preso in input
-     if(target_process != NULL){
-         outChild(target_process);
-         target_process->p_semAdd++;
-         target_process = NULL;
-     }*/
+        proc = findProcess(pid);
+        f_proc = findProcess(pid);
     }
-    process_count--;
-    soft_blocked_count--; // ?
+
+    while (proc != NULL)
+        {
+            outChild(proc);         // outChild per eliminare il figlio dal padre
+            if (proc->p_semAdd < 0) // if semaphor < 0 deve essere incrementato (controllare su 3.9 del libro)
+            {                                   
+                if (headBlocked(proc->p_semAdd) == NULL)        // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
+                {
+                    proc->p_semAdd++;
+                    soft_blocked_count--;
+                }
+            }
+            proc = NULL;
+            process_count--;
+            proc = removeChild(f_proc);
+        }
+
     scheduler();
 }
 
-/*
+
 pcb_PTR findProcess(int pid) {
     struct list_head* current_process;
     pcb_PTR pcb;
 
-    list_for_each(current_process, &ready_queue) {
-        pcb = list_entry(current_process, pcb_PTR, p_list);
-        if (pcb->p_pid == pid) {
-            return pcb;
-        }
-    }
+    // list_for_each(current_process, &ready_queue) {
+    //     pcb = list_entry(current_process, pcb_PTR, p_list);
+    //     if (pcb->p_pid == pid) {
+    //         return pcb;
+    //     }
+    // }
     // Processo non trovato
     return NULL;
 }
-*/
 
 
 // decrementa il semaforo all'ind semaddr, se diventa < 0 il processo viene bloccato e si chiama lo scheduler
@@ -119,12 +122,15 @@ void Passeren(int *semaddr)
     if (*semaddr <= 0)
     {
         soft_blocked_count++;
-        if (insertBlocked(semaddr, active_process)) {
+        if (insertBlocked(semaddr, active_process))
+        {
             PANIC(); // errore nei semafori
         }
+        debug_var = *semaddr;
+        debug3();
         BlockingExceptEnd(semaddr);
     }
-    else if(*semaddr >= 1)
+    else if (*semaddr >= 1)
     {
         pcb_t *waked_proc = removeBlocked(semaddr);
         if (waked_proc != NULL)
@@ -132,11 +138,19 @@ void Passeren(int *semaddr)
             // wakeup proc
             insertProcQ(&ready_queue, waked_proc);
             soft_blocked_count--;
+            debug_var = *semaddr;
+            debug4();
         }
-        else (*semaddr)--;
+        else
+        {
+            (*semaddr)--;
+            debug_var = *semaddr;
+            debug5();
+        }
         NonBlockingExceptEnd();
     }
-    else PANIC();
+    else
+        PANIC();
 }
 
 // incrementa il semaforo all'ind semaddr, se diventa >= 0 il processo viene messo nella coda ready
@@ -157,23 +171,34 @@ void Verhogen(int *semaddr)
     if (*semaddr >= 1)
     {
         soft_blocked_count++;
-        if (insertBlocked(semaddr, active_process)) {
+        if (insertBlocked(semaddr, active_process))
+        {
             PANIC(); // errore nei semafori
         }
+        debug_var = *semaddr;
+        debug3();
         BlockingExceptEnd();
     }
-    else if(*semaddr <= 0)
+    else if (*semaddr <= 0)
     {
         pcb_t *waked_proc = removeBlocked(semaddr);
         if (waked_proc != NULL)
         {
             insertProcQ(&ready_queue, waked_proc);
             soft_blocked_count--;
+            debug_var = *semaddr;
+            debug4();
         }
-        else (*semaddr)++;
+        else
+        {
+            (*semaddr)++;
+            debug_var = *semaddr;
+            debug5();
+        }
         NonBlockingExceptEnd();
     }
-    else PANIC();
+    else
+        PANIC();
 }
 
 /*
@@ -194,19 +219,21 @@ int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
     // ritorna 0 o -1
 
     // solo per print:
-    // P 
+    // P
     int *semaddr = &sem_dev_terminal_w[0];
-    (*semaddr) --;
+    (*semaddr)--;
     if (*semaddr < 0)
     {
         soft_blocked_count++;
-        if (insertBlocked(semaddr, active_process)) {
+        if (insertBlocked(semaddr, active_process))
+        {
             PANIC(); // errore nei semafori
         }
-    } 
-    else PANIC();
+    }
+    else
+        PANIC();
 
-    termreg_t *dev_reg = (termreg_t *)(cmdAddr-2);
+    termreg_t *dev_reg = (termreg_t *)(cmdAddr - 2);
     dev_reg->transm_command = cmdValues[1]; // 2 | (((unsigned int)'O') << 8);
 
     // *cmdAddr = cmdValues[0];
@@ -219,7 +246,6 @@ int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
     // copia dei valori in cmdValues,  probabilmente va fatto nel nonTimerInterruptT
     // cmdValues[0] = 5;
     mem = cmdValues;
-
 
     // unsigned int status = *(unsigned int *)(cmdAddr + 0x8);
     // if (status == 5)
@@ -237,7 +263,7 @@ int GetCPUTime()
 
     // return active_process->p_time + (time - timer_start);
     state_t *state = (state_t *)BIOSDATAPAGE;
-    state->reg_v0 = (int) active_process->p_time + (time - timer_start);
+    state->reg_v0 = (int)active_process->p_time + (time - timer_start);
 
     NonBlockingExceptEnd();
 }
@@ -253,7 +279,7 @@ support_t *GetSupportData()
 {
     // return active_process->p_supportStruct;
     state_t *state = (state_t *)BIOSDATAPAGE;
-    state->reg_v0 = (int) active_process->p_supportStruct;
+    state->reg_v0 = (int)active_process->p_supportStruct;
 
     NonBlockingExceptEnd();
 }
