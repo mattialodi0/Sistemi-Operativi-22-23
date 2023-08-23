@@ -291,33 +291,33 @@ void test() {
     ns2_b_state.status                      = ns2_b_state.status | IEPBITON | CAUSEINTMASK | TEBITON;
 
     /* create process p2 */
-debug();
     p2pid = SYSCALL(CREATEPROCESS, (int)&p2state, (int)NULL, (int)NULL); /* start p2     */
 
     print("p2 was started\n");
 
-print("V1\n"); debug();
+// print("V1\n"); debug();
     SYSCALL(VERHOGEN, (int)&sem_startp2, 0, 0); /* V(sem_startp2)   */  // V sbloccante
 
 int i= 0;for(i;i<100000;i++) {int a=0;}  
 
-print("V2\n"); debug();
+// print("V2\n"); debug();
     SYSCALL(VERHOGEN, (int)&sem_endp2, 0, 0); /* V(sem_endp2) (blocking V!)     */
 
     /* make sure we really blocked */
     if (p1p2synch == 0) {
         print("error: p1/p2 synchronization bad\n");
     }
+
+debug();
+    p3pid = SYSCALL(CREATEPROCESS, (int)&p3state, (int)NULL, (int)NULL); /* start p3     */
+
+    print("p3 is started\n");
+
+    SYSCALL(PASSEREN, (int)&sem_endp3, 0, 0); /* P(sem_endp3)     */
+
+    SYSCALL(CREATEPROCESS, (int)&hp_p1state, (int)NULL, (int)NULL);
     
-    // p3pid = SYSCALL(CREATEPROCESS, (int)&p3state, (int)NULL, (int)NULL); /* start p3     */
-
-    // print("p3 is started\n");
-
-    // SYSCALL(PASSEREN, (int)&sem_endp3, 0, 0); /* P(sem_endp3)     */
-
-    // SYSCALL(CREATEPROCESS, (int)&hp_p1state, (int)NULL, (int)NULL);
-    
-    // SYSCALL(CREATEPROCESS, (int)&hp_p2state, (int)NULL, (int)NULL);
+    SYSCALL(CREATEPROCESS, (int)&hp_p2state, (int)NULL, (int)NULL);
 
     // p4pid = SYSCALL(CREATEPROCESS, (int)&p4state, (int)NULL, (int)NULL); /* start p4     */
 
@@ -374,7 +374,7 @@ void p2() {
     cpu_t now1, now2;     /* times of day        */
     cpu_t cpu_t1, cpu_t2; /* cpu time used       */
 
-print("P1\n"); debug();
+// print("P1\n"); debug();
     SYSCALL(PASSEREN, (int)&sem_startp2, 0, 0); /* P(sem_startp2)   */ // P bloccante
 
     print("p2 starts\n");
@@ -404,7 +404,7 @@ print("P1\n"); debug();
     /* test of SYS6 */
     STCK(now1);                         /* time of day   */
     cpu_t1 = SYSCALL(GETTIME, 0, 0, 0); /* CPU time used */
-    debug_var = cpu_t1; debug1();
+    // debug_var = cpu_t1; debug1();
 
     /* delay for several milliseconds */
     for (i = 1; i < LOOPNUM; i++)
@@ -412,7 +412,7 @@ print("P1\n"); debug();
 
     STCK(now2);                         /* time of day  */
     cpu_t2 = SYSCALL(GETTIME, 0, 0, 0); /* CPU time used */
-    debug_var1 = cpu_t2; debug1();
+    // debug_var1 = cpu_t2; debug1();
 
     if (((now2 - now1) >= (cpu_t2 - cpu_t1)) && ((cpu_t2 - cpu_t1) >= (MINLOOPTIME / (*((cpu_t *)TIMESCALEADDR))))) {
         print("p2 is OK\n");
@@ -426,7 +426,7 @@ print("P1\n"); debug();
 
     p1p2synch = 1; /* p1 will check this */
 
-print("P2\n"); debug();
+// print("P2\n"); debug();
     SYSCALL(PASSEREN, (int)&sem_endp2, 0, 0); /* P(sem_endp2)    unblocking P ! */
 
     SYSCALL(TERMPROCESS, 0, 0, 0); /* terminate p2 */

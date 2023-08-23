@@ -126,8 +126,7 @@ void Passeren(int *semaddr)
         {
             PANIC(); // errore nei semafori
         }
-        debug_var = *semaddr;
-        debug3();
+        (*semaddr)--;
         BlockingExceptEnd(semaddr);
     }
     else if (*semaddr >= 1)
@@ -138,14 +137,11 @@ void Passeren(int *semaddr)
             // wakeup proc
             insertProcQ(&ready_queue, waked_proc);
             soft_blocked_count--;
-            debug_var = *semaddr;
-            debug4();
+            (*semaddr)--;
         }
         else
         {
             (*semaddr)--;
-            debug_var = *semaddr;
-            debug5();
         }
         NonBlockingExceptEnd();
     }
@@ -175,8 +171,7 @@ void Verhogen(int *semaddr)
         {
             PANIC(); // errore nei semafori
         }
-        debug_var = *semaddr;
-        debug3();
+        (*semaddr)++;
         BlockingExceptEnd();
     }
     else if (*semaddr <= 0)
@@ -186,14 +181,11 @@ void Verhogen(int *semaddr)
         {
             insertProcQ(&ready_queue, waked_proc);
             soft_blocked_count--;
-            debug_var = *semaddr;
-            debug4();
+            (*semaddr)++;
         }
         else
         {
             (*semaddr)++;
-            debug_var = *semaddr;
-            debug5();
         }
         NonBlockingExceptEnd();
     }

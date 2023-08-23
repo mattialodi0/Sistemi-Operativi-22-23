@@ -1,8 +1,8 @@
 p1 v(sem_testsem)
-P1
 p2 was started
-V1
 p2 starts
-V2
-error: p1/p2 synchronization bad
-p1 finishes OK -- TTFN
+p2 v's successfully
+p2 is OK
+p3 is started
+p3 - CLOCKWAIT OK
+System halted 
