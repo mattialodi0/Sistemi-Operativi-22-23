@@ -1,7 +1,5 @@
 #include <syscalls.h>
 
-extern cpu_t timer_start;
-extern int pid_count;
 extern int debug_var;
 extern int debug_char;
 
@@ -18,6 +16,7 @@ int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
         new_proc->p_supportStruct = supportp; // assegno alla struttura di supporto il parametro in input
         process_count++;
         insertProcQ(&ready_queue, new_proc);   // inseriamo in coda il processo
+        // insertProcQ(&all_proc_queue, new_proc);
         insertChild(active_process, new_proc); // inseriamo new_proc come figlio di active_process
         new_proc->p_semAdd = NULL;
         new_proc->p_time = 0; // inizializzo il tempo a 0
@@ -55,52 +54,66 @@ void TerminateProcess(int pid)
 {
     pcb_t *proc, *f_proc;
 
-    if (pid == 0) // pid == 0, bisogna terminare active_process (processo invocante), e i suoi figli
-    {
-        proc = active_process;
+    if (pid == 0)
+    { // pid == 0, bisogna terminare active_process (processo invocante), e i suoi figli
         f_proc = active_process;
+
+        // terminazione del padre
+        outChild(f_proc);       // outChild per eliminare il figlio dal padre
+        if (proc->p_semAdd < 0) // if semaphor < 0 deve essere incrementato (controllare su 3.9 del libro)
+        {
+            if (headBlocked(proc->p_semAdd) == NULL && notDevice(proc->p_semAdd)) // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
+            {
+                proc->p_semAdd++;
+                soft_blocked_count--;
+            }
+        }
+        // outProcQ(&all_proc_queue, f_proc);
+        process_count--;
+        proc = removeChild(f_proc);
     }
     else
-    { 
-     //stessa cosa dell'if ma con il processo del pid preso in input
-        proc = findProcess(pid);
+    { // stessa cosa dell'if ma con il processo del pid preso in input
         f_proc = findProcess(pid);
+
+        // terminazione del padre
+        outChild(f_proc);       // outChild per eliminare il figlio dal padre
+        // se è bloccato ad un semaforo
+        if (proc->p_semAdd < 0) // if semaphor < 0 deve essere incrementato (controllare su 3.9 del libro)
+        {
+            if (headBlocked(proc->p_semAdd) == NULL && notDevice(proc->p_semAdd)) // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
+            {
+                proc->p_semAdd++;
+                soft_blocked_count--;
+            }
+        }
+        // se è nella coda ready lo rimuove
+        outProcQ(&ready_queue, f_proc);
+        // outProcQ(&all_proc_queue, f_proc);
+        process_count--;
+        proc = removeChild(f_proc);
     }
 
+    // terminazione dei figli
     while (proc != NULL)
+    {
+        if (proc->p_semAdd < 0) // if semaphor < 0 deve essere incrementato (controllare su 3.9 del libro)
         {
-            outChild(proc);         // outChild per eliminare il figlio dal padre
-            if (proc->p_semAdd < 0) // if semaphor < 0 deve essere incrementato (controllare su 3.9 del libro)
-            {                                   
-                if (headBlocked(proc->p_semAdd) == NULL)        // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
-                {
-                    proc->p_semAdd++;
-                    soft_blocked_count--;
-                }
+            if (headBlocked(proc->p_semAdd) == NULL && notDevice(proc->p_semAdd)) // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
+            {
+                proc->p_semAdd++;
+                soft_blocked_count--;
             }
-            proc = NULL;
-            process_count--;
-            proc = removeChild(f_proc);
         }
+        // se è nella coda ready lo rimuove
+        outProcQ(&ready_queue, proc);
+        // outProcQ(&all_proc_queue, f_proc);
+        process_count--;
+        proc = removeChild(f_proc);
+    }
 
     scheduler();
 }
-
-
-pcb_PTR findProcess(int pid) {
-    struct list_head* current_process;
-    pcb_PTR pcb;
-
-    // list_for_each(current_process, &ready_queue) {
-    //     pcb = list_entry(current_process, pcb_PTR, p_list);
-    //     if (pcb->p_pid == pid) {
-    //         return pcb;
-    //     }
-    // }
-    // Processo non trovato
-    return NULL;
-}
-
 
 // decrementa il semaforo all'ind semaddr, se diventa < 0 il processo viene bloccato e si chiama lo scheduler
 void Passeren(int *semaddr)
@@ -241,7 +254,7 @@ int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
     // unsigned int status = *(unsigned int *)(cmdAddr + 0x8);
     // if (status == 5)
     //     return 0;
-    // else                     
+    // else
     //     return -1;
 
     BlockingExceptEnd();
@@ -254,7 +267,7 @@ int GetCPUTime()
 
     // return active_process->p_time + (time - timer_start);
     state_t *state = (state_t *)BIOSDATAPAGE;
-    state->reg_v0 = (int) (active_process->p_time + (time - timer_start)); 
+    state->reg_v0 = (int)(active_process->p_time + (time - timer_start));
 
     NonBlockingExceptEnd();
 }
@@ -272,7 +285,7 @@ int WaitForClock()
             PANIC(); // errore nei semafori
         }
     }
-    else 
+    else
     {
         PANIC();
     }
@@ -342,4 +355,41 @@ bool eqNS(nsd_t *a[], nsd_t *b[])
     }
 
     return res;
+}
+
+pcb_PTR findProcess(int pid)
+{
+    pcb_t *p, *first;
+
+    // è il proc attivo
+    if(active_process->p_pid == pid) return active_process;
+    
+    // è nella ready queue
+    p = first = removeProcQ(&ready_queue);
+    insertProcQ(&ready_queue, p);
+    if(p->p_pid == pid) return p;
+    while((p = removeProcQ(&ready_queue)) != NULL) {
+        insertProcQ(&ready_queue, p);
+        if(p->p_pid == pid) return p;
+        else if(p == first) break;
+    }
+
+    // è in un semaforo
+    // è un problema
+
+    // non esiste
+    return NULL;
+}
+
+int notDevice(int *semaddr)
+{
+    for(int i=0; i < 8; i++) {
+        if(&sem_dev_disk[i] == semaddr) return 1;
+        else if(&sem_dev_flash[i] == semaddr) return 1;
+        else if(&sem_dev_net[i] == semaddr) return 1;
+        else if(&sem_dev_printer[i] == semaddr) return 1;
+        else if(&sem_dev_terminal_r[i] == semaddr) return 1;
+        else if(&sem_dev_terminal_w[i] == semaddr) return 1;
+    }
+    return 0;
 }

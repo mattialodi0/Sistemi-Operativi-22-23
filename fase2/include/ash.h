@@ -9,7 +9,7 @@
 #include <pandos_const.h>
 
 
-/* insertBloked - inserisce il PCB puntato da p nella coda dei processi bloccati del semafori con chiave semAdd
+/* insertBloked - inserisce il PCB puntato da p nella coda dei processi bloccati del semaforo con chiave semAdd
 *   ritorna vero solo se il semaforo cercato non esiste e non è possibile allocarne uno nuovo */
  int insertBlocked(int *semAdd, pcb_t *p);
 

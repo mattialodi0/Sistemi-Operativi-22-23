@@ -1,8 +1,6 @@
 #include <interrupts.h>
 
 extern int debug_var;
-extern cpu_t timer_start;
-extern cpu_t exc_timer_start;
 
 void interruptHandler()
 {
