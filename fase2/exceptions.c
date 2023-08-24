@@ -35,7 +35,7 @@ void exceptionHandler()
     case 10:
     case 11:
     case 12:
-        debugE();
+        // debugE();
         ProgramTrapExceptionHandler();
         break;
     case 8:
