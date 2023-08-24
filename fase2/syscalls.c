@@ -261,21 +261,21 @@ int GetCPUTime()
 
 int WaitForClock()
 {
-    Passeren(&IT_sem);
-    // int *semaddr = &IT_sem;
-    // (*semaddr)--;
-    // if (*semaddr < 0)
-    // {
-    //     soft_blocked_count++;
-    //     if (insertBlocked(semaddr, active_process))
-    //     {
-    //         PANIC(); // errore nei semafori
-    //     }
-    // }
-    // else 
-    // {
-    //     PANIC();
-    // }
+    // Passeren(&IT_sem);
+    int *semaddr = &IT_sem;
+    if (*semaddr <= 0)
+    {
+        soft_blocked_count++;
+        (*semaddr)--;
+        if (insertBlocked(semaddr, active_process))
+        {
+            PANIC(); // errore nei semafori
+        }
+    }
+    else 
+    {
+        PANIC();
+    }
 
     BlockingExceptEnd();
 }

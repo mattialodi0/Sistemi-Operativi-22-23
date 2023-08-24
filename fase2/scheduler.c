@@ -51,7 +51,6 @@ void scheduler()
             else if (soft_blocked_count == 0)
             {
                 // deadlock detection
-                debugE();
                 PANIC();
             }
         }

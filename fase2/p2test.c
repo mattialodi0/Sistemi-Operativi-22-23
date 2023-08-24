@@ -298,7 +298,7 @@ void test() {
 // print("V1\n"); debug();
     SYSCALL(VERHOGEN, (int)&sem_startp2, 0, 0); /* V(sem_startp2)   */  // V sbloccante
 
-int i= 0;for(i;i<100000;i++) {int a=0;}  
+int i= 0;for(i;i<100000;i++) {;}  
 
 // print("V2\n"); debug();
     SYSCALL(VERHOGEN, (int)&sem_endp2, 0, 0); /* V(sem_endp2) (blocking V!)     */
@@ -460,8 +460,8 @@ void p3() {
     cpu_t1 = SYSCALL(GETTIME, 0, 0, 0);
 
     for (i = 0; i < CLOCKLOOP; i++) {
-debug1();
         SYSCALL(CLOCKWAIT, 0, 0, 0);
+debug1();
     }
     cpu_t2 = SYSCALL(GETTIME, 0, 0, 0);
 

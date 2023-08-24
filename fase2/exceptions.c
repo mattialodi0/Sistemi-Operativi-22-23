@@ -14,7 +14,7 @@ void exceptionHandler()
     exc_code = cause_reg & GETEXECCODE;
     exc_code >>= 2;
 
-    // debug_var = exc_code;
+    debug_var = exc_code;
     debugX();
 
     switch (exc_code)
@@ -35,6 +35,7 @@ void exceptionHandler()
     case 10:
     case 11:
     case 12:
+        debugE();
         ProgramTrapExceptionHandler();
         break;
     case 8:

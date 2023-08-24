@@ -119,8 +119,9 @@ void ITInterrupt()
 
     pcb_t *waked_proc;
     // sbloccare tutti i processi fermi al semaforo dello pseudo clock
-    while ((waked_proc = removeBlocked(&IT_sem)) != NULL)
+    while (headBlocked(&IT_sem) != NULL)
     {
+        waked_proc = removeBlocked(&IT_sem);
         insertProcQ(&ready_queue, waked_proc);
         soft_blocked_count--;
     }
@@ -131,11 +132,13 @@ void ITInterrupt()
     remove_time();
 
     // LDST per tornare il controllo al processo corrente
-    // if (!on_wait)
-    // {
+    if (!on_wait)
+    // if (process_count > 0 && soft_blocked_count > 0)
+    {
         state_t *state = (state_t *)BIOSDATAPAGE; // costante definita in umps
         LDST(state);
-    // }
+    }
+
 }
 
 void nonTimerInterrupt(unsigned int int_line_no, unsigned int dev_num)
