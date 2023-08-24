@@ -4,3 +4,4 @@ Progetto di sistemi operativi 22/23
 - errori in P e V in p2 
 - terminateProcess 
 - DoIO / nonTimerInterrupt 
+- timer CPU 
