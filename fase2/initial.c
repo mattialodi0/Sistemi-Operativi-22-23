@@ -26,6 +26,9 @@ cpu_t timer_start;
 // semaforo per lo pseudo clock
 int IT_sem; // da verificare se vada inizializzato a 0
 
+// tutti i proc
+struct list_head all_proc_queue;
+
 // array di semafori, uno per dispositivo
 // int sem_disp[DISPNUM];  un unico array
 int sem_dev_disk[8];
@@ -44,6 +47,7 @@ int main(void)
     process_count = 0;
     soft_blocked_count = 0;
     mkEmptyProcQ(&ready_queue);
+    mkEmptyProcQ(&all_proc_queue);
     active_process = NULL;
     pid_count = 1;
     IT_sem = 0;
@@ -79,6 +83,7 @@ int main(void)
     pcb_t *first_proc = allocPcb();
     process_count++;
     insertProcQ(&ready_queue, first_proc);
+    insertProcQ(&all_proc_queue, first_proc);
 
     // set dello stato
     // STST(&first_proc->p_s);

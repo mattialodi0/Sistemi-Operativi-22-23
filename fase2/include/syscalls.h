@@ -50,9 +50,16 @@ int GetChildren(int *children, int size);
 //confronta i namespaces, un campo alla volta, da implementare
 bool eqNS(nsd_t *a[], nsd_t *b[]);
 
+// trova un processo bloccato in un semaforo
 pcb_PTR findProcess(int pid);
 
-
+// terminazione di un'eccezione non bloccante
 void NonBlockingExceptEnd();
-
+// terminazione di un'eccezione bloccante
 void BlockingExceptEnd();
+
+// aggiornamento del tempo di uso della CPU
+void update_time();
+void update_time_exc(pcb_t * proc);
+// elimina il tempo usato nella gestione dell'eccezione da quello del proc
+void remove_time();

@@ -1,5 +1,6 @@
 #include <syscalls.h>
 
+extern struct list_head all_proc_queue;
 extern cpu_t timer_start;
 extern int pid_count;
 extern int debug_var;
@@ -18,6 +19,7 @@ int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
         new_proc->p_supportStruct = supportp; // assegno alla struttura di supporto il parametro in input
         process_count++;
         insertProcQ(&ready_queue, new_proc);   // inseriamo in coda il processo
+        insertProcQ(&all_proc_queue, new_proc); 
         insertChild(active_process, new_proc); // inseriamo new_proc come figlio di active_process
         new_proc->p_semAdd = NULL;
         new_proc->p_time = 0; // inizializzo il tempo a 0
@@ -53,51 +55,54 @@ int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
 // termina il processo indicato da pid insieme ai suoi figli
 void TerminateProcess(int pid)
 {
-    pcb_t *proc, *f_proc;
+    pcb_t *proc, f_proc;
 
     if (pid == 0) // pid == 0, bisogna terminare active_process (processo invocante), e i suoi figli
     {
         proc = active_process;
-        f_proc = active_process;
+        f_proc = *active_process;
     }
     else
     { 
      //stessa cosa dell'if ma con il processo del pid preso in input
         proc = findProcess(pid);
-        f_proc = findProcess(pid);
+        f_proc = *findProcess(pid);
     }
 
     while (proc != NULL)
         {
             outChild(proc);         // outChild per eliminare il figlio dal padre
-            if (proc->p_semAdd < 0) // if semaphor < 0 deve essere incrementato (controllare su 3.9 del libro)
+            if (*(proc->p_semAdd) < 0) // se semadd < 0 deve essere incrementato (controllare su 3.9 del libro)
             {                                   
                 if (headBlocked(proc->p_semAdd) == NULL)        // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
                 {
-                    proc->p_semAdd++;
+                    (*(proc->p_semAdd))++;
                     soft_blocked_count--;
                 }
             }
+            outProcQ(&all_proc_queue, proc);
             proc = NULL;
             process_count--;
-            proc = removeChild(f_proc);
+            proc = removeChild(&f_proc);
         }
+
+    remove_time();
 
     scheduler();
 }
 
 
 pcb_PTR findProcess(int pid) {
-    struct list_head* current_process;
-    pcb_PTR pcb;
+    // pcb_t *p, *first;
+    // p = first = removeProcQ(&all_proc_queue);
+    // insertProcQ(&all_proc_queue, p);
+    // if(p->p_pid == pid) return p;
 
-    // list_for_each(current_process, &ready_queue) {
-    //     pcb = list_entry(current_process, pcb_PTR, p_list);
-    //     if (pcb->p_pid == pid) {
-    //         return pcb;
-    //     }
+    // while((p = removeProcQ(&all_proc_queue)) != NULL) {
+    //     insertProcQ(&all_proc_queue, p);
+    //     if(p->p_pid == pid) return p;
+    //     else if(p == first) break;
     // }
-    // Processo non trovato
     return NULL;
 }
 
