@@ -460,8 +460,9 @@ void p3() {
     cpu_t1 = SYSCALL(GETTIME, 0, 0, 0);
 
     for (i = 0; i < CLOCKLOOP; i++) {
-        SYSCALL(CLOCKWAIT, 0, 0, 0);
 debug1();
+        SYSCALL(CLOCKWAIT, 0, 0, 0);
+debug2();
     }
     cpu_t2 = SYSCALL(GETTIME, 0, 0, 0);
 

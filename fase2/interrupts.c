@@ -132,12 +132,13 @@ void ITInterrupt()
     remove_time();
 
     // LDST per tornare il controllo al processo corrente
-    if (!on_wait)
     // if (process_count > 0 && soft_blocked_count > 0)
+    if (!on_wait)
     {
         state_t *state = (state_t *)BIOSDATAPAGE; // costante definita in umps
         LDST(state);
     }
+    else scheduler();
 
 }
 
