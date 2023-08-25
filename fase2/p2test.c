@@ -318,7 +318,7 @@ int i= 0;for(i;i<100000;i++) {;}
     
     SYSCALL(CREATEPROCESS, (int)&hp_p2state, (int)NULL, (int)NULL);
 
-    p4pid = SYSCALL(CREATEPROCESS, (int)&p4state, (int)NULL, (int)NULL); /* start p4     */
+    // p4pid = SYSCALL(CREATEPROCESS, (int)&p4state, (int)NULL, (int)NULL); /* start p4     */
 
     pFiveSupport.sup_exceptContext[GENERALEXCEPT].stackPtr = (int)p5Stack;
     pFiveSupport.sup_exceptContext[GENERALEXCEPT].status   = ALLOFF | IEPBITON | CAUSEINTMASK | TEBITON;
@@ -529,7 +529,6 @@ void p4() {
     PANIC(); /* PANIC            */
 }
 
-
 /* p5's program trap handler */
 void p5gen() {
     unsigned int exeCode = pFiveSupport.sup_exceptState[GENERALEXCEPT].cause;
@@ -591,6 +590,7 @@ void p5mm() {
     LDST(&(pFiveSupport.sup_exceptState[PGFAULTEXCEPT]));
 }
 
+// extern void TLBExceptionHandler();
 /* p5's SYS trap handler */
 void p5sys() {
     
@@ -619,7 +619,6 @@ void p5a() {
 
     p5MemLocation  = (memaddr *)0x80000000;
     *p5MemLocation = 42;
-    
 }
 
 /* second part of p5 - should be entered in user mode first time through */

@@ -9,7 +9,6 @@ int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
     pcb_t *new_proc = allocPcb(); // inizializza new_proc, allocPcb la mette == NULL se vuota, quindi va direttamente nell'else?
     if (new_proc != NULL)
     {
-        new_proc->p_parent = NULL; // Inizializzo tutti i campi del processo attivo a NULL/0
         INIT_LIST_HEAD(&new_proc->p_child);
         INIT_LIST_HEAD(&new_proc->p_sib);
         new_proc->p_pid = pid_count++;        // assegno il pid successivo al processo
@@ -17,10 +16,11 @@ int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
         new_proc->p_supportStruct = supportp; // assegno alla struttura di supporto il parametro in input
         process_count++;
         insertProcQ(&ready_queue, new_proc); // inseriamo in coda il processo
-        // insertProcQ(&all_proc_queue, new_proc);
+        
         insertChild(active_process, new_proc); // inseriamo new_proc come figlio di active_process
         new_proc->p_semAdd = NULL;
         new_proc->p_time = 0; // inizializzo il tempo a 0
+
         if (ns != NULL)
         {
             for (int i = 0; i < NS_TYPE_MAX; i++)
@@ -35,8 +35,7 @@ int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
                 new_proc->namespaces[i] = active_process->namespaces[i];
             }
         }
-// debug_var1 = new_proc->p_parent->p_pid; debug_var = new_proc->p_pid; debug();
-        // return new_proc->p_pid;
+
         state_t *state = (state_t *)BIOSDATAPAGE;
         state->reg_v0 = 0; // non ha senso ma è richiesto
         state->reg_v0 = new_proc->p_pid;
