@@ -358,7 +358,7 @@ int i= 0;for(i;i<100000;i++) {;}
     // SYSCALL(CREATEPROCESS, (int)&p11state, (int)NULL, (int)NULL); /* start p7		*/
     // SYSCALL(PASSEREN, (int)&sem_p11, 0, 0);
 
-for(i=0;i<10000;i++) {;}  
+for(i=0;i<100000;i++) {;}  
     print("p1 finishes OK -- TTFN\n");
     *((memaddr *)BADADDR) = 0; /* terminate p1 */
 
