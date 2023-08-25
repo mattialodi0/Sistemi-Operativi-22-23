@@ -52,9 +52,15 @@ int GetChildren(int *children, int size);
 //confronta i namespaces, un campo alla volta, da implementare
 bool eqNS(nsd_t *a[], nsd_t *b[]);
 
+// elimina un proc
+void kill(pcb_t *f_proc);
+
+// ritorna un ptr al processo di cui si ha il pid
 pcb_PTR findProcess(int pid);
 
+// ritorna 1 se il proc non è bloccato su un semaforo di un device
 int notDevice(int *semaddr);
+
 
 void NonBlockingExceptEnd();
 

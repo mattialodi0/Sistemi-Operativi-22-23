@@ -54,71 +54,26 @@ void TerminateProcess(int pid)
 {
     pcb_t *proc, *f_proc;
 
-    if(pid == 0) debug_var = active_process->p_pid;
-    else debug_char = pid;
+    if (pid == 0)
+        debug_var = active_process->p_pid;
+    else
+        debug_char = pid;
     debug1();
 
-    if (pid == 0)
-    { // pid == 0, bisogna terminare active_process (processo invocante), e i suoi figli
+    if (pid == 0)   // pid == 0, bisogna terminare active_process (processo invocante), e i suoi figli
+    { 
         f_proc = active_process;
-
-        // terminazione del padre
-        outChild(f_proc);       // outChild per eliminare il figlio dal padre
-        if (proc->p_semAdd < 0) // if semaphor < 0 deve essere incrementato (controllare su 3.9 del libro)
-        {
-            if (headBlocked(proc->p_semAdd) == NULL && notDevice(proc->p_semAdd)) // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
-            {
-                proc->p_semAdd++;
-                soft_blocked_count--;
-            }
-        }
-        // outProcQ(&all_proc_queue, f_proc);
-        process_count--;
-        proc = removeChild(f_proc);
     }
-    else
-    { // stessa cosa dell'if ma con il processo del pid preso in input
+    else            // stessa cosa dell'if ma con il processo del pid preso in input
+    { 
         f_proc = findProcess(pid);
-
-        // terminazione del padre
-        outChild(f_proc); // outChild per eliminare il figlio dal padre
-        // se è bloccato ad un semaforo
-        if (proc->p_semAdd < 0) // if semaphor < 0 deve essere incrementato (controllare su 3.9 del libro)
-        {
-            if (headBlocked(proc->p_semAdd) == NULL && notDevice(proc->p_semAdd)) // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
-            {
-                proc->p_semAdd++;
-                soft_blocked_count--;
-            }
-        }
-        // se è nella coda ready lo rimuove
-        outProcQ(&ready_queue, f_proc);
-        // outProcQ(&all_proc_queue, f_proc);
-        process_count--;
-        proc = removeChild(f_proc);
     }
 
-    // terminazione dei figli
-    while (proc != NULL)
-    {
-        debug2();
-        if (proc->p_semAdd < 0) // if semaphor < 0 deve essere incrementato (controllare su 3.9 del libro)
-        {
-            if (headBlocked(proc->p_semAdd) == NULL && notDevice(proc->p_semAdd)) // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
-            {
-                proc->p_semAdd++;
-                soft_blocked_count--;
-            }
-        }
-        // se è nella coda ready lo rimuove
-        outProcQ(&ready_queue, proc);
-        // outProcQ(&all_proc_queue, f_proc);
-        process_count--;
-        proc = removeChild(f_proc);
-    }
+    // terminazione ricorsiva
+    kill(f_proc);
 
-    if (pid != 0)       // se pid = 0 non ha senso togliere il tempo tanto il proc termina
-        remove_time(); 
+    if (pid != 0) // se pid = 0 non ha senso togliere il tempo tanto il proc termina
+        remove_time();
 
     scheduler();
 }
@@ -363,6 +318,28 @@ bool eqNS(nsd_t *a[], nsd_t *b[])
     }
 
     return res;
+}
+
+void kill(pcb_t *f_proc)
+{
+    outChild(f_proc);
+    if (f_proc->p_semAdd < 0) // if semaphor < 0 deve essere incrementato (controllare su 3.9 del libro)
+    {
+        if (headBlocked(f_proc->p_semAdd) == NULL && notDevice(f_proc->p_semAdd)) // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
+        {
+            f_proc->p_semAdd++;
+            soft_blocked_count--;
+        }
+    }
+    process_count--;
+
+    pcb_t *proc = removeChild(f_proc);
+    //chiamata ricorsiva su tutti i figli
+    while (proc != NULL)
+    {
+        kill(proc);
+        proc = removeChild(f_proc);
+    }
 }
 
 pcb_PTR findProcess(int pid)

@@ -153,7 +153,7 @@ void NonBlockingExceptEnd() {
     state_t *state = (state_t *)BIOSDATAPAGE;
     state->pc_epc += 4;
 
-    remove_time();
+    update_time();
 
     LDST(state);
 }
