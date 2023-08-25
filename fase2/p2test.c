@@ -298,7 +298,7 @@ void test() {
 // print("V1\n"); debug();
     SYSCALL(VERHOGEN, (int)&sem_startp2, 0, 0); /* V(sem_startp2)   */  // V sbloccante
 
-int i= 0;for(i;i<100000;i++) {;}  
+int i= 0;for(i;i<100000;i++) {;}    // solo per il debug();
 
 // print("V2\n"); debug();
     SYSCALL(VERHOGEN, (int)&sem_endp2, 0, 0); /* V(sem_endp2) (blocking V!)     */
@@ -341,24 +341,23 @@ int i= 0;for(i;i<100000;i++) {;}
 
     SYSCALL(PASSEREN, (int)&sem_blkp4, 0, 0); /* P(sem_blkp4)		*/
 
-    // /* now for a more rigorous check of process termination */
-    // for (p8inc = 0; p8inc < 4; p8inc++) {
-    //     /* Reset semaphores */ 
-    //     sem_blkp8 = 0;
-    //     sem_endp8 = 0;
-    //     for (int i = 0; i < NOLEAVES; i++) {
-    //         sem_endcreate[i] = 0;
-    //     }
+    /* now for a more rigorous check of process termination */
+    for (p8inc = 0; p8inc < 4; p8inc++) {
+        /* Reset semaphores */ 
+        sem_blkp8 = 0;
+        sem_endp8 = 0;
+        for (int i = 0; i < NOLEAVES; i++) {
+            sem_endcreate[i] = 0;
+        }
 
-    //     p8pid = SYSCALL(CREATEPROCESS, (int)&p8rootstate, (int)NULL, (int)NULL);
+        p8pid = SYSCALL(CREATEPROCESS, (int)&p8rootstate, (int)NULL, (int)NULL);
 
-    //     SYSCALL(PASSEREN, (int)&sem_endp8, 0, 0);
-    // }
+        SYSCALL(PASSEREN, (int)&sem_endp8, 0, 0);
+    }
 
-    // SYSCALL(CREATEPROCESS, (int)&p11state, (int)NULL, (int)NULL); /* start p7		*/
-    // SYSCALL(PASSEREN, (int)&sem_p11, 0, 0);
+    SYSCALL(CREATEPROCESS, (int)&p11state, (int)NULL, (int)NULL); /* start p7		*/
+    SYSCALL(PASSEREN, (int)&sem_p11, 0, 0);
 
-for(i=0;i<100000;i++) {;}  
     print("p1 finishes OK -- TTFN\n");
     *((memaddr *)BADADDR) = 0; /* terminate p1 */
 
