@@ -15,7 +15,7 @@ int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
         new_proc->p_s = *statep;              // assegno allo stato il parametro in input
         new_proc->p_supportStruct = supportp; // assegno alla struttura di supporto il parametro in input
         process_count++;
-        insertProcQ(&ready_queue, new_proc);   // inseriamo in coda il processo
+        insertProcQ(&ready_queue, new_proc); // inseriamo in coda il processo
         // insertProcQ(&all_proc_queue, new_proc);
         insertChild(active_process, new_proc); // inseriamo new_proc come figlio di active_process
         new_proc->p_semAdd = NULL;
@@ -54,6 +54,10 @@ void TerminateProcess(int pid)
 {
     pcb_t *proc, *f_proc;
 
+    if(pid == 0) debug_var = active_process->p_pid;
+    else debug_char = pid;
+    debug1();
+
     if (pid == 0)
     { // pid == 0, bisogna terminare active_process (processo invocante), e i suoi figli
         f_proc = active_process;
@@ -77,7 +81,7 @@ void TerminateProcess(int pid)
         f_proc = findProcess(pid);
 
         // terminazione del padre
-        outChild(f_proc);       // outChild per eliminare il figlio dal padre
+        outChild(f_proc); // outChild per eliminare il figlio dal padre
         // se è bloccato ad un semaforo
         if (proc->p_semAdd < 0) // if semaphor < 0 deve essere incrementato (controllare su 3.9 del libro)
         {
@@ -97,6 +101,7 @@ void TerminateProcess(int pid)
     // terminazione dei figli
     while (proc != NULL)
     {
+        debug2();
         if (proc->p_semAdd < 0) // if semaphor < 0 deve essere incrementato (controllare su 3.9 del libro)
         {
             if (headBlocked(proc->p_semAdd) == NULL && notDevice(proc->p_semAdd)) // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
@@ -111,6 +116,9 @@ void TerminateProcess(int pid)
         process_count--;
         proc = removeChild(f_proc);
     }
+
+    if (pid != 0)       // se pid = 0 non ha senso togliere il tempo tanto il proc termina
+        remove_time(); 
 
     scheduler();
 }
@@ -222,7 +230,7 @@ int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
     // ...
     // ritorna 0 o -1
 
-    // solo per print:
+    /* solo per print: */
     // P
     int *semaddr = &sem_dev_terminal_w[0];
     (*semaddr)--;
@@ -362,16 +370,21 @@ pcb_PTR findProcess(int pid)
     pcb_t *p, *first;
 
     // è il proc attivo
-    if(active_process->p_pid == pid) return active_process;
-    
+    if (active_process->p_pid == pid)
+        return active_process;
+
     // è nella ready queue
     p = first = removeProcQ(&ready_queue);
     insertProcQ(&ready_queue, p);
-    if(p->p_pid == pid) return p;
-    while((p = removeProcQ(&ready_queue)) != NULL) {
+    if (p->p_pid == pid)
+        return p;
+    while ((p = removeProcQ(&ready_queue)) != NULL)
+    {
         insertProcQ(&ready_queue, p);
-        if(p->p_pid == pid) return p;
-        else if(p == first) break;
+        if (p->p_pid == pid)
+            return p;
+        else if (p == first)
+            break;
     }
 
     // è in un semaforo
@@ -383,13 +396,20 @@ pcb_PTR findProcess(int pid)
 
 int notDevice(int *semaddr)
 {
-    for(int i=0; i < 8; i++) {
-        if(&sem_dev_disk[i] == semaddr) return 1;
-        else if(&sem_dev_flash[i] == semaddr) return 1;
-        else if(&sem_dev_net[i] == semaddr) return 1;
-        else if(&sem_dev_printer[i] == semaddr) return 1;
-        else if(&sem_dev_terminal_r[i] == semaddr) return 1;
-        else if(&sem_dev_terminal_w[i] == semaddr) return 1;
+    for (int i = 0; i < 8; i++)
+    {
+        if (&sem_dev_disk[i] == semaddr)
+            return 1;
+        else if (&sem_dev_flash[i] == semaddr)
+            return 1;
+        else if (&sem_dev_net[i] == semaddr)
+            return 1;
+        else if (&sem_dev_printer[i] == semaddr)
+            return 1;
+        else if (&sem_dev_terminal_r[i] == semaddr)
+            return 1;
+        else if (&sem_dev_terminal_w[i] == semaddr)
+            return 1;
     }
     return 0;
 }

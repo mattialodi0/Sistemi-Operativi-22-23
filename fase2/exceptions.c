@@ -14,7 +14,7 @@ void exceptionHandler()
     exc_code = cause_reg & GETEXECCODE;
     exc_code >>= 2;
 
-    debug_var = exc_code;
+    // debug_var = exc_code;
     debugX();
 
     switch (exc_code)
@@ -152,6 +152,9 @@ void syscallHandler(state_t state)
 void NonBlockingExceptEnd() {
     state_t *state = (state_t *)BIOSDATAPAGE;
     state->pc_epc += 4;
+
+    remove_time();
+
     LDST(state);
 }
 

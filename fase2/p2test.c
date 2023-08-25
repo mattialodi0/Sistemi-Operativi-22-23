@@ -320,7 +320,6 @@ int i= 0;for(i;i<100000;i++) {;}
 
     p4pid = SYSCALL(CREATEPROCESS, (int)&p4state, (int)NULL, (int)NULL); /* start p4     */
 
-debug();
     pFiveSupport.sup_exceptContext[GENERALEXCEPT].stackPtr = (int)p5Stack;
     pFiveSupport.sup_exceptContext[GENERALEXCEPT].status   = ALLOFF | IEPBITON | CAUSEINTMASK | TEBITON;
     pFiveSupport.sup_exceptContext[GENERALEXCEPT].pc       = (memaddr)p5gen;
@@ -359,6 +358,7 @@ debug();
     // SYSCALL(CREATEPROCESS, (int)&p11state, (int)NULL, (int)NULL); /* start p7		*/
     // SYSCALL(PASSEREN, (int)&sem_p11, 0, 0);
 
+for(i=0;i<10000;i++) {;}  
     print("p1 finishes OK -- TTFN\n");
     *((memaddr *)BADADDR) = 0; /* terminate p1 */
 
@@ -513,7 +513,6 @@ void p4() {
     /* a V(sem_synp4). the new process will block at the P(sem_blkp4),*/
     /* and eventually, the parent p4 will terminate, killing  */
     /* off both p4's.                                         */
-
     p4state.reg_sp -= QPAGE; /* give another page  */
 
     p4pid = SYSCALL(CREATEPROCESS, (int)&p4state, (int)NULL, 0); /* start a new p4    */
