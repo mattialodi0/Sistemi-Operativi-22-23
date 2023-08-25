@@ -6,3 +6,4 @@ Progetto di sistemi operativi 22/23
 - createProcess
 - DoIO / nonTimerInterrupt 
 - timer CPU 
+- eqNS 
