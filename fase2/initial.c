@@ -79,21 +79,12 @@ int main(void)
     pcb_t *first_proc = allocPcb();
     process_count++;
     insertProcQ(&ready_queue, first_proc);
-
-    // interrupt abilitati
-    first_proc->p_s.status |= IEPON;
-    first_proc->p_s.status |= IMON;
-    // PLT abilitato
-    first_proc->p_s.status |= TEBITON;
-    // kernel mode abilitata
-    // first_proc->p_s.status &= ~USERPON; //lo è già
+    STST(&first_proc->p_s);
+    first_proc->p_s.status |= IEPON | IMON | TEBITON;
 
     // first_proc->p_s.status |= 0x00400000; //cambia come vengono gestite le eccezioni
 
-    first_proc->p_s.pc_epc = (memaddr)test;
-    first_proc->p_s.reg_t9 = (memaddr)test;
-
-    //    first_proc->p_s.entry_hi = 0;      //pid forse
+    first_proc->p_s.reg_t9 = first_proc->p_s.pc_epc = (memaddr)test;
 
     RAMTOP(first_proc->p_s.reg_sp);     // setta sp a RAMTOP
     first_proc->p_supportStruct = NULL; // settata la struttura di supporto a NULL

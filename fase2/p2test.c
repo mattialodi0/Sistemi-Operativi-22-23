@@ -329,9 +329,9 @@ int i= 0;for(i;i<100000;i++) {;}
 
     SYSCALL(CREATEPROCESS, (int)&p5state, (int)&(pFiveSupport), (int)NULL); /* start p5     */
 
-    // SYSCALL(CREATEPROCESS, (int)&p6state, (int)NULL, (int)NULL); /* start p6		*/
+    SYSCALL(CREATEPROCESS, (int)&p6state, (int)NULL, (int)NULL); /* start p6		*/
 
-    // SYSCALL(CREATEPROCESS, (int)&p7state, (int)NULL, (int)NULL); /* start p7		*/
+    SYSCALL(CREATEPROCESS, (int)&p7state, (int)NULL, (int)NULL); /* start p7		*/
 
     // p9pid = SYSCALL(CREATEPROCESS, (int)&p9state, (int)NULL, (int)NULL); /* start p7		*/
 
@@ -530,19 +530,21 @@ void p4() {
 }
 
 
-
 /* p5's program trap handler */
 void p5gen() {
     unsigned int exeCode = pFiveSupport.sup_exceptState[GENERALEXCEPT].cause;
     exeCode              = (exeCode & CAUSEMASK) >> 2;
+    
     switch (exeCode) {
         case BUSERROR:
+        debug();
             print("Bus Error (as expected): Access non-existent memory\n");
             pFiveSupport.sup_exceptState[GENERALEXCEPT].pc_epc = (memaddr)p5a; /* Continue with p5a() */
             pFiveSupport.sup_exceptState[GENERALEXCEPT].reg_t9 = (memaddr)p5a; /* Continue with p5a() */
             break;
 
         case RESVINSTR:
+        debug1();
             print("privileged instruction\n");
             /* return in kernel mode */
             pFiveSupport.sup_exceptState[GENERALEXCEPT].pc_epc = (memaddr)p5b; /* Continue with p5b() */
@@ -552,6 +554,7 @@ void p5gen() {
             break;
 
         case ADDRERROR:
+        debug2();
             print("Address Error (as expected): non-kuseg access w/KU=1\n");
             /* return in kernel mode */
             pFiveSupport.sup_exceptState[GENERALEXCEPT].pc_epc = (memaddr)p5b; /* Continue with p5b() */
