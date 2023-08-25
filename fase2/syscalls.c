@@ -1,6 +1,7 @@
 #include <syscalls.h>
 
 extern int debug_var;
+extern int debug_var1;
 extern int debug_char;
 
 int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
@@ -34,7 +35,7 @@ int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
                 new_proc->namespaces[i] = active_process->namespaces[i];
             }
         }
-
+// debug_var1 = new_proc->p_parent->p_pid; debug_var = new_proc->p_pid; debug();
         // return new_proc->p_pid;
         state_t *state = (state_t *)BIOSDATAPAGE;
         state->reg_v0 = 0; // non ha senso ma è richiesto
@@ -54,11 +55,11 @@ void TerminateProcess(int pid)
 {
     pcb_t *proc, *f_proc;
 
-    if (pid == 0)
-        debug_var = active_process->p_pid;
-    else
-        debug_char = pid;
-    debug1();
+    // if (pid == 0)
+    //     debug_var = active_process->p_pid;
+    // else
+    //     debug_char = pid;
+    // debug1();
 
     if (pid == 0)   // pid == 0, bisogna terminare active_process (processo invocante), e i suoi figli
     { 
