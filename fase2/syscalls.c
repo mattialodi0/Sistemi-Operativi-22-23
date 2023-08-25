@@ -16,7 +16,7 @@ int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
         new_proc->p_supportStruct = supportp; // assegno alla struttura di supporto il parametro in input
         process_count++;
         insertProcQ(&ready_queue, new_proc); // inseriamo in coda il processo
-        
+
         insertChild(active_process, new_proc); // inseriamo new_proc come figlio di active_process
         new_proc->p_semAdd = NULL;
         new_proc->p_time = 0; // inizializzo il tempo a 0
@@ -60,12 +60,12 @@ void TerminateProcess(int pid)
     //     debug_char = pid;
     // debug1();
 
-    if (pid == 0)   // pid == 0, bisogna terminare active_process (processo invocante), e i suoi figli
-    { 
+    if (pid == 0) // pid == 0, bisogna terminare active_process (processo invocante), e i suoi figli
+    {
         f_proc = active_process;
     }
-    else            // stessa cosa dell'if ma con il processo del pid preso in input
-    { 
+    else // stessa cosa dell'if ma con il processo del pid preso in input
+    {
         f_proc = findProcess(pid);
     }
 
@@ -269,9 +269,22 @@ support_t *GetSupportData()
 // ritorna il pid del chiamante
 int GetProcessId(int parent)
 {
-    // return active_process->p_pid;
-    state_t *state = (state_t *)BIOSDATAPAGE;
-    state->reg_v0 = active_process->p_pid;
+    if (parent)
+    {
+        if (eqNS(active_process->namespaces, active_process->p_parent->namespaces))
+        {
+            state_t *state = (state_t *)BIOSDATAPAGE;
+            state->reg_v0 = active_process->p_parent->p_pid;
+        }
+        else {
+            state_t *state = (state_t *)BIOSDATAPAGE;
+            state->reg_v0 = 0;
+        }
+    }
+    else {
+        state_t *state = (state_t *)BIOSDATAPAGE;
+        state->reg_v0 = active_process->p_pid;
+    }
 
     NonBlockingExceptEnd();
 }
@@ -310,14 +323,15 @@ int GetChildren(int *children, int size)
 // confronta i namespaces, un campo alla volta, da implementare
 bool eqNS(nsd_t *a[], nsd_t *b[])
 {
-    bool res = true;
-    for (int i = 0; i < MAXPROC; i++)
-    {
-        if (a[i] != b[i])
-            res = false;
-    }
+    // bool res = true;
+    // for (int i = 0; i < MAXPROC; i++)
+    // {
+    //     if (a[i] != b[i])
+    //         res = false;
+    // }
 
-    return res;
+    // return res;
+    return 1;
 }
 
 void kill(pcb_t *f_proc)
@@ -334,7 +348,7 @@ void kill(pcb_t *f_proc)
     process_count--;
 
     pcb_t *proc = removeChild(f_proc);
-    //chiamata ricorsiva su tutti i figli
+    // chiamata ricorsiva su tutti i figli
     while (proc != NULL)
     {
         kill(proc);
