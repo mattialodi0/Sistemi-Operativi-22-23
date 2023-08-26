@@ -2,8 +2,8 @@
 #include <syscalls.h>
 #include <interrupts.h>
 
-extern pcb_t *active_process;   
-
+extern volatile pcb_t *active_process;   
+extern volatile cpu_t timer_start;
 
 void exceptionHandler();
 

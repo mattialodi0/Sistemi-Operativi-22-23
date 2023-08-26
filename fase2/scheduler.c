@@ -9,9 +9,8 @@
 // se il process count è > 0 e il Soft-Block Count > 0 va in Wait State
 // controllo se process count > 0 e Soft-Block Count == 0 => deadlock. ???. Richiamare PANIC BIOS.
 extern int debug_var;
-extern cpu_t timer_start;
 
-int on_wait = false;
+volatile int on_wait = false;
 
 void scheduler()
 {  

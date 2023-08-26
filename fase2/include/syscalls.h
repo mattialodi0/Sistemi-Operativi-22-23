@@ -1,19 +1,19 @@
 #include <lib_def.h>
 #include <scheduler.h>
 
-extern struct list_head ready_queue; 
-extern pcb_t *active_process;   
-extern int process_count;
-extern int soft_blocked_count;
-extern int IT_sem;
-extern cpu_t timer_start;
-extern int pid_count;
-extern int sem_dev_disk[8];
-extern int sem_dev_flash[8];
-extern int sem_dev_net[8];
-extern int sem_dev_printer[8];
-extern int sem_dev_terminal_r[8];
-extern int sem_dev_terminal_w[8];
+extern volatile struct list_head ready_queue; 
+extern volatile pcb_t *active_process;   
+extern volatile int process_count;
+extern volatile int soft_blocked_count;
+extern volatile int IT_sem;
+extern volatile cpu_t timer_start;
+extern volatile int pid_count;
+extern volatile int sem_dev_disk[8];
+extern volatile int sem_dev_flash[8];
+extern volatile int sem_dev_net[8];
+extern volatile int sem_dev_printer[8];
+extern volatile int sem_dev_terminal_r[8];
+extern volatile int sem_dev_terminal_w[8];
 
 
 // crea un nuovo processo come figlio del chiamante
