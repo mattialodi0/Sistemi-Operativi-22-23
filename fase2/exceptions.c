@@ -15,7 +15,7 @@ void exceptionHandler()
     exc_code = cause_reg & GETEXECCODE;
     exc_code >>= 2;
 
-    debug_var = exc_code;
+    // debug_var = exc_code;
     debugX();
 
     switch (exc_code)
@@ -99,8 +99,8 @@ void syscallHandler(state_t state)
     }
 
     // i parametri sono presi dai registri e castati
-    unsigned int v0;
-    int v1, v2, v3; // forse unsigned int
+    unsigned int v0=0;
+    int v1=0, v2=0, v3=0; // forse unsigned int
     v0 = state.reg_a0;
     v1 = state.reg_a1;
     v2 = state.reg_a2;
@@ -117,10 +117,10 @@ void syscallHandler(state_t state)
         TerminateProcess(v1);
         break;
     case PASSEREN:
-        Passeren((int *)v1);
+        Passeren((int *)v1, v3);
         break;
     case VERHOGEN:
-        Verhogen((int *)v1);
+        Verhogen((int *)v1, v3);
         break;
     case DOIO:
         DoIO((unsigned int *)v1, (unsigned int *)v2);

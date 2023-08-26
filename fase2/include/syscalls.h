@@ -23,10 +23,10 @@ int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns);
 void TerminateProcess(int pid);
 
 //decrementa il semaforo all'ind semaddr, se diventa < 0 il processo viene bloccato e si chiama lo scheduler
-void Passeren(int *semaddr);
+void Passeren(int *semaddr, int i);
 
 //incrementa il semaforo all'ind semaddr, se diventa > 0 il processo viene messo nella coda ready
-void Verhogen(int *semaddr);
+void Verhogen(int *semaddr, int i);
 
 // effettua un'operazione di I/O
 int DoIO(unsigned *cmdAddr, unsigned int *cmdValues);

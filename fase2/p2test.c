@@ -295,12 +295,12 @@ void test() {
 
     print("p2 was started\n");
 
-print("V1\n"); debug();
+print("V1\n");
     SYSCALL(VERHOGEN, (int)&sem_startp2, 0, 0); /* V(sem_startp2)   */  // V sbloccante
 
 // int i= 0;for(i;i<100000;i++) {;}    // solo per il debug();
 
-print("V2\n"); debug();
+print("V2\n");
     SYSCALL(VERHOGEN, (int)&sem_endp2, 0, 0); /* V(sem_endp2) (blocking V!)     */
 
     /* make sure we really blocked */
@@ -373,7 +373,7 @@ void p2() {
     cpu_t now1, now2;     /* times of day        */
     cpu_t cpu_t1, cpu_t2; /* cpu time used       */
 
-print("P1\n"); debug();
+print("P1\n");
     SYSCALL(PASSEREN, (int)&sem_startp2, 0, 0); /* P(sem_startp2)   */ // P bloccante
 
     print("p2 starts\n");
@@ -390,8 +390,8 @@ print("P1\n"); debug();
     }
     /* V, then P, all of the semaphores in the s[] array */
     for (i = 0; i <= MAXSEM; i++) {
-        SYSCALL(VERHOGEN, (int)&s[i], 0, 0); /* V(S[I]) */
-        SYSCALL(PASSEREN, (int)&s[i], 0, 0); /* P(S[I]) */
+        SYSCALL(VERHOGEN, (int)&s[i], 0, 1); /* V(S[I]) */
+        SYSCALL(PASSEREN, (int)&s[i], 0, 1); /* P(S[I]) */
         if (s[i] != 0) {
             print("error: p2 bad v/p pairs\n");
         }
@@ -424,7 +424,7 @@ print("P1\n"); debug();
 
     p1p2synch = 1; /* p1 will check this */
 
-print("P2\n"); debug();
+print("P2\n");
     SYSCALL(PASSEREN, (int)&sem_endp2, 0, 0); /* P(sem_endp2)    unblocking P ! */
 
     SYSCALL(TERMPROCESS, 0, 0, 0); /* terminate p2 */

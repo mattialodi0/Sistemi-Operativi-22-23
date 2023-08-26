@@ -20,9 +20,7 @@ void interruptHandler()
     // else if((*addr5) > 0) debug_var = 6;
     // else if((*addr6) > 0) debug_var = 6;
     // else if((*addr7) > 0) debug_var = 7;
-    // debug_var = cause;
-    debugInt();
-
+    
     // per trovare anche il numero del device
     if ((cause & 1) == 1)
     {
@@ -61,6 +59,9 @@ void interruptHandler()
         line = 7;
         dev_num = find_dev_num(0x10000040 + 0x10);
     }
+
+    debug_var = line;
+    debugInt();
 
     // in caso di più interrupt si risolve quello con priorità più alta (switch)
     switch (line)
