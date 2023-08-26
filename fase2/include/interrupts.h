@@ -1,11 +1,11 @@
 #include <lib_def.h>
 #include <syscalls.h>
 
-extern volatile struct list_head ready_queue; 
-extern volatile pcb_t *active_process;   
-extern volatile int IT_sem;
-extern volatile cpu_t timer_start;
-extern volatile cpu_t exc_timer_start;
+extern struct list_head ready_queue; 
+extern pcb_t *active_process;   
+extern int IT_sem;
+extern cpu_t timer_start;
+extern cpu_t exc_timer_start;
 
 void interruptHandler();
 

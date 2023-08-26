@@ -6,34 +6,34 @@ extern void uTLB_RefillHandler();
 extern void exceptionHandler();
 
 // processi vivi
-volatile int process_count;
+int process_count;
 
 // processi bloccati
-volatile int soft_blocked_count;
+int soft_blocked_count;
 
 // processi ready
-volatile struct list_head ready_queue;
+struct list_head ready_queue;
 
 // puntatore al proc attivo
-volatile pcb_t *active_process;
+pcb_t *active_process;
 
 // contatore di pid usato in exeptions.c
-volatile int pid_count;
+int pid_count;
 
 // tempo di inizio del quanto di un proc
-volatile cpu_t timer_start;
+cpu_t timer_start;
 
 // semaforo per lo pseudo clock
-volatile int IT_sem; // da verificare se vada inizializzato a 0
+int IT_sem; // da verificare se vada inizializzato a 0
 
 // array di semafori, uno per dispositivo
 // int sem_disp[DISPNUM];  un unico array
-volatile int sem_dev_disk[8];
-volatile int sem_dev_flash[8];
-volatile int sem_dev_net[8];
-volatile int sem_dev_printer[8];
-volatile int sem_dev_terminal_r[8];
-volatile int sem_dev_terminal_w[8];
+int sem_dev_disk[8];
+int sem_dev_flash[8];
+int sem_dev_net[8];
+int sem_dev_printer[8];
+int sem_dev_terminal_r[8];
+int sem_dev_terminal_w[8];
 
 int debug_var = 0;
 int debug_var1 = 0;

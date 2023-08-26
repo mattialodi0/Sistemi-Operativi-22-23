@@ -3,7 +3,7 @@
 
 extern int debug_var;
 
-cpu_t volatile exc_timer_start;
+cpu_t exc_timer_start;
 
 void exceptionHandler()
 {

@@ -81,66 +81,58 @@ void TerminateProcess(int pid)
 // decrementa il semaforo all'ind semaddr, se diventa < 0 il processo viene bloccato e si chiama lo scheduler
 void Passeren(int *semaddr)
 {
-    if (*semaddr <= 0)
+    if (*semaddr == 0)      // blocca il proc
     {
         soft_blocked_count++;
         if (insertBlocked(semaddr, active_process))
         {
             PANIC(); // errore nei semafori
         }
-        (*semaddr)--;
         BlockingExceptEnd(semaddr);
     }
-    else if (*semaddr >= 1)
+    else
     {
         pcb_t *waked_proc = removeBlocked(semaddr);
-        if (waked_proc != NULL)
+        if (waked_proc != NULL)     // sblocca un proc
         {
             // wakeup proc
             insertProcQ(&ready_queue, waked_proc);
             soft_blocked_count--;
-            (*semaddr)--;
         }
-        else
+        else                // decrementa il valore del semaforo
         {
             (*semaddr)--;
         }
         NonBlockingExceptEnd();
     }
-    else
-        PANIC();
 }
 
 // incrementa il semaforo all'ind semaddr, se diventa >= 0 il processo viene messo nella coda ready
 void Verhogen(int *semaddr)
 {
-    if (*semaddr >= 1)
+    if (*semaddr == 1)      // blocca il proc
     {
         soft_blocked_count++;
         if (insertBlocked(semaddr, active_process))
         {
             PANIC(); // errore nei semafori
         }
-        (*semaddr)++;
         BlockingExceptEnd();
     }
-    else if (*semaddr <= 0)
+    else 
     {
         pcb_t *waked_proc = removeBlocked(semaddr);
-        if (waked_proc != NULL)
+        if (waked_proc != NULL)     // sblocca un proc
         {
             insertProcQ(&ready_queue, waked_proc);
             soft_blocked_count--;
-            (*semaddr)++;
         }
-        else
+        else                // incrementa il valore del semaforo
         {
             (*semaddr)++;
         }
         NonBlockingExceptEnd();
     }
-    else
-        PANIC();
 }
 
 /*

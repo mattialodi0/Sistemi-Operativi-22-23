@@ -384,7 +384,6 @@ print("P1\n"); debug();
         print("Inconsistent process id for p2!\n");
         PANIC();
     }
-    
     /* initialize all semaphores in the s[] array */
     for (i = 0; i <= MAXSEM; i++) {
         s[i] = 0;
