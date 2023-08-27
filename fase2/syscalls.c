@@ -72,8 +72,7 @@ void TerminateProcess(int pid)
     // terminazione ricorsiva
     kill(f_proc);
 
-    if (pid != 0) // se pid = 0 non ha senso togliere il tempo tanto il proc termina
-        remove_time();
+    update_time();
 
     scheduler();
 }
@@ -85,7 +84,6 @@ void Passeren(int *semaddr, int i)
 
     if (*semaddr == 0)      // blocca il proc
     {
-        if(i) {debug();}
         soft_blocked_count++;
         if (insertBlocked(semaddr, active_process))
         {
@@ -98,13 +96,11 @@ void Passeren(int *semaddr, int i)
         pcb_t *waked_proc = removeBlocked(semaddr);
         if (waked_proc != NULL)     // sblocca un proc
         {
-            if(i) {debug1();}
             insertProcQ(&ready_queue, waked_proc);
             soft_blocked_count--;
         }
         else                // decrementa il valore del semaforo
         {
-            if(i) {debug2();}
             (*semaddr)--;
         }
         NonBlockingExceptEnd();
@@ -118,7 +114,6 @@ void Verhogen(int *semaddr, int i)
 
     if (*semaddr == 1)      // blocca il proc
     {
-        if(i) {debug3();}
         soft_blocked_count++;
         if (insertBlocked(semaddr, active_process))
         {
@@ -131,13 +126,11 @@ void Verhogen(int *semaddr, int i)
         pcb_t *waked_proc = removeBlocked(semaddr);
         if (waked_proc != NULL)     // sblocca un proc
         {
-            if(i) {debug_var = (int)waked_proc->p_semAdd; debug_var1 = (int)semaddr; debug4();}
             insertProcQ(&ready_queue, waked_proc);
             soft_blocked_count--;
         }
         else                // incrementa il valore del semaforo
         {
-            if(i) {debug5();}
             (*semaddr)++;
         }
         NonBlockingExceptEnd();
@@ -291,7 +284,8 @@ int GetChildren(int *children, int size)
             i++;
     }*/
 
-    return n;
+    // return n;
+    NonBlockingExceptEnd();
 }
 // qualcosa non torna
 
@@ -355,6 +349,7 @@ pcb_PTR findProcess(int pid)
 
     // è in un semaforo
     // è un problema
+    // ????????????????????????????????????????????????????????????????????????????????????????????????????????
 
     // non esiste
     return NULL;
@@ -378,4 +373,22 @@ int notDevice(int *semaddr)
             return 1;
     }
     return 0;
+}
+
+void NonBlockingExceptEnd() {
+    state_t *state = (state_t *)BIOSDATAPAGE;
+    state->pc_epc += 4;
+
+    LDST(state);
+}
+
+void BlockingExceptEnd() {
+    state_t *state = (state_t *)BIOSDATAPAGE;
+    state->pc_epc += 4;
+    active_process->p_s = *state;
+
+    // aggiornamento del tempo di uso della CPU
+    update_time();
+
+    scheduler();
 }

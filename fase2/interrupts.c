@@ -10,17 +10,6 @@ void interruptHandler()
     cause &= 0x0000FF00; // maschera per  avere IP
     cause >>= 8;
 
-    // int *addr3 = (int*) 0x10000040;
-    // int *addr4 = (int*) (0x10000040 + 0x04);
-    // int *addr5 = (int*) (0x10000040 + 0x08);
-    // int *addr6 = (int*) (0x10000040 + 0x0C);
-    // int *addr7 = (int*) (0x10000040 + 0x10);
-    // if((*addr3) > 0) debug_var = 3;
-    // else if((*addr4) > 0) debug_var = 4;
-    // else if((*addr5) > 0) debug_var = 6;
-    // else if((*addr6) > 0) debug_var = 6;
-    // else if((*addr7) > 0) debug_var = 7;
-    
     // per trovare anche il numero del device
     if ((cause & 1) == 1)
     {
@@ -60,7 +49,7 @@ void interruptHandler()
         dev_num = find_dev_num(0x10000040 + 0x10);
     }
 
-    debug_var = line;
+    // debug_var = line;
     debugInt();
 
     // in caso di più interrupt si risolve quello con priorità più alta (switch)
@@ -183,18 +172,19 @@ void nonTimerInterrupt(unsigned int int_line_no, unsigned int dev_num)
         // mettere lo status code nel reg. v0 del pcb del processo sbloccato
         proc->p_s.reg_v0 = status_code;
 
-        update_time_exc(proc);
         // wakeup proc
         insertProcQ(&ready_queue, proc);
         soft_blocked_count--;
     }
 
+    update_time_proc(proc);
     remove_time();
 
     // LDST per tornare il controllo al processo corrente
     state_t *state = (state_t *)BIOSDATAPAGE;
     LDST(state);
 }
+
 extern int * mem;
 void nonTimerInterruptT(unsigned int int_line_no, unsigned int dev_num)
 {
@@ -226,7 +216,6 @@ void nonTimerInterruptT(unsigned int int_line_no, unsigned int dev_num)
             proc->p_s.reg_v0 = -1;
         mem[0] = status_code & 0x000000FF;
 
-        update_time_exc(proc);
         // wakeup proc
         insertProcQ(&ready_queue, proc);
         soft_blocked_count--;
@@ -234,11 +223,13 @@ void nonTimerInterruptT(unsigned int int_line_no, unsigned int dev_num)
 
     if (on_wait)
     {
+        update_time_proc(proc);
         remove_time();
         scheduler();
     }
     else
     {
+        update_time_proc(proc);
         remove_time();
         state_t *state = (state_t *)BIOSDATAPAGE; // costante definita in umps
         LDST(state);
@@ -279,14 +270,14 @@ void update_time() {
     active_process->p_time += (time - timer_start);
 }
 
-void update_time_exc(pcb_t * proc) {    // dovrebbero servire ma funziona solo senza
-    // cpu_t time;
-    // STCK(time);
-    // proc->p_time += (time - exc_timer_start);
+void update_time_proc(pcb_t * proc) {
+    cpu_t time;
+    STCK(time);
+    proc->p_time += (time - exc_timer_start);
 }
 
 void remove_time() {
-    // cpu_t time;
-    // timer_start += (time - exc_timer_start);
-    // // active_process->p_time -= (time - exc_timer_start);
+    cpu_t time;
+    STCK(time);
+    active_process->p_time -= (time - exc_timer_start);
 }

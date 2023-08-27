@@ -145,23 +145,3 @@ void syscallHandler(state_t state)
         break;
     }
 }
-
-void NonBlockingExceptEnd() {
-    state_t *state = (state_t *)BIOSDATAPAGE;
-    state->pc_epc += 4;
-
-    update_time();
-
-    LDST(state);
-}
-
-void BlockingExceptEnd() {
-    state_t *state = (state_t *)BIOSDATAPAGE;
-    state->pc_epc += 4;
-    active_process->p_s = *state;
-
-    // aggiornamento del tempo di uso della CPU
-    update_time();
-
-    scheduler();
-}
