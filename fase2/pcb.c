@@ -4,7 +4,6 @@ HIDDEN struct list_head pcbFree_h;      /*lista dei pcb liberi o inutilizzati*/
 HIDDEN pcb_t pcbFree_table[MAXPROC];    /*array di pcb con dimensione massima MAXPROC*/
 
 
-/*Inizializza la lista pcbFree_h in modo da contenere gli elementi della pcbFree_table*/
 void initPcbs(){
     INIT_LIST_HEAD(&pcbFree_h);
     int i=0;
@@ -16,13 +15,11 @@ void initPcbs(){
 }
 
 
-/*Inserisce il pcb puntato da p nella lista pcbFree_h*/
 void freePcb(pcb_t *p){
     list_add(&p->p_list, &pcbFree_h);
 }
 
 
-/*Rimuove un elemento dalla pcbFree_h e restituisce l'elemento rimosso*/
 pcb_t *allocPcb(){
     if (list_empty(&pcbFree_h) == 1){       /*Se la pcbFree_h è vuota ritorno NULL*/
         return NULL;
@@ -42,25 +39,21 @@ pcb_t *allocPcb(){
 }
 
 
-/*Crea una lista di pcb inizializzandola come lista vuota*/
 void mkEmptyProcQ(struct list_head *head){
     INIT_LIST_HEAD(head);
 }
 
 
-/*Se la lista puntata da head è vuota restituisce TRUE, altrimenti FALSE*/
 int emptyProcQ(struct list_head *head){
     return (list_empty(head));      /*restituisco list_empty(head) che ritorna TRUE se lista presa in input è vuota, FALSE altrimenti*/
 }
 
 
-/*Inserisce l'elemento puntato da p nella coda dei processi puntata da head*/
 void insertProcQ(struct list_head *head, pcb_t *p){
     list_add_tail(&p->p_list, head);
 }
 
 
-/*Restituisce l'elemento di testa della coda dei processi puntata da head senza rimuoverlo*/
 pcb_t *headProcQ(struct list_head *head){
     if(list_empty(head) == 1){                                   /*Se head è vuota restituisco NULL*/
         return NULL;
@@ -71,7 +64,6 @@ pcb_t *headProcQ(struct list_head *head){
     } 
 }
 
-/*Rimuove il primo elemento della coda dei processi puntata da head*/
 pcb_t *removeProcQ(struct list_head *head){
     if(list_empty(head) == 1){                                      /*Se head è vuota restituisco NULL*/
         return NULL;
@@ -84,7 +76,6 @@ pcb_t *removeProcQ(struct list_head *head){
 }
 
 
-/*Rimuove il pcb puntato da p dalla coda dei processi puntata da head*/
 pcb_t *outProcQ(struct list_head *head, pcb_t *p){
     if (list_empty(head) == 1){     /*Se head è vuota restituisco NULL*/
         return NULL;
@@ -104,20 +95,18 @@ pcb_t *outProcQ(struct list_head *head, pcb_t *p){
 }
 
 
-/*Se il pcb puntato da p non ha figli restituisce TRUE, altrimenti FALSE*/
+
 int emptyChild(pcb_t *p){
     return (list_empty(&p->p_child));               /*Verifico tramite list_empty se il pcb puntato da p ha figli o meno*/
 }
 
 
-/*Inserisce il pcb puntato da p come figlio del pcb puntato da prnt*/
 void insertChild(pcb_t *prnt, pcb_t *p){
     p->p_parent = prnt;                             /*inizializzo prnt come parent per l'aggiunta successiva dei figli*/
     list_add_tail(&p->p_sib, &prnt->p_child);       /*aggiungo il pcb puntato da p come figlio del pcb puntato da prnt*/
 }
 
 
-/*Rimuove il primo figlio del pcb puntato da p*/
 pcb_t *removeChild(pcb_t *p){
     if (list_empty(&p->p_child) == 1){          /*Se p non ha figli restituisco NULL*/
         return NULL;
@@ -131,8 +120,6 @@ pcb_t *removeChild(pcb_t *p){
 }
 
 
-
-/*Rimuove il pcb puntato da p dalla lista dei figli del padre*/
 pcb_t *outChild(pcb_t *p){
     if(p->p_parent == NULL){        /*Se il pcb puntato da p non ha un padre restituisco NULL*/
         return  NULL;

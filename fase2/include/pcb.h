@@ -5,43 +5,43 @@
 #include <pandos_const.h>
 
 
-/*Funzione 1*/
+/*Inizializza la lista pcbFree_h in modo da contenere gli elementi della pcbFree_table*/
 void initPcbs();
 
-/*Funzione 2*/
+/*Inserisce il pcb puntato da p nella lista pcbFree_h*/
 void freePcb(pcb_t *p);
 
-/*Funzione 3*/
+/*Rimuove un elemento dalla pcbFree_h e restituisce l'elemento rimosso*/
 pcb_t *allocPcb();
 
-/*Funzione 4*/
+/*Crea una lista di pcb inizializzandola come lista vuota*/
 void mkEmptyProcQ(struct list_head *head);
 
-/*Funzione 5*/
+/*Se la lista puntata da head è vuota restituisce TRUE, altrimenti FALSE*/
 int emptyProcQ(struct list_head *head);
 
-/*Funzione 6*/
+/*Inserisce l'elemento puntato da p nella coda dei processi puntata da head*/
 void insertProcQ(struct list_head *head, pcb_t *p);
 
-/*Funzione 7*/
+/*Restituisce l'elemento di testa della coda dei processi puntata da head senza rimuoverlo*/
 pcb_t *headProcQ(struct list_head *head);
 
-/*Funzione 8*/
+/*Rimuove il primo elemento della coda dei processi puntata da head*/
 pcb_t *removeProcQ(struct list_head *head);
 
-/*Funzione 9*/
+/*Rimuove il pcb puntato da p dalla coda dei processi puntata da head*/
 pcb_t *outProcQ(struct list_head *head, pcb_t *p);
 
-/*Funzione 10*/
+/*Se il pcb puntato da p non ha figli restituisce TRUE, altrimenti FALSE*/
 int emptyChild(pcb_t *p);
 
-/*Funzione 11*/
+/*Inserisce il pcb puntato da p come figlio del pcb puntato da prnt*/
 void insertChild(pcb_t *prnt, pcb_t *p);
 
-/*Funzione 12*/
+/*Rimuove il primo figlio del pcb puntato da p*/
 pcb_t *removeChild(pcb_t *p);
 
-/*Funzione 13*/
+/*Rimuove il pcb puntato da p dalla lista dei figli del padre*/
 pcb_t *outChild(pcb_t *p);
 
 #endif
