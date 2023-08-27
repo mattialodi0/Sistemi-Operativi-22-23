@@ -4,7 +4,7 @@ static semd_t semd_table[MAXPROC];
 
 static struct list_head *semdFree_h;
 
-DEFINE_HASHTABLE(semd_h, 10);
+DEFINE_HASHTABLE(semd_h, 8);
 
 int insertBlocked(int *semAdd, pcb_t *p)
 {
