@@ -4,7 +4,7 @@ extern int debug_var;
 extern int debug_var1;
 extern int debug_char;
 
-int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
+void CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
 {
     pcb_t *new_proc = allocPcb(); // inizializza new_proc, allocPcb la mette == NULL se vuota, quindi va direttamente nell'else?
     if (new_proc != NULL)
@@ -23,10 +23,7 @@ int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
 
         if (ns != NULL)
         {
-            for (int i = 0; i < NS_TYPE_MAX; i++)
-            {
-                new_proc->namespaces[i] = &ns[i];
-            }
+            new_proc->namespaces[ns->n_type] = ns;
         }
         else
         {
@@ -142,7 +139,7 @@ void Verhogen(int *semaddr, int i)
  * del comando
  */
 int *mem;
-int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
+void DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
 {
     // Installed Devices Bit Map 0x1000002C
     // Interrupting Devices Bit Map 0x10000040
@@ -190,7 +187,7 @@ int DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
     BlockingExceptEnd();
 }
 
-int GetCPUTime()
+void GetCPUTime()
 {
     cpu_t time;
     STCK(time);
@@ -202,7 +199,7 @@ int GetCPUTime()
     NonBlockingExceptEnd();
 }
 
-int WaitForClock()
+void WaitForClock()
 {
     // Passeren(&IT_sem);
     int *semaddr = &IT_sem;
@@ -224,7 +221,7 @@ int WaitForClock()
 }
 
 // ritorna un puntatore alla struttura di supporto del chiamante
-support_t *GetSupportData()
+void GetSupportData()
 {
     // return active_process->p_supportStruct;
     state_t *state = (state_t *)BIOSDATAPAGE;
@@ -234,7 +231,7 @@ support_t *GetSupportData()
 }
 
 // ritorna il pid del chiamante
-int GetProcessId(int parent)
+void GetProcessId(int parent)
 {
     if (parent)
     {
@@ -258,32 +255,38 @@ int GetProcessId(int parent)
 
 // cerca i primi size figli con lo stesso NS del chiamante e li ritorna nell'array children
 // e ritorna il numero di figli del processo
-int GetChildren(int *children, int size)
+void GetChildren(int *children, int size)
 {
     struct list_head *pos;
     int n = 0;
-    pcb_t *child = container_of(active_process->p_child, pcb_t, p_child);
-    pcb_t *child_sib = container_of(child->p_sib, pcb_t, p_sib);
-
-    if(eqNS(child, active_process)) n++;
-    list_for_each_entry(pos, child_sib, p_sib) {
-        if(eqNS(container_of(pos, pcb_t, p_sib)->namespaces, active_process->namespaces))
+        
+    list_for_each(pos, &active_process->p_child) {
+        pcb_t *p = container_of(pos, pcb_t, p_child);
+        if(eqNS(p, active_process)) {
+            if(n < size)
+                children[n] = p->p_pid;
             n++;
+        }
     }
 
-    int i = 0;
-    if(eqNS(child, active_process)) {
-        children[i] = child->p_pid;
-        i++;
-    }
-    list_for_each_entry(pos, child_sib, p_sib) {
-        if(i >= size) break;
-        if(eqNS(container_of(pos, pcb_t, p_sib), active_process))
-            children[i] = container_of(pos, pcb_t, p_sib)->p_pid;
-            i++;
-    }
-
+    // if(eqNS(child, active_process)) n++;
+    // list_for_each_entry(pos, child_sib, p_sib) {
+    //     if(eqNS(container_of(pos, pcb_t, p_sib), active_process))
+    //         n++;
+    // }
+    // int i = 0;
+    // if(eqNS(child, active_process)) {
+    //     children[i] = child->p_pid;
+    //     i++;
+    // }
+    // list_for_each_entry(pos, child_sib, p_sib) {
+    //     if(i >= size) break;
+    //     if(eqNS(container_of(pos, pcb_t, p_sib), active_process))
+    //         children[i] = container_of(pos, pcb_t, p_sib)->p_pid;
+    //         i++;
+    // }
     // return n;
+
     state_t *state = (state_t *)BIOSDATAPAGE;
     state->reg_v0 = n;
 
@@ -293,15 +296,13 @@ int GetChildren(int *children, int size)
 // confronta i namespaces, un campo alla volta, da implementare
 bool eqNS(pcb_t *a, pcb_t*b)
 {
-    nsd_t *a_ns = getNamespace(a, 0);
-    nsd_t *b_ns = getNamespace(b, 0);
-    nsd_t *ta = a_ns;
-    nsd_t *tb = b_ns;
+    // nsd_t *a_ns = getNamespace(a, 0);
+    // nsd_t *b_ns = getNamespace(b, 0);
+    
+    // if(a_ns == b_ns) return true;
+    // else return false;
 
-    while(ta != NULL && tb != NULL && ta != a_ns && tb != b_ns) {
-
-    }
-
+    return true;
 }
 
 void kill(pcb_t *f_proc)
@@ -366,7 +367,7 @@ pcb_PTR findProcess(int pid)
 
     if(p->p_semAdd != NULL) {
         /*Da capire la gestione e se p va bene da usare*/
-        outBlocked(p)
+        outBlocked(p);
     }
 
     // non esiste

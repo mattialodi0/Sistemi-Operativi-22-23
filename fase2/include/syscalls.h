@@ -17,7 +17,7 @@ extern int sem_dev_terminal_w[8];
 
 
 // crea un nuovo processo come figlio del chiamante
-int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns);
+void CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns);
 
 // termina il processo indicato dal pid insieme ai figli
 void TerminateProcess(int pid);
@@ -29,23 +29,23 @@ void Passeren(int *semaddr, int i);
 void Verhogen(int *semaddr, int i);
 
 // effettua un'operazione di I/O
-int DoIO(unsigned *cmdAddr, unsigned int *cmdValues);
+void DoIO(unsigned *cmdAddr, unsigned int *cmdValues);
 
 // restituisce il tempo di esecuzione del processo che l'ha chiamata fino a quel momento
-int GetCPUTime();
+void GetCPUTime();
 
 // blocca il processo invocante fino al prossimo tick del dispositivo
-int WaitForClock();
+void WaitForClock();
 
 // ritorna un puntatore alla struttura di supporto del chiamante
-support_t* GetSupportData();
+void GetSupportData();
 
 // ritorna il pid del chiamante
-int GetProcessId(int parent);
+void GetProcessId(int parent);
 
 /* cerca i primi size figli con lo stesso NS del chiamante e li ritorna nell'array children
 *  e ritorna il numero di figli del processo */
-int GetChildren(int *children, int size);
+void GetChildren(int *children, int size);
 
 
 

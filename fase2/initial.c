@@ -96,6 +96,10 @@ int main(void)
     first_proc->p_semAdd = NULL;*/
     first_proc->p_time = 0;
 
+    // namespace
+    nsd_t *ns = allocNamespace(0);
+    first_proc->namespaces[ns->n_type] = ns;
+
     // chiamata allo scheduler
     scheduler();
 
