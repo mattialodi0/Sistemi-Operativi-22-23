@@ -258,34 +258,45 @@ void GetProcessId(int parent)
 void GetChildren(int *children, int size)
 {
     struct list_head *pos;
+    pcb_t *p;
     int n = 0;
         
-    list_for_each(pos, &active_process->p_child) {
-        pcb_t *p = container_of(pos, pcb_t, p_child);
-        if(eqNS(p, active_process)) {
+    // list_for_each(pos, &active_process->p_child) {
+    //     pcb_t *p = list_entry(pos, pcb_t, p_child);
+    //     if(eqNS(p, active_process)) {
+    //         if(n < size)
+    //             children[n] = p->p_pid;
+    //         n++;
+    //     }
+    // }
+    // list_for_each_entry(p, &active_process->p_child, p_child) {
+    //     debug_var = p->p_pid; debug1();
+    //     if(eqNS(p, active_process)) {
+    //         if(n < size)
+    //             children[n] = p->p_pid;
+    //         n++;
+    //     }
+    // }
+
+    pcb_t *arr[MAXPROC];            // fa schifo ma funziona => per ora va bene
+    int i = 0;
+    for(i=0; i<MAXPROC; i++) {
+        arr[i] = removeChild(active_process);
+        if(arr[i] == NULL) {
+            i--;
+            break;
+        }
+    }
+    for(int j=0; j<i; j++) {
+        if(eqNS(arr[j], active_process)) {
             if(n < size)
-                children[n] = p->p_pid;
+                children[n] = arr[j]->p_pid;
             n++;
         }
     }
-
-    // if(eqNS(child, active_process)) n++;
-    // list_for_each_entry(pos, child_sib, p_sib) {
-    //     if(eqNS(container_of(pos, pcb_t, p_sib), active_process))
-    //         n++;
-    // }
-    // int i = 0;
-    // if(eqNS(child, active_process)) {
-    //     children[i] = child->p_pid;
-    //     i++;
-    // }
-    // list_for_each_entry(pos, child_sib, p_sib) {
-    //     if(i >= size) break;
-    //     if(eqNS(container_of(pos, pcb_t, p_sib), active_process))
-    //         children[i] = container_of(pos, pcb_t, p_sib)->p_pid;
-    //         i++;
-    // }
-    // return n;
+    for(int j=0; j<i; j++) {
+        insertChild(active_process, arr[j]);
+    }
 
     state_t *state = (state_t *)BIOSDATAPAGE;
     state->reg_v0 = n;
@@ -296,11 +307,11 @@ void GetChildren(int *children, int size)
 // confronta i namespaces, un campo alla volta, da implementare
 bool eqNS(pcb_t *a, pcb_t*b)
 {
-    // nsd_t *a_ns = getNamespace(a, 0);
-    // nsd_t *b_ns = getNamespace(b, 0);
-    
-    // if(a_ns == b_ns) return true;
-    // else return false;
+    for(int i=0; i<NS_TYPE_MAX; i++) {
+        if(getNamespace(a, i) != getNamespace(b, i)) {
+            return false;
+        }
+    }
 
     return true;
 }
