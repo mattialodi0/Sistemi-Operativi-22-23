@@ -331,7 +331,7 @@ void test() {
     SYSCALL(PASSEREN, (int)&sem_endp5, 0, 0); /* P(sem_endp5)		*/
 
     print("p1 knows p5 ended\n");
-    SYSCALL(PASSEREN, (int)&sem_blkp4, 0, 1); /* P(sem_blkp4)		*/
+    SYSCALL(PASSEREN, (int)&sem_blkp4, 0, 0); /* P(sem_blkp4)		*/
 
     /* now for a more rigorous check of process termination */
     for (p8inc = 0; p8inc < 4; p8inc++) {
@@ -492,7 +492,7 @@ void p4() {
 
 
     SYSCALL(VERHOGEN, (int)&sem_synp4, 0, 0); /* V(sem_synp4)     */
-    SYSCALL(PASSEREN, (int)&sem_blkp4, 0, 1); /* P(sem_blkp4)     */
+    SYSCALL(PASSEREN, (int)&sem_blkp4, 0, 0); /* P(sem_blkp4)     */
     SYSCALL(PASSEREN, (int)&sem_synp4, 0, 0); /* P(sem_synp4)     */
 
     /* start another incarnation of p4 running, and wait for  */
@@ -622,7 +622,7 @@ void p5b() {
 
     /* if p4 and offspring are really dead, this will increment sem_blkp4 */
 
-    SYSCALL(VERHOGEN, (int)&sem_blkp4, 0, 1); /* V(sem_blkp4) */
+    SYSCALL(VERHOGEN, (int)&sem_blkp4, 0, 0); /* V(sem_blkp4) */
     SYSCALL(VERHOGEN, (int)&sem_endp5, 0, 0); /* V(sem_endp5) */
 
     /* should cause a termination       */

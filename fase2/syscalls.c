@@ -83,7 +83,6 @@ void Passeren(int *semaddr, int i)
 
     if (*semaddr == 0)      // blocca il proc
     {
-    if(i) {debug_var = *semaddr; debug_var1 = 0x0; debug();}
         soft_blocked_count++;
         if (insertBlocked(semaddr, active_process))
         {
@@ -96,13 +95,11 @@ void Passeren(int *semaddr, int i)
         pcb_t *waked_proc = removeBlocked(semaddr);
         if (waked_proc != NULL)     // sblocca un proc
         {
-    if(i) {debug_var = *semaddr; debug_var1 = 0x0; debug1();}
             insertProcQ(&ready_queue, waked_proc);
             soft_blocked_count--;
         }
         else                // decrementa il valore del semaforo
         {
-    if(i) {debug_var = *semaddr; debug_var1 = 0x0; debug2();}
             (*semaddr)--;
         }
         NonBlockingExceptEnd();
@@ -115,7 +112,6 @@ void Verhogen(int *semaddr, int i)
 
     if (*semaddr == 1)      // blocca il proc
     {
-    if(i) {debug_var = *semaddr; debug_var1 = 0xFFFFFFFF; debug3();}
         soft_blocked_count++;
         if (insertBlocked(semaddr, active_process))
         {
@@ -128,13 +124,11 @@ void Verhogen(int *semaddr, int i)
         pcb_t *waked_proc = removeBlocked(semaddr);
         if (waked_proc != NULL)     // sblocca un proc
         {
-    if(i) {debug_var = *semaddr; debug_var1 = 0xFFFFFFFF; debug4();}
             insertProcQ(&ready_queue, waked_proc);
             soft_blocked_count--;
         }
         else                // incrementa il valore del semaforo
         {
-    if(i) {debug_var = *semaddr; debug_var1 = 0xFFFFFFFF; debug5();}
             (*semaddr)++;
         }
         NonBlockingExceptEnd();
