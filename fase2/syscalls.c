@@ -83,7 +83,7 @@ void Passeren(int *semaddr, int i)
 
     if (*semaddr == 0)      // blocca il proc
     {
-    if(i) {debug_var = (int)semaddr; debug_var1 = 0x0; debug();}
+    if(i) {debug_var = *semaddr; debug_var1 = 0x0; debug();}
         soft_blocked_count++;
         if (insertBlocked(semaddr, active_process))
         {
@@ -96,13 +96,13 @@ void Passeren(int *semaddr, int i)
         pcb_t *waked_proc = removeBlocked(semaddr);
         if (waked_proc != NULL)     // sblocca un proc
         {
-    if(i) {debug_var = (int)semaddr; debug_var1 = 0x0; debug1();}
+    if(i) {debug_var = *semaddr; debug_var1 = 0x0; debug1();}
             insertProcQ(&ready_queue, waked_proc);
             soft_blocked_count--;
         }
         else                // decrementa il valore del semaforo
         {
-    if(i) {debug_var = (int)semaddr; debug_var1 = 0x0; debug2();}
+    if(i) {debug_var = *semaddr; debug_var1 = 0x0; debug2();}
             (*semaddr)--;
         }
         NonBlockingExceptEnd();
@@ -115,7 +115,7 @@ void Verhogen(int *semaddr, int i)
 
     if (*semaddr == 1)      // blocca il proc
     {
-    if(i) {debug_var = (int)semaddr; debug_var1 = 0xFFFFFFFF; debug3();}
+    if(i) {debug_var = *semaddr; debug_var1 = 0xFFFFFFFF; debug3();}
         soft_blocked_count++;
         if (insertBlocked(semaddr, active_process))
         {
@@ -128,13 +128,13 @@ void Verhogen(int *semaddr, int i)
         pcb_t *waked_proc = removeBlocked(semaddr);
         if (waked_proc != NULL)     // sblocca un proc
         {
-    if(i) {debug_var = (int)semaddr; debug_var1 = 0xFFFFFFFF; debug4();}
+    if(i) {debug_var = *semaddr; debug_var1 = 0xFFFFFFFF; debug4();}
             insertProcQ(&ready_queue, waked_proc);
             soft_blocked_count--;
         }
         else                // incrementa il valore del semaforo
         {
-    if(i) {debug_var = (int)semaddr; debug_var1 = 0xFFFFFFFF; debug5();}
+    if(i) {debug_var = *semaddr; debug_var1 = 0xFFFFFFFF; debug5();}
             (*semaddr)++;
         }
         NonBlockingExceptEnd();
@@ -310,14 +310,25 @@ bool eqNS(nsd_t *a[], nsd_t *b[])
 void kill(pcb_t *f_proc)
 {
     outChild(f_proc);
-    if (f_proc->p_semAdd < 0) // if semaphor < 0 deve essere incrementato (controllare su 3.9 del libro)
+    if (*(f_proc->p_semAdd) < 0 || (*(f_proc->p_semAdd) == 0 && headBlocked(f_proc->p_semAdd) != NULL)) // if semaphor < 0 deve essere incrementato (controllare su 3.9 del libro)
     {
-        if (headBlocked(f_proc->p_semAdd) == NULL && notDevice(f_proc->p_semAdd)) // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
+        if (headBlocked(f_proc->p_semAdd) != NULL && notDevice(f_proc->p_semAdd)) // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
         {
-            f_proc->p_semAdd++;
+            outBlocked(f_proc);
+            // (*f_proc->p_semAdd)++;
             soft_blocked_count--;
         }
     }
+    if (*(f_proc->p_semAdd) > 1 || (*(f_proc->p_semAdd) == 1 && headBlocked(f_proc->p_semAdd) != NULL)) // if semaphor > 1 deve essere incrementato (controllare su 3.9 del libro)
+    {
+        if (headBlocked(f_proc->p_semAdd) != NULL && notDevice(f_proc->p_semAdd)) // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
+        {
+            outBlocked(f_proc);
+            // (*f_proc->p_semAdd)--;
+            soft_blocked_count--;
+        }
+    }
+
     process_count--;
 
     pcb_t *proc = removeChild(f_proc);
@@ -364,19 +375,19 @@ int notDevice(int *semaddr)
     for (int i = 0; i < 8; i++)
     {
         if (&sem_dev_disk[i] == semaddr)
-            return 1;
+            return 0;
         else if (&sem_dev_flash[i] == semaddr)
-            return 1;
+            return 0;
         else if (&sem_dev_net[i] == semaddr)
-            return 1;
+            return 0;
         else if (&sem_dev_printer[i] == semaddr)
-            return 1;
+            return 0;
         else if (&sem_dev_terminal_r[i] == semaddr)
-            return 1;
+            return 0;
         else if (&sem_dev_terminal_w[i] == semaddr)
-            return 1;
+            return 0;
     }
-    return 0;
+    return 1;
 }
 
 void NonBlockingExceptEnd() {

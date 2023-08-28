@@ -326,27 +326,26 @@ void test() {
 
     SYSCALL(CREATEPROCESS, (int)&p7state, (int)NULL, (int)NULL); /* start p7		*/
 
-    // p9pid = SYSCALL(CREATEPROCESS, (int)&p9state, (int)NULL, (int)NULL); /* start p7		*/
+    p9pid = SYSCALL(CREATEPROCESS, (int)&p9state, (int)NULL, (int)NULL); /* start p7		*/
 
     SYSCALL(PASSEREN, (int)&sem_endp5, 0, 0); /* P(sem_endp5)		*/
 
     print("p1 knows p5 ended\n");
-
     SYSCALL(PASSEREN, (int)&sem_blkp4, 0, 1); /* P(sem_blkp4)		*/
-print("ok\n");
-    // /* now for a more rigorous check of process termination */
-    // for (p8inc = 0; p8inc < 4; p8inc++) {
-    //     /* Reset semaphores */ 
-    //     sem_blkp8 = 0;
-    //     sem_endp8 = 0;
-    //     for (int i = 0; i < NOLEAVES; i++) {
-    //         sem_endcreate[i] = 0;
-    //     }
 
-    //     p8pid = SYSCALL(CREATEPROCESS, (int)&p8rootstate, (int)NULL, (int)NULL);
+    /* now for a more rigorous check of process termination */
+    for (p8inc = 0; p8inc < 4; p8inc++) {
+        /* Reset semaphores */ 
+        sem_blkp8 = 0;
+        sem_endp8 = 0;
+        for (int i = 0; i < NOLEAVES; i++) {
+            sem_endcreate[i] = 0;
+        }
 
-    //     SYSCALL(PASSEREN, (int)&sem_endp8, 0, 0);
-    // }
+        p8pid = SYSCALL(CREATEPROCESS, (int)&p8rootstate, (int)NULL, (int)NULL);
+
+        SYSCALL(PASSEREN, (int)&sem_endp8, 0, 0);
+    }
 
     // SYSCALL(CREATEPROCESS, (int)&p11state, (int)NULL, (int)NULL); /* start p7		*/
     // SYSCALL(PASSEREN, (int)&sem_p11, 0, 0);
