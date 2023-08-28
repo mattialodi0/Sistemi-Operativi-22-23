@@ -76,7 +76,7 @@ void TerminateProcess(int pid)
 }
 
 // decrementa il semaforo all'ind semaddr, se diventa < 0 il processo viene bloccato e si chiama lo scheduler
-void Passeren(int *semaddr, int i)
+void Passeren(int *semaddr)
 {
 
     if (*semaddr == 0)      // blocca il proc
@@ -105,7 +105,7 @@ void Passeren(int *semaddr, int i)
 }
 
 // incrementa il semaforo all'ind semaddr, se diventa >= 0 il processo viene messo nella coda ready
-void Verhogen(int *semaddr, int i)
+void Verhogen(int *semaddr)
 {
 
     if (*semaddr == 1)      // blocca il proc

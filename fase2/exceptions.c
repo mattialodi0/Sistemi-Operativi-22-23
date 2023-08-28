@@ -117,10 +117,10 @@ void syscallHandler(state_t state)
         TerminateProcess(v1);
         break;
     case PASSEREN:
-        Passeren((int *)v1, v3);
+        Passeren((int *)v1);
         break;
     case VERHOGEN:
-        Verhogen((int *)v1, v3);
+        Verhogen((int *)v1);
         break;
     case DOIO:
         DoIO((unsigned int *)v1, (unsigned int *)v2);

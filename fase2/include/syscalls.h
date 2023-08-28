@@ -23,10 +23,10 @@ void CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns);
 void TerminateProcess(int pid);
 
 //decrementa il semaforo all'ind semaddr, se diventa < 0 il processo viene bloccato e si chiama lo scheduler
-void Passeren(int *semaddr, int i);
+void Passeren(int *semaddr);
 
 //incrementa il semaforo all'ind semaddr, se diventa > 0 il processo viene messo nella coda ready
-void Verhogen(int *semaddr, int i);
+void Verhogen(int *semaddr);
 
 // effettua un'operazione di I/O
 void DoIO(unsigned *cmdAddr, unsigned int *cmdValues);
@@ -49,7 +49,7 @@ void GetChildren(int *children, int size);
 
 
 
-//confronta i namespaces, un campo alla volta, da implementare
+//confronta i namespaces, un campo alla volta
 bool eqNS(pcb_t *a, pcb_t*b);
 
 // elimina un proc
