@@ -624,7 +624,7 @@ void p5b() {
     /* if p4 and offspring are really dead, this will increment sem_blkp4 */
 
     SYSCALL(VERHOGEN, (int)&sem_blkp4, 0, 1); /* V(sem_blkp4) */
-    SYSCALL(VERHOGEN, (int)&sem_endp5, 0, 1); /* V(sem_endp5) */
+    SYSCALL(VERHOGEN, (int)&sem_endp5, 0, 0); /* V(sem_endp5) */
 
     /* should cause a termination       */
     /* since this has already been      */
