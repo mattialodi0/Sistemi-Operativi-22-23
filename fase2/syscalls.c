@@ -261,42 +261,34 @@ void GetChildren(int *children, int size)
     pcb_t *p;
     int n = 0;
         
-    // list_for_each(pos, &active_process->p_child) {
-    //     pcb_t *p = list_entry(pos, pcb_t, p_child);
-    //     if(eqNS(p, active_process)) {
-    //         if(n < size)
-    //             children[n] = p->p_pid;
-    //         n++;
-    //     }
-    // }
-    // list_for_each_entry(p, &active_process->p_child, p_child) {
-    //     debug_var = p->p_pid; debug1();
-    //     if(eqNS(p, active_process)) {
-    //         if(n < size)
-    //             children[n] = p->p_pid;
-    //         n++;
-    //     }
-    // }
-
-    pcb_t *arr[MAXPROC];            // fa schifo ma funziona => per ora va bene
-    int i = 0;
-    for(i=0; i<MAXPROC; i++) {
-        arr[i] = removeChild(active_process);
-        if(arr[i] == NULL) {
-            i--;
-            break;
-        }
-    }
-    for(int j=0; j<i; j++) {
-        if(eqNS(arr[j], active_process)) {
+    list_for_each(pos, &active_process->p_child) {
+        pcb_t *p = list_entry(pos, pcb_t, p_sib);
+        if(eqNS(p, active_process)) {
             if(n < size)
-                children[n] = arr[j]->p_pid;
+                children[n] = p->p_pid;
             n++;
         }
     }
-    for(int j=0; j<i; j++) {
-        insertChild(active_process, arr[j]);
-    }
+
+    // pcb_t *arr[MAXPROC];            // altro modo 
+    // int i = 0;
+    // for(i=0; i<MAXPROC; i++) {
+    //     arr[i] = removeChild(active_process);
+    //     if(arr[i] == NULL) {
+    //         i--;
+    //         break;
+    //     }
+    // }
+    // for(int j=0; j<i; j++) {
+    //     if(eqNS(arr[j], active_process)) {
+    //         if(n < size)
+    //             children[n] = arr[j]->p_pid;
+    //         n++;
+    //     }
+    // }
+    // for(int j=0; j<i; j++) {
+    //     insertChild(active_process, arr[j]);
+    // }
 
     state_t *state = (state_t *)BIOSDATAPAGE;
     state->reg_v0 = n;
