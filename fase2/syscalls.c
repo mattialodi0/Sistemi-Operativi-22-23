@@ -46,6 +46,7 @@ int CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
         state_t *state = (state_t *)BIOSDATAPAGE;
         state->reg_v0 = -1;
     }
+    // debug_var = new_proc->p_pid; debug4();
     NonBlockingExceptEnd();
 }
 
@@ -237,7 +238,7 @@ int GetProcessId(int parent)
 {
     if (parent)
     {
-        if (eqNS(active_process->namespaces, active_process->p_parent->namespaces))
+        if (eqNS(active_process, active_process->p_parent))
         {
             state_t *state = (state_t *)BIOSDATAPAGE;
             state->reg_v0 = active_process->p_parent->p_pid;
@@ -261,61 +262,63 @@ int GetChildren(int *children, int size)
 {
     struct list_head *pos;
     int n = 0;
-    /*pcb_t *child = container_of(active_process->p_child, pcb_t, p_child);
+    pcb_t *child = container_of(active_process->p_child, pcb_t, p_child);
     pcb_t *child_sib = container_of(child->p_sib, pcb_t, p_sib);
 
-    if(eqNS(child->namespaces, active_process->namespaces)) n++;
+    if(eqNS(child, active_process)) n++;
     list_for_each_entry(pos, child_sib, p_sib) {
         if(eqNS(container_of(pos, pcb_t, p_sib)->namespaces, active_process->namespaces))
             n++;
     }
 
     int i = 0;
-    if(eqNS(child->namespaces, active_process->namespaces)) {
+    if(eqNS(child, active_process)) {
         children[i] = child->p_pid;
         i++;
     }
     list_for_each_entry(pos, child_sib, p_sib) {
         if(i >= size) break;
-        if(eqNS(container_of(pos, pcb_t, p_sib)->namespaces, active_process->namespaces))
+        if(eqNS(container_of(pos, pcb_t, p_sib), active_process))
             children[i] = container_of(pos, pcb_t, p_sib)->p_pid;
             i++;
-    }*/
+    }
 
     // return n;
+    state_t *state = (state_t *)BIOSDATAPAGE;
+    state->reg_v0 = n;
+
     NonBlockingExceptEnd();
 }
-// qualcosa non torna
 
 // confronta i namespaces, un campo alla volta, da implementare
-bool eqNS(nsd_t *a[], nsd_t *b[])
+bool eqNS(pcb_t *a, pcb_t*b)
 {
-    // bool res = true;
-    // for (int i = 0; i < MAXPROC; i++)
-    // {
-    //     if (a[i] != b[i])
-    //         res = false;
-    // }
+    nsd_t *a_ns = getNamespace(a, 0);
+    nsd_t *b_ns = getNamespace(b, 0);
+    nsd_t *ta = a_ns;
+    nsd_t *tb = b_ns;
 
-    // return res;
-    return 1;
+    while(ta != NULL && tb != NULL && ta != a_ns && tb != b_ns) {
+
+    }
+
 }
 
 void kill(pcb_t *f_proc)
 {
     outChild(f_proc);
-    if (*(f_proc->p_semAdd) < 0 || (*(f_proc->p_semAdd) == 0 && headBlocked(f_proc->p_semAdd) != NULL)) // if semaphor < 0 deve essere incrementato (controllare su 3.9 del libro)
+    if (*(f_proc->p_semAdd) == 0 && headBlocked(f_proc->p_semAdd) != NULL) // se *semaddr < 0 deve essere incrementato
     {
-        if (headBlocked(f_proc->p_semAdd) != NULL && notDevice(f_proc->p_semAdd)) // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
+        if (notDevice(f_proc->p_semAdd)) // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
         {
             outBlocked(f_proc);
             // (*f_proc->p_semAdd)++;
             soft_blocked_count--;
         }
     }
-    if (*(f_proc->p_semAdd) > 1 || (*(f_proc->p_semAdd) == 1 && headBlocked(f_proc->p_semAdd) != NULL)) // if semaphor > 1 deve essere incrementato (controllare su 3.9 del libro)
+    if (*(f_proc->p_semAdd) == 1 && headBlocked(f_proc->p_semAdd) != NULL) // se *semaddr  > 1 deve essere incrementato
     {
-        if (headBlocked(f_proc->p_semAdd) != NULL && notDevice(f_proc->p_semAdd)) // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
+        if (notDevice(f_proc->p_semAdd)) // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
         {
             outBlocked(f_proc);
             // (*f_proc->p_semAdd)--;
@@ -323,15 +326,16 @@ void kill(pcb_t *f_proc)
         }
     }
 
-    process_count--;
-
-    pcb_t *proc = removeChild(f_proc);
     // chiamata ricorsiva su tutti i figli
+    pcb_t *proc = removeChild(f_proc);
     while (proc != NULL)
     {
         kill(proc);
         proc = removeChild(f_proc);
     }
+
+    freePcb(f_proc);
+    process_count--;
 }
 
 pcb_PTR findProcess(int pid)

@@ -17,6 +17,8 @@
         "tuple": "c",
         "type_traits": "c",
         "utility": "c",
-        "ash.h": "c"
+        "ash.h": "c",
+        "pcb.h": "c",
+        "ns.h": "c"
     }
 }
