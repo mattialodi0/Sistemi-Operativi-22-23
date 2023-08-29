@@ -133,7 +133,7 @@ void ITInterrupt()
 void nonTimerInterrupt(unsigned int int_line_no, unsigned int dev_num)
 {
     // calcolare l'ind. per il device register
-    dtpreg_t *dev_reg = (dtpreg_t *)(0x10000054 + ((7 - 3) * 0x80) + (0 * 0x10)); // int_line_no, dev_num
+    dtpreg_t *dev_reg = (dtpreg_t *)(0x10000054 + ((int_line_no - 3) * 0x80) + (dev_num * 0x10));
 
     // salvare lo status code del device register
     unsigned int status_code = dev_reg->status;
@@ -142,21 +142,21 @@ void nonTimerInterrupt(unsigned int int_line_no, unsigned int dev_num)
     dev_reg->command = ACK;
 
     pcb_t *proc;
-    int *ind;
+    int *semaddr;
 
     switch (int_line_no)
     {
     case 3:
-        ind = &sem_dev_disk[dev_num];
+        semaddr = &sem_dev_disk[dev_num];
         break;
     case 4:
-        ind = &sem_dev_flash[dev_num];
+        semaddr = &sem_dev_flash[dev_num];
         break;
     case 5:
-        ind = &sem_dev_net[dev_num];
+        semaddr = &sem_dev_net[dev_num];
         break;
     case 6:
-        ind = &sem_dev_printer[dev_num];
+        semaddr = &sem_dev_printer[dev_num];
         break;
     default:
         break;
@@ -164,33 +164,54 @@ void nonTimerInterrupt(unsigned int int_line_no, unsigned int dev_num)
 
     // V sul semaforo associato al device dell'interrupt per sbloccare il processo che sta aspettando la fine dell'I/O
     // se la V non ritorna il pcb salta le prossime due operazioni
-    (*ind)++;
-    proc = removeBlocked(ind);
+    proc = removeBlocked(semaddr);
     if (proc != NULL)
     {
-        // mettere lo status code nel reg. v0 del pcb del processo sbloccato
-        proc->p_s.reg_v0 = status_code;
+        // mette il valore di ritorno nel reg. v0 del pcb del processo sbloccato
+        // proc->p_s.reg_v0 = status_code & 0x000000FF;
+        if ((status_code & 0x000000FF) == 5)
+            proc->p_s.reg_v0 = 0;
+        else
+            proc->p_s.reg_v0 = -1;
+        *proc->io_addr = status_code & 0x000000FF;
+
+        // wakeup proc
+        insertProcQ(&ready_queue, proc);
+        soft_blocked_count--;
 
         // wakeup proc
         insertProcQ(&ready_queue, proc);
         soft_blocked_count--;
     }
 
-    update_time_proc(proc);
-    remove_time();
-
-    // LDST per tornare il controllo al processo corrente
-    state_t *state = (state_t *)BIOSDATAPAGE;
-    LDST(state);
+    if (on_wait)
+    {
+        update_time_proc(proc);
+        remove_time();
+        scheduler();
+    }
+    else
+    {
+        update_time_proc(proc);
+        remove_time();
+        state_t *state = (state_t *)BIOSDATAPAGE; // costante definita in umps
+        LDST(state);
+    }
 }
 
-extern int * mem;
 void nonTimerInterruptT(unsigned int int_line_no, unsigned int dev_num)
 {
-    // da distinguere R e W
-
     // calcolare l'ind. per il device register
     termreg_t *dev_reg = (termreg_t *)(0x10000054 + ((int_line_no - 3) * 0x80) + (dev_num * 0x10));
+    int *semaddr;
+
+    // per distinguere R e W
+    if(dev_reg->transm_status & 0x5 == 0x5) {
+        semaddr = &sem_dev_terminal_w[dev_num];
+    }
+    else {
+            semaddr = &sem_dev_terminal_r[dev_num];
+    }
 
     // salvare lo status code del device register
     unsigned int status_code = dev_reg->transm_status;
@@ -201,25 +222,21 @@ void nonTimerInterruptT(unsigned int int_line_no, unsigned int dev_num)
     // V sul semaforo associato al device dell'interrupt per sbloccare il processo che sta aspettando la fine dell'I/O
     // se la V non ritorna il pcb salta le prossime due operazioni
     pcb_t *proc;
-    int *semaddr = &sem_dev_terminal_w[dev_num]; // non va bene
-debug2();
-    // (*semaddr)++;
     proc = removeBlocked(semaddr);
     if (proc != NULL)
     {
         // mette il valore di ritorno nel reg. v0 del pcb del processo sbloccato
+        // proc->p_s.reg_v0 = status_code & 0x000000FF;
         if ((status_code & 0x000000FF) == 5)
             proc->p_s.reg_v0 = 0;
         else
             proc->p_s.reg_v0 = -1;
-        mem[0] = status_code & 0x000000FF;
-        // proc->p_s.reg_v0 = status_code & 0x000000FF;
+        *proc->io_addr = status_code & 0x000000FF;
 
         // wakeup proc
         insertProcQ(&ready_queue, proc);
         soft_blocked_count--;
     }
-debug3();
 
     if (on_wait)
     {

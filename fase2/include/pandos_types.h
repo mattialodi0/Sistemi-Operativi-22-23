@@ -74,6 +74,9 @@ typedef struct pcb_t {
 
     /* Process ID */
     int p_pid;
+
+    /* for comunication between DoIO syscall and interrupt */
+    unsigned int *io_addr;
 } pcb_t, *pcb_PTR;
 
 

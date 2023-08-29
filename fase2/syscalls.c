@@ -138,17 +138,11 @@ void Verhogen(int *semaddr)
  * cmdAddr contiene l'ind del comando e cmdValues è un array di puntatori ai valori
  * del comando
  */
-int *mem;
 void DoIO(int cmdAddr, unsigned int *cmdValues)
 {
-    // classificazione dell'ind
-    // individuazione del sem
-    // (verifica che il disp sia installato)
-    // ...
-    // ritorna 0 o -1
-
     int line, no, *semaddr;
 
+    // trova linea e numero del device
     switch (cmdAddr)
     {
     case DISK:
@@ -189,20 +183,46 @@ void DoIO(int cmdAddr, unsigned int *cmdValues)
         debugE();
         break;
     }
-debug();
-    // P
-    // (*semaddr)--;
-    if (*semaddr <= 0)
-    {
-        soft_blocked_count++;
-        if (insertBlocked(semaddr, active_process))
-        {
-            PANIC(); // errore nei semafori
-        }
-    }
-    else
-        PANIC();
 
+    // verifica che il device sia installato
+    switch (no)
+    {
+    case 0:
+        if(*(unsigned int*)(0x1000002C + (0x4 * line)) & DEV0ON == 0)
+            PANIC();
+        break;
+    case 1:
+        if(*(unsigned int*)(0x1000002C + (0x4 * line)) & DEV1ON == 0)
+            PANIC();
+        break;
+    case 2:
+        if(*(unsigned int*)(0x1000002C + (0x4 * line)) & DEV2ON == 0)
+            PANIC();
+        break;
+    case 3:
+        if(*(unsigned int*)(0x1000002C + (0x4 * line)) & DEV3ON == 0)
+            PANIC();
+        break;
+    case 4:
+        if(*(unsigned int*)(0x1000002C + (0x4 * line)) & DEV4ON == 0)
+            PANIC();
+        break;
+    case 5:
+        if(*(unsigned int*)(0x1000002C + (0x4 * line)) & DEV5ON == 0)
+            PANIC();
+        break;
+    case 6:
+        if(*(unsigned int*)(0x1000002C + (0x4 * line)) & DEV6ON == 0)
+            PANIC();
+        break;
+    case 7:
+        if(*(unsigned int*)(0x1000002C + (0x4 * line)) & DEV7ON == 0)
+            PANIC();
+        break;
+    default:
+        break;
+    }
+    
     // inserimento degli operandi nel devce register
     if (line == 4)
     {
@@ -218,16 +238,20 @@ debug();
         *(p + 2) = cmdValues[2];
         *(p + 3) = cmdValues[3];
     }
-debug1();
-    // copia dei valori in cmdValues,  probabilmente va fatto nel nonTimerInterruptT
-    mem = cmdValues;
-    // unsigned int status_code = active_process->p_s.reg_v0;
-    // if (status_code == 5)
-    //     active_process->p_s.reg_v0 = 0;
-    // else
-    //     active_process->p_s.reg_v0 = -1;
-    // cmdValues[0] = status_code & 0x000000FF;
-    
+
+    // P
+    if (*semaddr <= 0)
+    {
+        soft_blocked_count++;
+        if (insertBlocked(semaddr, active_process))
+        {
+            PANIC(); // errore nei semafori
+        }
+    }
+    else
+        PANIC();
+
+    active_process->io_addr = cmdValues;
 
     BlockingExceptEnd();
 }
