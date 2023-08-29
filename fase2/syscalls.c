@@ -141,9 +141,6 @@ void Verhogen(int *semaddr)
 int *mem;
 void DoIO(int cmdAddr, unsigned int *cmdValues)
 {
-    // Installed Devices Bit Map 0x1000002C
-    // Interrupting Devices Bit Map 0x10000040
-
     // classificazione dell'ind
     // individuazione del sem
     // (verifica che il disp sia installato)
@@ -192,10 +189,10 @@ void DoIO(int cmdAddr, unsigned int *cmdValues)
         debugE();
         break;
     }
-
+debug();
     // P
-    (*semaddr)--;
-    if (*semaddr < 0)
+    // (*semaddr)--;
+    if (*semaddr <= 0)
     {
         soft_blocked_count++;
         if (insertBlocked(semaddr, active_process))
@@ -221,10 +218,16 @@ void DoIO(int cmdAddr, unsigned int *cmdValues)
         *(p + 2) = cmdValues[2];
         *(p + 3) = cmdValues[3];
     }
-
+debug1();
     // copia dei valori in cmdValues,  probabilmente va fatto nel nonTimerInterruptT
-    // cmdValues[0] = 5;
     mem = cmdValues;
+    // unsigned int status_code = active_process->p_s.reg_v0;
+    // if (status_code == 5)
+    //     active_process->p_s.reg_v0 = 0;
+    // else
+    //     active_process->p_s.reg_v0 = -1;
+    // cmdValues[0] = status_code & 0x000000FF;
+    
 
     BlockingExceptEnd();
 }

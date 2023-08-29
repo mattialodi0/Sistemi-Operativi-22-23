@@ -190,8 +190,7 @@ void nonTimerInterruptT(unsigned int int_line_no, unsigned int dev_num)
     // da distinguere R e W
 
     // calcolare l'ind. per il device register
-    // dtpreg_t *dev_reg = (dtpreg_t *)(0x10000054 + ((int_line_no - 3) * 0x80) + (dev_num * 0x10));
-    termreg_t *dev_reg = (termreg_t *)(0x10000254);
+    termreg_t *dev_reg = (termreg_t *)(0x10000054 + ((int_line_no - 3) * 0x80) + (dev_num * 0x10));
 
     // salvare lo status code del device register
     unsigned int status_code = dev_reg->transm_status;
@@ -203,8 +202,8 @@ void nonTimerInterruptT(unsigned int int_line_no, unsigned int dev_num)
     // se la V non ritorna il pcb salta le prossime due operazioni
     pcb_t *proc;
     int *semaddr = &sem_dev_terminal_w[dev_num]; // non va bene
-
-    (*semaddr)++;
+debug2();
+    // (*semaddr)++;
     proc = removeBlocked(semaddr);
     if (proc != NULL)
     {
@@ -214,11 +213,13 @@ void nonTimerInterruptT(unsigned int int_line_no, unsigned int dev_num)
         else
             proc->p_s.reg_v0 = -1;
         mem[0] = status_code & 0x000000FF;
+        // proc->p_s.reg_v0 = status_code & 0x000000FF;
 
         // wakeup proc
         insertProcQ(&ready_queue, proc);
         soft_blocked_count--;
     }
+debug3();
 
     if (on_wait)
     {

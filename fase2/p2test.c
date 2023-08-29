@@ -145,6 +145,7 @@ void print(char *msg)
         status = SYSCALL(DOIO, (int)command, (int)value, 0);
         if (status != 0 || (value[0] & TERMSTATMASK) != RECVD)
         {
+            debugE();
             PANIC();
         }
         s++;
