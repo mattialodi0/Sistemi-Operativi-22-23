@@ -164,9 +164,7 @@ void nonTimerInterrupt(unsigned int int_line_no, unsigned int dev_num)
 
     // V sul semaforo associato al device dell'interrupt per sbloccare il processo che sta aspettando la fine dell'I/O
     // se la V non ritorna il pcb salta le prossime due operazioni
-    (*ind)++;
     proc = removeBlocked(ind);
-
     if (proc != NULL)
     {
         // mettere lo status code nel reg. v0 del pcb del processo sbloccato
@@ -205,7 +203,6 @@ void nonTimerInterruptT(unsigned int int_line_no, unsigned int dev_num)
     pcb_t *proc;
     int *semaddr = &sem_dev_terminal_w[dev_num]; // non va bene
 
-    (*semaddr)++;
     proc = removeBlocked(semaddr);
     if (proc != NULL)
     {

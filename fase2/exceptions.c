@@ -123,7 +123,7 @@ void syscallHandler(state_t state)
         Verhogen((int *)v1);
         break;
     case DOIO:
-        DoIO((unsigned int *)v1, (unsigned int *)v2);
+        DoIO(v1, (unsigned int*) v2);
         break;
     case GETTIME:
         GetCPUTime();

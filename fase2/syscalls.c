@@ -139,50 +139,122 @@ void Verhogen(int *semaddr)
  * del comando
  */
 int *mem;
-void DoIO(unsigned int *cmdAddr, unsigned int *cmdValues)
+void DoIO(int cmdAddr, unsigned int *cmdValues)
 {
     // Installed Devices Bit Map 0x1000002C
     // Interrupting Devices Bit Map 0x10000040
 
+    // classificazione dell'ind
+    // individuazione del sem
     // (verifica che il disp sia installato)
-    // P sul sem indicato in a1 e a2
     // ...
     // ritorna 0 o -1
 
+    int line, no, *semaddr;
+
+    switch(cmdAddr) {
+        case DISK:
+debug();
+            line = 0;
+            no = (cmdAddr - 0x10000054) / 0x10;
+            *semaddr = sem_dev_disk[no];
+            break;
+        case FLASH:
+debug1();
+            line = 1;
+            no = (cmdAddr - 0x100000D4) / 0x10;
+            *semaddr = sem_dev_flash[no];
+            break;
+        case NETWORK:
+debug2();
+            line = 2;
+            no = (cmdAddr - 0x10000154) / 0x10;
+            *semaddr = sem_dev_net[no];
+            break;
+        case PRINTER:
+debug3();
+            line = 3; 
+            no = (cmdAddr - 0x100001D4) / 0x10;
+            *semaddr = sem_dev_printer[no];
+            break;
+        case TERM:
+debug4();
+            line = 4;
+            no = (cmdAddr - 0x10000254) / 0x10;
+            if(cmdAddr % 0x10 == 0)
+                *semaddr = sem_dev_terminal_r[no];
+            else if(cmdAddr % 0x8 == 0)
+                *semaddr = sem_dev_terminal_w[no];
+            break;
+        default: 
+            debugE();
+            break;
+    }
+//     if(cmdAddr >= 0x10000054 && cmdAddr <= 0x100000D3) {
+// debug();
+//             line = 0;
+//             no = (cmdAddr - 0x10000054) / 0x10;
+//             *semaddr = sem_dev_disk[no];
+//     }
+//     else if(cmdAddr >= 0x100000D4 && cmdAddr <= 0x10000153) {
+// debug1();
+//             line = 1;
+//             no = (cmdAddr - 0x100000D4) / 0x10;
+//             *semaddr = sem_dev_flash[no];
+//     }
+//     else if(cmdAddr >= 0x10000154 && cmdAddr <= 0x100001D3) {
+// debug2();
+//             line = 2;
+//             no = (cmdAddr - 0x10000154) / 0x10;
+//             *semaddr = sem_dev_net[no];
+//     }
+//     else if(cmdAddr >= 0x100001D4 && cmdAddr <= 0x10000253) {
+// debug3();
+//             line = 3; 
+//             no = (cmdAddr - 0x100001D4) / 0x10;
+//             *semaddr = sem_dev_printer[no];
+//     }
+//     else if(cmdAddr >= 0x10000254 && cmdAddr <= 0x100002D3) {
+// debug4();
+//             line = 4;
+//             no = (cmdAddr - 0x10000254) / 0x10;
+//             if(cmdAddr % 0x10 == 0)
+//                 *semaddr = sem_dev_terminal_r[no];
+//             else if(cmdAddr % 0x8 == 0)
+//                 *semaddr = sem_dev_terminal_w[no];
+//     }
+//     else
+//         debugE();
+
+    debug_var = cmdAddr; debug_var1 = no; debug();
+
+
     /* solo per print: */
     // P
-    int *semaddr = &sem_dev_terminal_w[0];
-    (*semaddr)--;
-    if (*semaddr < 0)
-    {
-        soft_blocked_count++;
-        if (insertBlocked(semaddr, active_process))
-        {
-            PANIC(); // errore nei semafori
-        }
-    }
-    else
-        PANIC();
+    // int *semaddr = &sem_dev_terminal_w[0];
+    
+    // if (*semaddr != 0)
+    //     PANIC();
+    // else {
+    //     soft_blocked_count++;
+    //     if (insertBlocked(semaddr, active_process))
+    //         PANIC(); // errore nei semafori
+    // }
+        
 
-    termreg_t *dev_reg = (termreg_t *)(cmdAddr - 2);
-    dev_reg->transm_command = cmdValues[1]; // 2 | (((unsigned int)'O') << 8);
+    // termreg_t *dev_reg = (termreg_t *)(cmdAddr - 2);
+    // dev_reg->transm_command = cmdValues[1]; // 2 | (((unsigned int)'O') << 8);
 
-    // *cmdAddr = cmdValues[0];
-    // *(cmdAddr++) = cmdValues[1];
+    // // cmdAddr = cmdValues[0];
+    // // *(cmdAddr++) = cmdValues[1];
 
-    // *(cmdAddr + 0xC) = cmdValues[0];
-    // debug_char = base->transm_command;  debug3();
-    // debug_var = *(unsigned int *)(cmdAddr + 0x8); debug3();
+    // // *(cmdAddr + 0xC) = cmdValues[0];
+    // // debug_char = base->transm_command;  debug3();
+    // // debug_var = *(unsigned int *)(cmdAddr + 0x8); debug3();
 
-    // copia dei valori in cmdValues,  probabilmente va fatto nel nonTimerInterruptT
-    // cmdValues[0] = 5;
-    mem = cmdValues;
-
-    // unsigned int status = *(unsigned int *)(cmdAddr + 0x8);
-    // if (status == 5)
-    //     return 0;
-    // else
-    //     return -1;
+    // // copia dei valori in cmdValues,  probabilmente va fatto nel nonTimerInterruptT
+    // // cmdValues[0] = 5;
+    // mem = cmdValues;
 
     BlockingExceptEnd();
 }

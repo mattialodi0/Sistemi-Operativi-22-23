@@ -16,6 +16,13 @@ extern int sem_dev_terminal_r[8];
 extern int sem_dev_terminal_w[8];
 
 
+#define DISK 0x10000054 ... 0x100000D3
+#define FLASH 0x100000D4 ... 0x10000153
+#define NETWORK 0x10000154 ... 0x100001D3
+#define PRINTER 0x100001D4 ... 0x10000253
+#define TERM 0x10000254 ... 0x100002D3
+
+
 // crea un nuovo processo come figlio del chiamante
 void CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns);
 
@@ -29,7 +36,7 @@ void Passeren(int *semaddr);
 void Verhogen(int *semaddr);
 
 // effettua un'operazione di I/O
-void DoIO(unsigned *cmdAddr, unsigned int *cmdValues);
+void DoIO(int cmdAddr, unsigned int *cmdValues);
 
 // restituisce il tempo di esecuzione del processo che l'ha chiamata fino a quel momento
 void GetCPUTime();
