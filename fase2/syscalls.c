@@ -79,7 +79,7 @@ void TerminateProcess(int pid)
 void Passeren(int *semaddr)
 {
 
-    if (*semaddr == 0)      // blocca il proc
+    if (*semaddr == 0) // blocca il proc
     {
         soft_blocked_count++;
         if (insertBlocked(semaddr, active_process))
@@ -91,12 +91,12 @@ void Passeren(int *semaddr)
     else
     {
         pcb_t *waked_proc = removeBlocked(semaddr);
-        if (waked_proc != NULL)     // sblocca un proc
+        if (waked_proc != NULL) // sblocca un proc
         {
             insertProcQ(&ready_queue, waked_proc);
             soft_blocked_count--;
         }
-        else                // decrementa il valore del semaforo
+        else // decrementa il valore del semaforo
         {
             (*semaddr)--;
         }
@@ -108,7 +108,7 @@ void Passeren(int *semaddr)
 void Verhogen(int *semaddr)
 {
 
-    if (*semaddr == 1)      // blocca il proc
+    if (*semaddr == 1) // blocca il proc
     {
         soft_blocked_count++;
         if (insertBlocked(semaddr, active_process))
@@ -117,15 +117,15 @@ void Verhogen(int *semaddr)
         }
         BlockingExceptEnd();
     }
-    else 
+    else
     {
         pcb_t *waked_proc = removeBlocked(semaddr);
-        if (waked_proc != NULL)     // sblocca un proc
+        if (waked_proc != NULL) // sblocca un proc
         {
             insertProcQ(&ready_queue, waked_proc);
             soft_blocked_count--;
         }
-        else                // incrementa il valore del semaforo
+        else // incrementa il valore del semaforo
         {
             (*semaddr)++;
         }
@@ -152,95 +152,87 @@ void DoIO(int cmdAddr, unsigned int *cmdValues)
 
     int line, no, *semaddr;
 
-    switch(cmdAddr) {
-        case DISK:
+    switch (cmdAddr)
+    {
+    case DISK:
+        line = 0;
+        no = (cmdAddr - 0x10000054) / 0x10;
+        semaddr = &sem_dev_disk[no];
+        break;
+    case FLASH:
+        line = 1;
+        no = (cmdAddr - 0x100000D4) / 0x10;
+        semaddr = &sem_dev_flash[no];
+        break;
+    case NETWORK:
+        line = 2;
+        no = (cmdAddr - 0x10000154) / 0x10;
+        semaddr = &sem_dev_net[no];
+        break;
+    case PRINTER:
+        line = 3;
+        no = (cmdAddr - 0x100001D4) / 0x10;
+        semaddr = &sem_dev_printer[no];
+        break;
+    case TERM:
 debug();
-            line = 0;
-            no = (cmdAddr - 0x10000054) / 0x10;
-            *semaddr = sem_dev_disk[no];
-            break;
-        case FLASH:
-debug1();
-            line = 1;
-            no = (cmdAddr - 0x100000D4) / 0x10;
-            *semaddr = sem_dev_flash[no];
-            break;
-        case NETWORK:
-debug2();
-            line = 2;
-            no = (cmdAddr - 0x10000154) / 0x10;
-            *semaddr = sem_dev_net[no];
-            break;
-        case PRINTER:
-debug3();
-            line = 3; 
-            no = (cmdAddr - 0x100001D4) / 0x10;
-            *semaddr = sem_dev_printer[no];
-            break;
-        case TERM:
-debug4();
-            line = 4;
-            no = (cmdAddr - 0x10000254) / 0x10;
-            if(cmdAddr % 0x10 == 0)
-                *semaddr = sem_dev_terminal_r[no];
-            else if(cmdAddr % 0x8 == 0)
-                *semaddr = sem_dev_terminal_w[no];
-            break;
-        default: 
+        line = 4;
+        no = (cmdAddr - 0x10000254) / 0x10;
+        if (cmdAddr % 0x10 == 0) {
+            semaddr = &sem_dev_terminal_r[no];
+        }
+        else if (cmdAddr % 0x8 == 0) {
+            debug3(); 
+            semaddr = &sem_dev_terminal_w[no];
+        }
+        else 
             debugE();
-            break;
+        break;
+    default:
+        debugE();
+        break;
     }
-//     if(cmdAddr >= 0x10000054 && cmdAddr <= 0x100000D3) {
-// debug();
-//             line = 0;
-//             no = (cmdAddr - 0x10000054) / 0x10;
-//             *semaddr = sem_dev_disk[no];
-//     }
-//     else if(cmdAddr >= 0x100000D4 && cmdAddr <= 0x10000153) {
-// debug1();
-//             line = 1;
-//             no = (cmdAddr - 0x100000D4) / 0x10;
-//             *semaddr = sem_dev_flash[no];
-//     }
-//     else if(cmdAddr >= 0x10000154 && cmdAddr <= 0x100001D3) {
-// debug2();
-//             line = 2;
-//             no = (cmdAddr - 0x10000154) / 0x10;
-//             *semaddr = sem_dev_net[no];
-//     }
-//     else if(cmdAddr >= 0x100001D4 && cmdAddr <= 0x10000253) {
-// debug3();
-//             line = 3; 
-//             no = (cmdAddr - 0x100001D4) / 0x10;
-//             *semaddr = sem_dev_printer[no];
-//     }
-//     else if(cmdAddr >= 0x10000254 && cmdAddr <= 0x100002D3) {
-// debug4();
-//             line = 4;
-//             no = (cmdAddr - 0x10000254) / 0x10;
-//             if(cmdAddr % 0x10 == 0)
-//                 *semaddr = sem_dev_terminal_r[no];
-//             else if(cmdAddr % 0x8 == 0)
-//                 *semaddr = sem_dev_terminal_w[no];
-//     }
-//     else
-//         debugE();
-
-    debug_var = cmdAddr; debug_var1 = no; debug();
-
-
+debug_var = *semaddr; debug1();
+    // P
+    (*semaddr)--;
+debug_var = *semaddr; debug1();
+    if (*semaddr < 0)
+    {
+        soft_blocked_count++;
+        if (insertBlocked(semaddr, active_process))
+        {
+            PANIC(); // errore nei semafori
+        }
+    }
+    else
+        PANIC();
+debug2();
+    // inserimento degli operandi nel devce register
+    if (no == 4)
+    {
+        termreg_t *dev_reg = (termreg_t *)(cmdAddr - 2);
+        dev_reg->transm_command = cmdValues[1];
+    }
+    else
+    {
+        dtpreg_t *dev_reg = (dtpreg_t *)(cmdAddr - 2);
+        dev_reg->command = cmdValues[1];
+    }
+debug3();
     /* solo per print: */
     // P
     // int *semaddr = &sem_dev_terminal_w[0];
-    
-    // if (*semaddr != 0)
-    //     PANIC();
-    // else {
+    // (*semaddr)--;
+    // if (*semaddr < 0)
+    // {
     //     soft_blocked_count++;
     //     if (insertBlocked(semaddr, active_process))
+    //     {
     //         PANIC(); // errore nei semafori
+    //     }
     // }
-        
+    // else
+    //     PANIC();
 
     // termreg_t *dev_reg = (termreg_t *)(cmdAddr - 2);
     // dev_reg->transm_command = cmdValues[1]; // 2 | (((unsigned int)'O') << 8);
@@ -254,7 +246,7 @@ debug4();
 
     // // copia dei valori in cmdValues,  probabilmente va fatto nel nonTimerInterruptT
     // // cmdValues[0] = 5;
-    // mem = cmdValues;
+    mem = cmdValues;
 
     BlockingExceptEnd();
 }
@@ -312,12 +304,14 @@ void GetProcessId(int parent)
             state_t *state = (state_t *)BIOSDATAPAGE;
             state->reg_v0 = active_process->p_parent->p_pid;
         }
-        else {
+        else
+        {
             state_t *state = (state_t *)BIOSDATAPAGE;
             state->reg_v0 = 0;
         }
     }
-    else {
+    else
+    {
         state_t *state = (state_t *)BIOSDATAPAGE;
         state->reg_v0 = active_process->p_pid;
     }
@@ -332,17 +326,19 @@ void GetChildren(int *children, int size)
     struct list_head *pos;
     pcb_t *p;
     int n = 0;
-        
-    list_for_each(pos, &active_process->p_child) {
+
+    list_for_each(pos, &active_process->p_child)
+    {
         pcb_t *p = list_entry(pos, pcb_t, p_sib);
-        if(eqNS(p, active_process)) {
-            if(n < size)
+        if (eqNS(p, active_process))
+        {
+            if (n < size)
                 children[n] = p->p_pid;
             n++;
         }
     }
 
-    // pcb_t *arr[MAXPROC];            // altro modo 
+    // pcb_t *arr[MAXPROC];            // altro modo
     // int i = 0;
     // for(i=0; i<MAXPROC; i++) {
     //     arr[i] = removeChild(active_process);
@@ -369,10 +365,12 @@ void GetChildren(int *children, int size)
 }
 
 // confronta i namespaces, un campo alla volta, da implementare
-bool eqNS(pcb_t *a, pcb_t*b)
+bool eqNS(pcb_t *a, pcb_t *b)
 {
-    for(int i=0; i<NS_TYPE_MAX; i++) {
-        if(getNamespace(a, i) != getNamespace(b, i)) {
+    for (int i = 0; i < NS_TYPE_MAX; i++)
+    {
+        if (getNamespace(a, i) != getNamespace(b, i))
+        {
             return false;
         }
     }
@@ -440,7 +438,8 @@ pcb_PTR findProcess(int pid)
     // è un problema
     // ????????????????????????????????????????????????????????????????????????????????????????????????????????
 
-    if(p->p_semAdd != NULL) {
+    if (p->p_semAdd != NULL)
+    {
         /*Da capire la gestione e se p va bene da usare*/
         outBlocked(p);
     }
@@ -469,14 +468,16 @@ int notDevice(int *semaddr)
     return 1;
 }
 
-void NonBlockingExceptEnd() {
+void NonBlockingExceptEnd()
+{
     state_t *state = (state_t *)BIOSDATAPAGE;
     state->pc_epc += 4;
 
     LDST(state);
 }
 
-void BlockingExceptEnd() {
+void BlockingExceptEnd()
+{
     state_t *state = (state_t *)BIOSDATAPAGE;
     state->pc_epc += 4;
     active_process->p_s = *state;
