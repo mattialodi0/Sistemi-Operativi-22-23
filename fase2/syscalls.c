@@ -175,27 +175,26 @@ void DoIO(int cmdAddr, unsigned int *cmdValues)
         semaddr = &sem_dev_printer[no];
         break;
     case TERM:
-debug();
         line = 4;
         no = (cmdAddr - 0x10000254) / 0x10;
-        if (cmdAddr % 0x10 == 0) {
+        if (cmdAddr == (0x10000254 + 0x10 * no))
+        {
             semaddr = &sem_dev_terminal_r[no];
         }
-        else if (cmdAddr % 0x8 == 0) {
-            debug3(); 
+        else if (cmdAddr == (0x10000254 + 0x10 * no) + 0x8)
+        {
             semaddr = &sem_dev_terminal_w[no];
         }
-        else 
+        else
             debugE();
         break;
     default:
         debugE();
         break;
     }
-debug_var = *semaddr; debug1();
+
     // P
     (*semaddr)--;
-debug_var = *semaddr; debug1();
     if (*semaddr < 0)
     {
         soft_blocked_count++;
@@ -206,46 +205,25 @@ debug_var = *semaddr; debug1();
     }
     else
         PANIC();
-debug2();
+
     // inserimento degli operandi nel devce register
-    if (no == 4)
+    if (line == 4)
     {
-        termreg_t *dev_reg = (termreg_t *)(cmdAddr - 2);
-        dev_reg->transm_command = cmdValues[1];
+        int *p = (int *)cmdAddr;
+        *p = cmdValues[0];
+        *(p + 1) = cmdValues[1];
     }
     else
     {
-        dtpreg_t *dev_reg = (dtpreg_t *)(cmdAddr - 2);
-        dev_reg->command = cmdValues[1];
+        int *p = (int *)cmdAddr;
+        *p = cmdValues[0];
+        *(p + 1) = cmdValues[1];
+        *(p + 2) = cmdValues[2];
+        *(p + 3) = cmdValues[3];
     }
-debug3();
-    /* solo per print: */
-    // P
-    // int *semaddr = &sem_dev_terminal_w[0];
-    // (*semaddr)--;
-    // if (*semaddr < 0)
-    // {
-    //     soft_blocked_count++;
-    //     if (insertBlocked(semaddr, active_process))
-    //     {
-    //         PANIC(); // errore nei semafori
-    //     }
-    // }
-    // else
-    //     PANIC();
 
-    // termreg_t *dev_reg = (termreg_t *)(cmdAddr - 2);
-    // dev_reg->transm_command = cmdValues[1]; // 2 | (((unsigned int)'O') << 8);
-
-    // // cmdAddr = cmdValues[0];
-    // // *(cmdAddr++) = cmdValues[1];
-
-    // // *(cmdAddr + 0xC) = cmdValues[0];
-    // // debug_char = base->transm_command;  debug3();
-    // // debug_var = *(unsigned int *)(cmdAddr + 0x8); debug3();
-
-    // // copia dei valori in cmdValues,  probabilmente va fatto nel nonTimerInterruptT
-    // // cmdValues[0] = 5;
+    // copia dei valori in cmdValues,  probabilmente va fatto nel nonTimerInterruptT
+    // cmdValues[0] = 5;
     mem = cmdValues;
 
     BlockingExceptEnd();
