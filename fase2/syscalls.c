@@ -4,7 +4,6 @@ extern int debug_var;
 extern int debug_var1;
 extern int debug_char;
 
-
 // crea un nuovo processo come figlio del chiamante
 void CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
 {
@@ -57,18 +56,23 @@ void TerminateProcess(int pid)
     if (pid == 0) // pid == 0, bisogna terminare active_process (processo invocante), e i suoi figli
     {
         f_proc = active_process;
+
+        // terminazione ricorsiva
+        kill(f_proc);
+
+        update_time();
+
+        scheduler();
     }
     else // stessa cosa dell'if ma con il processo del pid preso in input
     {
         f_proc = findProcess(pid);
+
+        // terminazione ricorsiva
+        kill(f_proc);
+
+        NonBlockingExceptEnd();
     }
-
-    // terminazione ricorsiva
-    kill(f_proc);
-
-    update_time();
-
-    scheduler();
 }
 
 // decrementa il semaforo all'ind semaddr, se diventa < 0 il processo viene bloccato e si chiama lo scheduler
@@ -382,28 +386,33 @@ bool eqNS(pcb_t *a, pcb_t *b)
 void kill(pcb_t *f_proc)
 {
     if (f_proc == NULL)
-        return;
-debug_var = headBlocked(f_proc->p_semAdd); debug();
+        PANIC();
+    debug_var = f_proc->p_pid;
+    debug();
+
     outChild(f_proc);
-    if (*(f_proc->p_semAdd) == 0 && headBlocked(f_proc->p_semAdd) != NULL) // se *semaddr < 0 deve essere incrementato
+    if (*(f_proc->p_semAdd) == 0 && headBlocked(f_proc->p_semAdd) != NULL)       // se è bloccato su una P
     {
         if (notDevice(f_proc->p_semAdd)) // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
         {
-            debug3();
+            // debug3();
             outBlocked(f_proc);
             // (*f_proc->p_semAdd)++;
             soft_blocked_count--;
         }
     }
-    if (*(f_proc->p_semAdd) == 1 && headBlocked(f_proc->p_semAdd) != NULL) // se *semaddr > 1 deve essere incrementato
+    else if (*(f_proc->p_semAdd) == 1 && headBlocked(f_proc->p_semAdd) != NULL)  // se è bloccato su una V
     {
         if (notDevice(f_proc->p_semAdd)) // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
         {
-            debug4();
+            // debug4();
             outBlocked(f_proc);
             // (*f_proc->p_semAdd)--;
             soft_blocked_count--;
         }
+    }
+    else {                                                                       // se è nella coda ready
+        outProcQ(&ready_queue, f_proc);
     }
 
     // chiamata ricorsiva su tutti i figli
@@ -423,22 +432,18 @@ pcb_PTR findProcess(int pid)
 {
     pcb_t *p, *first;
 
-    // è il proc attivo
-    if (active_process->p_pid == pid)
-        return active_process;
-
     // è nella ready queue
     p = first = removeProcQ(&ready_queue);
     insertProcQ(&ready_queue, p);
     if (p->p_pid == pid)
     {
-        debug1();
         return p;
     }
     while ((p = removeProcQ(&ready_queue)) != NULL)
     {
         insertProcQ(&ready_queue, p);
-        if (p->p_pid == pid) {
+        if (p->p_pid == pid)
+        {
             return p;
         }
         if (p == first)
@@ -476,7 +481,8 @@ pcb_PTR findProcess(int pid)
             while ((p = removeProcQ(&semd.s_procq)) != NULL)
             {
                 insertProcQ(&semd.s_procq, p);
-                if (p->p_pid == pid) {
+                if (p->p_pid == pid)
+                {
                     return p;
                 }
                 if (p == first)
@@ -513,6 +519,24 @@ int notDevice(int *semaddr)
             return 0;
     }
     return 1;
+}
+
+void update_time() {
+    cpu_t time;
+    STCK(time);
+    active_process->p_time += (time - timer_start);
+}
+
+void update_time_proc(pcb_t * proc) {
+    cpu_t time;
+    STCK(time);
+    proc->p_time += (time - exc_timer_start);
+}
+
+void remove_time() {
+    cpu_t time;
+    STCK(time);
+    active_process->p_time -= (time - exc_timer_start);
 }
 
 void NonBlockingExceptEnd()

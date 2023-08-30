@@ -206,7 +206,7 @@ void nonTimerInterruptT(unsigned int int_line_no, unsigned int dev_num)
     int *semaddr;
 
     // per distinguere R e W
-    if(dev_reg->transm_status & 0x5 == 0x5) {
+    if((dev_reg->transm_status & 0x5) == 0x5) {
         semaddr = &sem_dev_terminal_w[dev_num];
     }
     else {
@@ -279,22 +279,4 @@ unsigned int find_dev_num(unsigned int bitmap_ind)
         num = 0;
 
     return num;
-}
-
-void update_time() {
-    cpu_t time;
-    STCK(time);
-    active_process->p_time += (time - timer_start);
-}
-
-void update_time_proc(pcb_t * proc) {
-    cpu_t time;
-    STCK(time);
-    proc->p_time += (time - exc_timer_start);
-}
-
-void remove_time() {
-    cpu_t time;
-    STCK(time);
-    active_process->p_time -= (time - exc_timer_start);
 }

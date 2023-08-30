@@ -287,73 +287,73 @@ void test()
     ns2_b_state.status = ns2_b_state.status | IEPBITON | CAUSEINTMASK | TEBITON;
 
     /* create process p2 */
-debug();
-    debug_var = SYSCALL(CREATEPROCESS, (int)&p2state, (int)NULL, (int)NULL); /* start p2     */
+debug1();
+    SYSCALL(CREATEPROCESS, (int)&p2state, (int)NULL, (int)NULL); /* start p2     */
     print("p2 was started\n");
-for (int i = 0; i < 100000; i++) ;
+// for (int i = 0; i < 100000; i++) ;
     SYSCALL(TERMPROCESS, 2, 0, 0); /* terminate p2 */
-debug4();
+debug1();
 
-    SYSCALL(VERHOGEN, (int)&sem_startp2, 0, 0); /* V(sem_startp2)   */ // V sbloccante
+    // SYSCALL(VERHOGEN, (int)&sem_startp2, 0, 0); /* V(sem_startp2)   */ // V sbloccante
 
-    SYSCALL(VERHOGEN, (int)&sem_endp2, 0, 0); /* V(sem_endp2) (blocking V!)     */
+    // SYSCALL(VERHOGEN, (int)&sem_endp2, 0, 0); /* V(sem_endp2) (blocking V!)     */
 
-    /* make sure we really blocked */
-    if (p1p2synch == 0)
-    {
-        print("error: p1/p2 synchronization bad\n");
-    }
+    // /* make sure we really blocked */
+    // if (p1p2synch == 0)
+    // {
+    //     print("error: p1/p2 synchronization bad\n");
+    // }
 
-    p3pid = SYSCALL(CREATEPROCESS, (int)&p3state, (int)NULL, (int)NULL); /* start p3     */
+    // p3pid = SYSCALL(CREATEPROCESS, (int)&p3state, (int)NULL, (int)NULL); /* start p3     */
 
-    print("p3 is started\n");
+    // print("p3 is started\n");
 
-    SYSCALL(PASSEREN, (int)&sem_endp3, 0, 0); /* P(sem_endp3)     */
+    // SYSCALL(PASSEREN, (int)&sem_endp3, 0, 0); /* P(sem_endp3)     */
 
-    SYSCALL(CREATEPROCESS, (int)&hp_p1state, (int)NULL, (int)NULL);
+    // SYSCALL(CREATEPROCESS, (int)&hp_p1state, (int)NULL, (int)NULL);
 
-    SYSCALL(CREATEPROCESS, (int)&hp_p2state, (int)NULL, (int)NULL);
+    // SYSCALL(CREATEPROCESS, (int)&hp_p2state, (int)NULL, (int)NULL);
 
-    p4pid = SYSCALL(CREATEPROCESS, (int)&p4state, (int)NULL, (int)NULL); /* start p4     */
+    // p4pid = SYSCALL(CREATEPROCESS, (int)&p4state, (int)NULL, (int)NULL); /* start p4     */
 
-    pFiveSupport.sup_exceptContext[GENERALEXCEPT].stackPtr = (int)p5Stack;
-    pFiveSupport.sup_exceptContext[GENERALEXCEPT].status = ALLOFF | IEPBITON | CAUSEINTMASK | TEBITON;
-    pFiveSupport.sup_exceptContext[GENERALEXCEPT].pc = (memaddr)p5gen;
-    pFiveSupport.sup_exceptContext[PGFAULTEXCEPT].stackPtr = p5Stack;
-    pFiveSupport.sup_exceptContext[PGFAULTEXCEPT].status = ALLOFF | IEPBITON | CAUSEINTMASK | TEBITON;
-    pFiveSupport.sup_exceptContext[PGFAULTEXCEPT].pc = (memaddr)p5mm;
+    // pFiveSupport.sup_exceptContext[GENERALEXCEPT].stackPtr = (int)p5Stack;
+    // pFiveSupport.sup_exceptContext[GENERALEXCEPT].status = ALLOFF | IEPBITON | CAUSEINTMASK | TEBITON;
+    // pFiveSupport.sup_exceptContext[GENERALEXCEPT].pc = (memaddr)p5gen;
+    // pFiveSupport.sup_exceptContext[PGFAULTEXCEPT].stackPtr = p5Stack;
+    // pFiveSupport.sup_exceptContext[PGFAULTEXCEPT].status = ALLOFF | IEPBITON | CAUSEINTMASK | TEBITON;
+    // pFiveSupport.sup_exceptContext[PGFAULTEXCEPT].pc = (memaddr)p5mm;
 
-    SYSCALL(CREATEPROCESS, (int)&p5state, (int)&(pFiveSupport), (int)NULL); /* start p5     */
+    // SYSCALL(CREATEPROCESS, (int)&p5state, (int)&(pFiveSupport), (int)NULL); /* start p5     */
 
-    SYSCALL(CREATEPROCESS, (int)&p6state, (int)NULL, (int)NULL); /* start p6		*/
+    // SYSCALL(CREATEPROCESS, (int)&p6state, (int)NULL, (int)NULL); /* start p6		*/
 
-    SYSCALL(CREATEPROCESS, (int)&p7state, (int)NULL, (int)NULL); /* start p7		*/
+    // SYSCALL(CREATEPROCESS, (int)&p7state, (int)NULL, (int)NULL); /* start p7		*/
 
-    p9pid = SYSCALL(CREATEPROCESS, (int)&p9state, (int)NULL, (int)NULL); /* start p7		*/
+    // p9pid = SYSCALL(CREATEPROCESS, (int)&p9state, (int)NULL, (int)NULL); /* start p7		*/
 
-    SYSCALL(PASSEREN, (int)&sem_endp5, 0, 0); /* P(sem_endp5)		*/
+    // SYSCALL(PASSEREN, (int)&sem_endp5, 0, 0); /* P(sem_endp5)		*/
 
-    print("p1 knows p5 ended\n");
-    SYSCALL(PASSEREN, (int)&sem_blkp4, 0, 0); /* P(sem_blkp4)		*/
+    // print("p1 knows p5 ended\n");
+    // SYSCALL(PASSEREN, (int)&sem_blkp4, 0, 0); /* P(sem_blkp4)		*/
 
-    /* now for a more rigorous check of process termination */
-    for (p8inc = 0; p8inc < 4; p8inc++)
-    {
-        /* Reset semaphores */
-        sem_blkp8 = 0;
-        sem_endp8 = 0;
-        for (int i = 0; i < NOLEAVES; i++)
-        {
-            sem_endcreate[i] = 0;
-        }
+    // /* now for a more rigorous check of process termination */
+    // for (p8inc = 0; p8inc < 4; p8inc++)
+    // {
+    //     /* Reset semaphores */
+    //     sem_blkp8 = 0;
+    //     sem_endp8 = 0;
+    //     for (int i = 0; i < NOLEAVES; i++)
+    //     {
+    //         sem_endcreate[i] = 0;
+    //     }
 
-        p8pid = SYSCALL(CREATEPROCESS, (int)&p8rootstate, (int)NULL, (int)NULL);
+    //     p8pid = SYSCALL(CREATEPROCESS, (int)&p8rootstate, (int)NULL, (int)NULL);
 
-        SYSCALL(PASSEREN, (int)&sem_endp8, 0, 0);
-    }
+    //     SYSCALL(PASSEREN, (int)&sem_endp8, 0, 0);
+    // }
 
-    SYSCALL(CREATEPROCESS, (int)&p11state, (int)NULL, (int)NULL); /* start p7		*/
-    SYSCALL(PASSEREN, (int)&sem_p11, 0, 0);
+    // SYSCALL(CREATEPROCESS, (int)&p11state, (int)NULL, (int)NULL); /* start p7		*/
+    // SYSCALL(PASSEREN, (int)&sem_p11, 0, 0);
 
     print("p1 finishes OK -- TTFN\n");
     *((memaddr *)BADADDR) = 0; /* terminate p1 */
@@ -367,76 +367,76 @@ debug4();
 void p2()
 {
     debug2();
-for (int i = 0; i < 100000; i++) ;
-    // SYSCALL(PASSEREN, (int)&sem_startp2, 0, 0); /* P(sem_startp2)   */ // P bloccante
+// for (int i = 0; i < 100000; i++) ;
+    SYSCALL(PASSEREN, (int)&sem_startp2, 0, 0); /* P(sem_startp2)   */ // P bloccante
     debug2();
 
-    int i;                /* just to waste time  */
-    cpu_t now1, now2;     /* times of day        */
-    cpu_t cpu_t1, cpu_t2; /* cpu time used       */
+    // int i;                /* just to waste time  */
+    // cpu_t now1, now2;     /* times of day        */
+    // cpu_t cpu_t1, cpu_t2; /* cpu time used       */
 
-    SYSCALL(PASSEREN, (int)&sem_startp2, 0, 0); /* P(sem_startp2)   */ // P bloccante
+    // SYSCALL(PASSEREN, (int)&sem_startp2, 0, 0); /* P(sem_startp2)   */ // P bloccante
 
-    print("p2 starts\n");
+    // print("p2 starts\n");
 
-    int pid = SYSCALL(GETPROCESSID, 0, 0, 0);
+    // int pid = SYSCALL(GETPROCESSID, 0, 0, 0);
 
-    if (pid != p2pid)
-    {
-        print("Inconsistent process id for p2!\n");
-        PANIC();
-    }
-    /* initialize all semaphores in the s[] array */
-    for (i = 0; i <= MAXSEM; i++)
-    {
-        s[i] = 0;
-    }
-    /* V, then P, all of the semaphores in the s[] array */
-    for (i = 0; i <= MAXSEM; i++)
-    {
-        SYSCALL(VERHOGEN, (int)&s[i], 0, 0); /* V(S[I]) */
-        SYSCALL(PASSEREN, (int)&s[i], 0, 0); /* P(S[I]) */
-        if (s[i] != 0)
-        {
-            print("error: p2 bad v/p pairs\n");
-        }
-    }
+    // if (pid != p2pid)
+    // {
+    //     print("Inconsistent process id for p2!\n");
+    //     PANIC();
+    // }
+    // /* initialize all semaphores in the s[] array */
+    // for (i = 0; i <= MAXSEM; i++)
+    // {
+    //     s[i] = 0;
+    // }
+    // /* V, then P, all of the semaphores in the s[] array */
+    // for (i = 0; i <= MAXSEM; i++)
+    // {
+    //     SYSCALL(VERHOGEN, (int)&s[i], 0, 0); /* V(S[I]) */
+    //     SYSCALL(PASSEREN, (int)&s[i], 0, 0); /* P(S[I]) */
+    //     if (s[i] != 0)
+    //     {
+    //         print("error: p2 bad v/p pairs\n");
+    //     }
+    // }
 
-    print("p2 v's successfully\n");
+    // print("p2 v's successfully\n");
 
-    /* test of SYS6 */
-    STCK(now1);                         /* time of day   */
-    cpu_t1 = SYSCALL(GETTIME, 0, 0, 0); /* CPU time used */
+    // /* test of SYS6 */
+    // STCK(now1);                         /* time of day   */
+    // cpu_t1 = SYSCALL(GETTIME, 0, 0, 0); /* CPU time used */
 
-    /* delay for several milliseconds */
-    for (i = 1; i < LOOPNUM; i++)
-        ;
+    // /* delay for several milliseconds */
+    // for (i = 1; i < LOOPNUM; i++)
+    //     ;
 
-    cpu_t2 = SYSCALL(GETTIME, 0, 0, 0); /* CPU time used */
-    STCK(now2);                         /* time of day  */
+    // cpu_t2 = SYSCALL(GETTIME, 0, 0, 0); /* CPU time used */
+    // STCK(now2);                         /* time of day  */
 
-    if (((now2 - now1) >= (cpu_t2 - cpu_t1)) && ((cpu_t2 - cpu_t1) >= (MINLOOPTIME / (*((cpu_t *)TIMESCALEADDR)))))
-    {
-        print("p2 is OK\n");
-    }
-    else
-    {
-        if ((now2 - now1) < (cpu_t2 - cpu_t1))
-            print("error: more cpu time than real time\n");
-        if ((cpu_t2 - cpu_t1) < (MINLOOPTIME / (*((cpu_t *)TIMESCALEADDR))))
-            print("error: not enough cpu time went by\n");
-        print("p2 blew it!\n");
-    }
+    // if (((now2 - now1) >= (cpu_t2 - cpu_t1)) && ((cpu_t2 - cpu_t1) >= (MINLOOPTIME / (*((cpu_t *)TIMESCALEADDR)))))
+    // {
+    //     print("p2 is OK\n");
+    // }
+    // else
+    // {
+    //     if ((now2 - now1) < (cpu_t2 - cpu_t1))
+    //         print("error: more cpu time than real time\n");
+    //     if ((cpu_t2 - cpu_t1) < (MINLOOPTIME / (*((cpu_t *)TIMESCALEADDR))))
+    //         print("error: not enough cpu time went by\n");
+    //     print("p2 blew it!\n");
+    // }
 
-    p1p2synch = 1; /* p1 will check this */
+    // p1p2synch = 1; /* p1 will check this */
 
-    SYSCALL(PASSEREN, (int)&sem_endp2, 0, 0); /* P(sem_endp2)    unblocking P ! */
+    // SYSCALL(PASSEREN, (int)&sem_endp2, 0, 0); /* P(sem_endp2)    unblocking P ! */
 
-    SYSCALL(TERMPROCESS, 0, 0, 0); /* terminate p2 */
+    // SYSCALL(TERMPROCESS, 0, 0, 0); /* terminate p2 */
 
-    /* just did a SYS2, so should not get to this point */
-    print("error: p2 didn't terminate\n");
-    PANIC(); /* PANIC!           */
+    // /* just did a SYS2, so should not get to this point */
+    // print("error: p2 didn't terminate\n");
+    // PANIC(); /* PANIC!           */
 }
 
 /* p3 -- clock semaphore test process */

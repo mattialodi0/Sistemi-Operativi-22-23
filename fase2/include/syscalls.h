@@ -14,6 +14,7 @@ extern int sem_dev_net[8];
 extern int sem_dev_printer[8];
 extern int sem_dev_terminal_r[8];
 extern int sem_dev_terminal_w[8];
+extern cpu_t exc_timer_start;
 
 
 #define DISK 0x10000054 ... 0x100000D3
@@ -67,6 +68,11 @@ pcb_PTR findProcess(int pid);
 // ritorna 1 se il proc non è bloccato su un semaforo di un device
 int notDevice(int *semaddr);
 
+// aggiornamento del tempo di uso della CPU
+void update_time();
+void update_time_proc(pcb_t * proc);
+// elimina il tempo usato nella gestione dell'eccezione da quello del proc
+void remove_time();
 
 void NonBlockingExceptEnd();
 
