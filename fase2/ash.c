@@ -1,6 +1,6 @@
 #include "include/ash.h"
 
-static semd_t semd_table[MAXPROC];
+semd_t semd_table[MAXPROC];
 
 static struct list_head *semdFree_h;
 

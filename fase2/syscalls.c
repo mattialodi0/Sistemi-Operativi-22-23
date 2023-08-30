@@ -4,6 +4,8 @@ extern int debug_var;
 extern int debug_var1;
 extern int debug_char;
 
+
+// crea un nuovo processo come figlio del chiamante
 void CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
 {
     pcb_t *new_proc = allocPcb(); // inizializza new_proc, allocPcb la mette == NULL se vuota, quindi va direttamente nell'else?
@@ -51,12 +53,6 @@ void CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
 void TerminateProcess(int pid)
 {
     pcb_t *proc, *f_proc;
-
-    // if (pid == 0)
-    //     debug_var = active_process->p_pid;
-    // else
-    //     debug_char = pid;
-    // debug1();
 
     if (pid == 0) // pid == 0, bisogna terminare active_process (processo invocante), e i suoi figli
     {
@@ -188,41 +184,41 @@ void DoIO(int cmdAddr, unsigned int *cmdValues)
     switch (no)
     {
     case 0:
-        if(*(unsigned int*)(0x1000002C + (0x4 * line)) & DEV0ON == 0)
+        if ((*(unsigned int *)(0x1000002C + (0x4 * line)) & DEV0ON) == 0)
             PANIC();
         break;
     case 1:
-        if(*(unsigned int*)(0x1000002C + (0x4 * line)) & DEV1ON == 0)
+        if ((*(unsigned int *)(0x1000002C + (0x4 * line)) & DEV1ON) == 0)
             PANIC();
         break;
     case 2:
-        if(*(unsigned int*)(0x1000002C + (0x4 * line)) & DEV2ON == 0)
+        if ((*(unsigned int *)(0x1000002C + (0x4 * line)) & DEV2ON) == 0)
             PANIC();
         break;
     case 3:
-        if(*(unsigned int*)(0x1000002C + (0x4 * line)) & DEV3ON == 0)
+        if ((*(unsigned int *)(0x1000002C + (0x4 * line)) & DEV3ON) == 0)
             PANIC();
         break;
     case 4:
-        if(*(unsigned int*)(0x1000002C + (0x4 * line)) & DEV4ON == 0)
+        if ((*(unsigned int *)(0x1000002C + (0x4 * line)) & DEV4ON) == 0)
             PANIC();
         break;
     case 5:
-        if(*(unsigned int*)(0x1000002C + (0x4 * line)) & DEV5ON == 0)
+        if ((*(unsigned int *)(0x1000002C + (0x4 * line)) & DEV5ON) == 0)
             PANIC();
         break;
     case 6:
-        if(*(unsigned int*)(0x1000002C + (0x4 * line)) & DEV6ON == 0)
+        if ((*(unsigned int *)(0x1000002C + (0x4 * line)) & DEV6ON) == 0)
             PANIC();
         break;
     case 7:
-        if(*(unsigned int*)(0x1000002C + (0x4 * line)) & DEV7ON == 0)
+        if ((*(unsigned int *)(0x1000002C + (0x4 * line)) & DEV7ON) == 0)
             PANIC();
         break;
     default:
         break;
     }
-    
+
     // inserimento degli operandi nel devce register
     if (line == 4)
     {
@@ -334,7 +330,7 @@ void GetChildren(int *children, int size)
 
     list_for_each(pos, &active_process->p_child)
     {
-        pcb_t *p = list_entry(pos, pcb_t, p_sib);
+        p = list_entry(pos, pcb_t, p_sib);
         if (eqNS(p, active_process))
         {
             if (n < size)
@@ -385,20 +381,25 @@ bool eqNS(pcb_t *a, pcb_t *b)
 
 void kill(pcb_t *f_proc)
 {
+    if (f_proc == NULL)
+        return;
+debug_var = headBlocked(f_proc->p_semAdd); debug();
     outChild(f_proc);
     if (*(f_proc->p_semAdd) == 0 && headBlocked(f_proc->p_semAdd) != NULL) // se *semaddr < 0 deve essere incrementato
     {
         if (notDevice(f_proc->p_semAdd)) // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
         {
+            debug3();
             outBlocked(f_proc);
             // (*f_proc->p_semAdd)++;
             soft_blocked_count--;
         }
     }
-    if (*(f_proc->p_semAdd) == 1 && headBlocked(f_proc->p_semAdd) != NULL) // se *semaddr  > 1 deve essere incrementato
+    if (*(f_proc->p_semAdd) == 1 && headBlocked(f_proc->p_semAdd) != NULL) // se *semaddr > 1 deve essere incrementato
     {
         if (notDevice(f_proc->p_semAdd)) // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
         {
+            debug4();
             outBlocked(f_proc);
             // (*f_proc->p_semAdd)--;
             soft_blocked_count--;
@@ -417,6 +418,7 @@ void kill(pcb_t *f_proc)
     process_count--;
 }
 
+extern semd_t semd_table[MAXPROC];
 pcb_PTR findProcess(int pid)
 {
     pcb_t *p, *first;
@@ -429,25 +431,65 @@ pcb_PTR findProcess(int pid)
     p = first = removeProcQ(&ready_queue);
     insertProcQ(&ready_queue, p);
     if (p->p_pid == pid)
+    {
+        debug1();
         return p;
+    }
     while ((p = removeProcQ(&ready_queue)) != NULL)
     {
         insertProcQ(&ready_queue, p);
-        if (p->p_pid == pid)
+        if (p->p_pid == pid) {
             return p;
-        else if (p == first)
+        }
+        if (p == first)
             break;
     }
+    // struct list_head *pos;
+    // struct a
+    // {
+    //     list_head *queue;
+    // };
+    // struct a a;
+    // a.queue = &ready_queue;
+    // list_for_each(pos, &a.queue)
+    // {
+    //     pcb_t *p = list_entry(pos, struct a, queue);
+    //     if (p->p_pid == pid)
+    //     {
+    //         debug();
+    //         return p;
+    //     }
+    // }
 
     // è in un semaforo
-    // è un problema
-    // ????????????????????????????????????????????????????????????????????????????????????????????????????????
-
-    if (p->p_semAdd != NULL)
+    for (int i = 0; i < MAXPROC; i++)
     {
-        /*Da capire la gestione e se p va bene da usare*/
-        outBlocked(p);
+        semd_t semd = semd_table[i];
+        if (!emptyProcQ(&semd.s_procq))
+        {
+            p = first = removeProcQ(&semd.s_procq);
+            insertProcQ(&semd.s_procq, p);
+            if (p->p_pid == pid)
+            {
+                return p;
+            }
+            while ((p = removeProcQ(&semd.s_procq)) != NULL)
+            {
+                insertProcQ(&semd.s_procq, p);
+                if (p->p_pid == pid) {
+                    return p;
+                }
+                if (p == first)
+                    break;
+            }
+        }
     }
+
+    // if (p->p_semAdd != NULL)
+    // {
+    //     /*Da capire la gestione e se p va bene da usare*/
+    //     outBlocked(p);
+    // }
 
     // non esiste
     return NULL;

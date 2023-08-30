@@ -171,7 +171,6 @@ void uTLB_RefillHandler()
 /*                                                                   */
 void test()
 {
-
     SYSCALL(VERHOGEN, (int)&sem_testsem, 0, 0); /* V(sem_testsem)   */
 
     print("p1 v(sem_testsem)\n");
@@ -288,9 +287,12 @@ void test()
     ns2_b_state.status = ns2_b_state.status | IEPBITON | CAUSEINTMASK | TEBITON;
 
     /* create process p2 */
-    p2pid = SYSCALL(CREATEPROCESS, (int)&p2state, (int)NULL, (int)NULL); /* start p2     */
-
+debug();
+    debug_var = SYSCALL(CREATEPROCESS, (int)&p2state, (int)NULL, (int)NULL); /* start p2     */
     print("p2 was started\n");
+for (int i = 0; i < 100000; i++) ;
+    SYSCALL(TERMPROCESS, 2, 0, 0); /* terminate p2 */
+debug4();
 
     SYSCALL(VERHOGEN, (int)&sem_startp2, 0, 0); /* V(sem_startp2)   */ // V sbloccante
 
@@ -364,6 +366,11 @@ void test()
 /* p2 -- semaphore and cputime-SYS test process */
 void p2()
 {
+    debug2();
+for (int i = 0; i < 100000; i++) ;
+    // SYSCALL(PASSEREN, (int)&sem_startp2, 0, 0); /* P(sem_startp2)   */ // P bloccante
+    debug2();
+
     int i;                /* just to waste time  */
     cpu_t now1, now2;     /* times of day        */
     cpu_t cpu_t1, cpu_t2; /* cpu time used       */
