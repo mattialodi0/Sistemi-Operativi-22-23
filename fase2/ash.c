@@ -49,6 +49,7 @@ pcb_t *removeBlocked(int *semAdd)
         if (t != NULL)
         {
             pcb_t *p = removeProcQ(&(t->s_procq));
+            p->p_semAdd = NULL;
             // se il SEMD ora è vuoto lo rimuove e lo riaggiunge alla lista dei liberi
             if (emptyProcQ(&(t->s_procq)))
             {
@@ -71,6 +72,7 @@ pcb_t *outBlocked(pcb_t *p)
     hash_for_each_possible(semd_h, t, s_link, (int)p->p_semAdd)
     {
         pcb_t *out = outProcQ(&t->s_procq, p);
+        out->p_semAdd = NULL;
         // se il SEMD ora è vuoto lo rimuove e lo riaggiunge alla lista dei liberi
         if (emptyProcQ(&(t->s_procq)))
         {

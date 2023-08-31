@@ -44,35 +44,27 @@ void CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
         state_t *state = (state_t *)BIOSDATAPAGE;
         state->reg_v0 = -1;
     }
-    // debug_var = new_proc->p_pid; debug4();
+
     NonBlockingExceptEnd();
 }
 
 // termina il processo indicato da pid insieme ai suoi figli
 void TerminateProcess(int pid)
 {
-    pcb_t *proc, *f_proc;
+    pcb_t *f_proc;
 
     if (pid == 0) // pid == 0, bisogna terminare active_process (processo invocante), e i suoi figli
     {
         f_proc = active_process;
-
-        // terminazione ricorsiva
-        kill(f_proc);
-
-        update_time();
-
-        scheduler();
     }
     else // stessa cosa dell'if ma con il processo del pid preso in input
     {
         f_proc = findProcess(pid);
-
-        // terminazione ricorsiva
-        kill(f_proc);
-
-        NonBlockingExceptEnd();
     }
+
+    kill(f_proc);
+
+    BlockingExceptEnd();
 }
 
 // decrementa il semaforo all'ind semaddr, se diventa < 0 il processo viene bloccato e si chiama lo scheduler
@@ -177,10 +169,10 @@ void DoIO(int cmdAddr, unsigned int *cmdValues)
             semaddr = &sem_dev_terminal_w[no];
         }
         else
-            debugE();
+            PANIC();
         break;
     default:
-        debugE();
+        PANIC();
         break;
     }
 
@@ -383,35 +375,31 @@ bool eqNS(pcb_t *a, pcb_t *b)
     return true;
 }
 
-void kill(pcb_t *f_proc)
+int kill(pcb_t *f_proc)
 {
-    if (f_proc == NULL)
+    int term_active = 0;
+
+    if (f_proc == NULL) {
+        debugE();
         PANIC();
-    debug_var = f_proc->p_pid;
-    debug();
+    }
+    
+    if (f_proc->p_pid == active_process->p_pid)
+        term_active = 1;
 
     outChild(f_proc);
-    if (*(f_proc->p_semAdd) == 0 && headBlocked(f_proc->p_semAdd) != NULL)       // se è bloccato su una P
+
+    if (headBlocked(f_proc->p_semAdd) != NULL)
     {
         if (notDevice(f_proc->p_semAdd)) // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
         {
-            // debug3();
-            outBlocked(f_proc);
+            if (outBlocked(f_proc) == NULL)
+                PANIC();
             // (*f_proc->p_semAdd)++;
             soft_blocked_count--;
         }
     }
-    else if (*(f_proc->p_semAdd) == 1 && headBlocked(f_proc->p_semAdd) != NULL)  // se è bloccato su una V
-    {
-        if (notDevice(f_proc->p_semAdd)) // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
-        {
-            // debug4();
-            outBlocked(f_proc);
-            // (*f_proc->p_semAdd)--;
-            soft_blocked_count--;
-        }
-    }
-    else {                                                                       // se è nella coda ready
+    else {
         outProcQ(&ready_queue, f_proc);
     }
 
@@ -419,23 +407,27 @@ void kill(pcb_t *f_proc)
     pcb_t *proc = removeChild(f_proc);
     while (proc != NULL)
     {
-        kill(proc);
+        term_active |= kill(proc);
         proc = removeChild(f_proc);
     }
 
     freePcb(f_proc);
     process_count--;
+
+    return term_active;
 }
 
 extern semd_t semd_table[MAXPROC];
-pcb_PTR findProcess(int pid)
+pcb_PTR findProcess(int pid)        // metodo sbagliato risultato giusto
 {
+
     pcb_t *p, *first;
 
     // è nella ready queue
     p = first = removeProcQ(&ready_queue);
-    insertProcQ(&ready_queue, p);
-    if (p->p_pid == pid)
+    if(p != NULL)
+        insertProcQ(&ready_queue, p);
+    else if (p->p_pid == pid)
     {
         return p;
     }
@@ -449,53 +441,34 @@ pcb_PTR findProcess(int pid)
         if (p == first)
             break;
     }
-    // struct list_head *pos;
-    // struct a
-    // {
-    //     list_head *queue;
-    // };
-    // struct a a;
-    // a.queue = &ready_queue;
-    // list_for_each(pos, &a.queue)
-    // {
-    //     pcb_t *p = list_entry(pos, struct a, queue);
-    //     if (p->p_pid == pid)
-    //     {
-    //         debug();
-    //         return p;
-    //     }
-    // }
-
+    
     // è in un semaforo
     for (int i = 0; i < MAXPROC; i++)
     {
-        semd_t semd = semd_table[i];
-        if (!emptyProcQ(&semd.s_procq))
+        semd_t *semd = &semd_table[i];
+        if (!emptyProcQ(&semd->s_procq))
         {
-            p = first = removeProcQ(&semd.s_procq);
-            insertProcQ(&semd.s_procq, p);
+            p = first = removeBlocked(semd->s_key);;
+            insertBlocked(semd->s_key, p);
             if (p->p_pid == pid)
             {
+                debug_var = p == active_process->p_parent;
+                debug_var1 = i; debug();
                 return p;
             }
-            while ((p = removeProcQ(&semd.s_procq)) != NULL)
+            while (p != NULL)
             {
-                insertProcQ(&semd.s_procq, p);
-                if (p->p_pid == pid)
+                p = removeBlocked(semd->s_key);
+                insertBlocked(semd->s_key, p);
+                if (p == first)
+                    break;
+                else if (p->p_pid == pid)
                 {
                     return p;
                 }
-                if (p == first)
-                    break;
             }
         }
     }
-
-    // if (p->p_semAdd != NULL)
-    // {
-    //     /*Da capire la gestione e se p va bene da usare*/
-    //     outBlocked(p);
-    // }
 
     // non esiste
     return NULL;

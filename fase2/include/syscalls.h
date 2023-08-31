@@ -60,7 +60,7 @@ void GetChildren(int *children, int size);
 bool eqNS(pcb_t *a, pcb_t*b);
 
 // elimina un proc
-void kill(pcb_t *f_proc);
+int kill(pcb_t *f_proc);
 
 // ritorna un ptr al processo di cui si ha il pid
 pcb_PTR findProcess(int pid);

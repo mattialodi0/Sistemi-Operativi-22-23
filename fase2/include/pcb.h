@@ -9,10 +9,10 @@
 void initPcbs();
 
 /*Inserisce il pcb puntato da p nella lista pcbFree_h*/
-void freePcb(pcb_t *p);
+pcb_t *allocPcb();
 
 /*Rimuove un elemento dalla pcbFree_h e restituisce l'elemento rimosso*/
-pcb_t *allocPcb();
+void freePcb(pcb_t *p);
 
 /*Crea una lista di pcb inizializzandola come lista vuota*/
 void mkEmptyProcQ(struct list_head *head);
