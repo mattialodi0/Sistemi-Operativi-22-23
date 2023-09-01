@@ -746,9 +746,8 @@ void p8leaf4() {
 
 void p9() {
     print("p9 starts\n");
-    SYSCALL(CREATEPROCESS, (int)&p10state, (int)NULL, (int)NULL); /* start p7		*/ 
+    SYSCALL(CREATEPROCESS, (int)&p10state, (int)NULL, (int)NULL); /* start p7		*/
     SYSCALL(PASSEREN, (int)&sem_blkp9, 0, 0);
-// for(int i=0; i<9999999999; i++) {;}
 }
 
 

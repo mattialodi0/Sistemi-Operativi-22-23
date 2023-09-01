@@ -1,7 +1,5 @@
 #include "scheduler.h"
 
-extern int debug_var;
-
 
 void scheduler()
 {  

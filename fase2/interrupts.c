@@ -1,16 +1,15 @@
 #include <interrupts.h>
 
-extern int debug_var;
-
+/* Gestore degli interrupt */
 void interruptHandler()
 {
-    // per trovare la linea di interrupt
+    // per trovare la linea dell interrupt
     unsigned int line = 0, cause = 0, dev_num = 0;
     cause = getCAUSE();
     cause &= 0x0000FF00; // maschera per  avere IP
     cause >>= 8;
 
-    // per trovare anche il numero del device
+    // per trovare il numero del device
     if ((cause & 1) == 1)
     {
         line = 0;
@@ -49,49 +48,40 @@ void interruptHandler()
         dev_num = find_dev_num(0x10000040 + 0x10);
     }
 
-    // debug_var = line;
-    debugInt();
-
-    // in caso di più interrupt si risolve quello con priorità più alta (switch)
+    // in caso di più interrupt si risolve quello con priorità più alta
     switch (line)
     {
-    case 0: // ingnorato
+    case 0:
+        // ingnorato
         break;
-    case 1:
-        // PLT
+    case PLTLINE:
         PLTInterrupt();
         break;
-    case 2:
-        // Interval Timer
+    case ITLINE:
         ITInterrupt();
         break;
-    case 3:
-        // disk devices
-    case 4:
-        // flash devices
-    case 5:
-        // network devices
-    case 6:
-        // printer devices
+    case DEVLINE:
+        // disk, flash, network, printer devices
         nonTimerInterrupt(line, dev_num);
         break;
-    case 7: // prima in scrittura poi in lettura
+    case TERMLINE:
         // terminal devices
-        nonTimerInterruptT(line, dev_num);
+        nonTimerInterruptTerm(line, dev_num);
         break;
     default:
+        PANIC();
         break;
     }
 }
 
-// è scaduto il quanto di tempo a disposizione del processo corrente e questo va messo da running a ready
+/* Mette il proc corrente da running a ready, perchè è scaduto il suo quanto di tempo*/
 void PLTInterrupt()
 {
     // caricare un nuovo valore nel PLT
     setTIMER(5000);
 
     // copiare lo stato del processore (all'inizio della BIOS data page) nel pcb del processo corrente
-    active_process->p_s = *((state_t *)0x0FFFF000); // non so se sia giusto il cast                                  **************************
+    active_process->p_s = *((state_t *)0x0FFFF000);
 
     insertProcQ(&ready_queue, active_process);
 
@@ -100,10 +90,10 @@ void PLTInterrupt()
     scheduler();
 }
 
-extern int on_wait;
+/* Sblocca tutti i proc fermi sul semaforo dello pseudo-clock con una V, ogni 100 ms */
 void ITInterrupt()
 {
-    LDIT(100000 / timescale); // carica nell'interval timer  T * la timescale del processore
+    LDIT(100000 / timescale); // carica 100 ms nell'interval timer
 
     pcb_t *waked_proc;
     // sbloccare tutti i processi fermi al semaforo dello pseudo clock
@@ -120,7 +110,6 @@ void ITInterrupt()
     remove_time();
 
     // LDST per tornare il controllo al processo corrente
-    // if (process_count > 0 && soft_blocked_count > 0)
     if (!on_wait)
     {
         state_t *state = (state_t *)BIOSDATAPAGE; // costante definita in umps
@@ -130,15 +119,16 @@ void ITInterrupt()
 
 }
 
+/* Sblocca il proc in attesa della fine dell'operazione di I/O che aveva iniziato */
 void nonTimerInterrupt(unsigned int int_line_no, unsigned int dev_num)
 {
-    // calcolare l'ind. per il device register
+    // calcola l'ind. per il device register
     dtpreg_t *dev_reg = (dtpreg_t *)(0x10000054 + ((int_line_no - 3) * 0x80) + (dev_num * 0x10));
 
-    // salvare lo status code del device register
+    // salva lo status code del device register
     unsigned int status_code = dev_reg->status;
 
-    // ack dell'interrupt: ACKN del device register
+    // ack dell'interrupt
     dev_reg->command = ACK;
 
     pcb_t *proc;
@@ -163,21 +153,15 @@ void nonTimerInterrupt(unsigned int int_line_no, unsigned int dev_num)
     }
 
     // V sul semaforo associato al device dell'interrupt per sbloccare il processo che sta aspettando la fine dell'I/O
-    // se la V non ritorna il pcb salta le prossime due operazioni
     proc = removeBlocked(semaddr);
     if (proc != NULL)
     {
         // mette il valore di ritorno nel reg. v0 del pcb del processo sbloccato
-        // proc->p_s.reg_v0 = status_code & 0x000000FF;
         if ((status_code & 0x000000FF) == 5)
             proc->p_s.reg_v0 = 0;
         else
             proc->p_s.reg_v0 = -1;
         *proc->io_addr = status_code & 0x000000FF;
-
-        // wakeup proc
-        insertProcQ(&ready_queue, proc);
-        soft_blocked_count--;
 
         // wakeup proc
         insertProcQ(&ready_queue, proc);
@@ -194,18 +178,19 @@ void nonTimerInterrupt(unsigned int int_line_no, unsigned int dev_num)
     {
         update_time_proc(proc);
         remove_time();
-        state_t *state = (state_t *)BIOSDATAPAGE; // costante definita in umps
+        state_t *state = (state_t *)BIOSDATAPAGE;
         LDST(state);
     }
 }
 
-void nonTimerInterruptT(unsigned int int_line_no, unsigned int dev_num)
+/* Sblocca il proc in attesa della fine dell'operazione di I/O su un terminale che aveva iniziato */
+void nonTimerInterruptTerm(unsigned int int_line_no, unsigned int dev_num)
 {
-    // calcolare l'ind. per il device register
+    // calcola l'ind. per il device register
     termreg_t *dev_reg = (termreg_t *)(0x10000054 + ((int_line_no - 3) * 0x80) + (dev_num * 0x10));
     int *semaddr;
 
-    // per distinguere R e W
+    // per distinguere read e write sul terminale
     if((dev_reg->transm_status & 0x5) == 0x5) {
         semaddr = &sem_dev_terminal_w[dev_num];
     }
@@ -213,20 +198,18 @@ void nonTimerInterruptT(unsigned int int_line_no, unsigned int dev_num)
             semaddr = &sem_dev_terminal_r[dev_num];
     }
 
-    // salvare lo status code del device register
+    // salva lo status code del device register
     unsigned int status_code = dev_reg->transm_status;
 
-    // ack dell'interrupt: ACKN del device register
+    // ack dell'interrupt
     dev_reg->transm_command = ACK;
 
     // V sul semaforo associato al device dell'interrupt per sbloccare il processo che sta aspettando la fine dell'I/O
-    // se la V non ritorna il pcb salta le prossime due operazioni
     pcb_t *proc;
     proc = removeBlocked(semaddr);
     if (proc != NULL)
     {
         // mette il valore di ritorno nel reg. v0 del pcb del processo sbloccato
-        // proc->p_s.reg_v0 = status_code & 0x000000FF;
         if ((status_code & 0x000000FF) == 5)
             proc->p_s.reg_v0 = 0;
         else
@@ -248,18 +231,16 @@ void nonTimerInterruptT(unsigned int int_line_no, unsigned int dev_num)
     {
         update_time_proc(proc);
         remove_time();
-        state_t *state = (state_t *)BIOSDATAPAGE; // costante definita in umps
+        state_t *state = (state_t *)BIOSDATAPAGE;
         LDST(state);
     }
 }
 
+/* Funzione ausiliaria per trovare il numero del device */
 unsigned int find_dev_num(unsigned int bitmap_ind)
 {
     unsigned int num;
     unsigned int *bitmap = (unsigned int *)bitmap_ind;
-
-    // debug_var = *bitmap;
-    // debug4();
 
     if ((*bitmap & 128) == 128)
         num = 7;

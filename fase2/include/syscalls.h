@@ -25,57 +25,66 @@ extern semd_t semd_table[MAXPROC];
 #define PRINTER 0x100001D4 ... 0x10000253
 #define TERM 0x10000254 ... 0x100002D3
 
-
-// crea un nuovo processo come figlio del chiamante
+/* Crea un nuovo processo come figlio del chiamante */
 void CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns);
 
-// termina il processo indicato dal pid insieme ai figli
+/* Termina il processo indicato da pid insieme ai suoi figli */
 void TerminateProcess(int pid);
 
-//decrementa il semaforo all'ind semaddr, se diventa < 0 il processo viene bloccato e si chiama lo scheduler
+/* Decrementa il semaforo all'ind semaddr, se diventa < 0 il processo viene bloccato e si chiama lo scheduler */
 void Passeren(int *semaddr);
 
-//incrementa il semaforo all'ind semaddr, se diventa > 0 il processo viene messo nella coda ready
+/* Incrementa il semaforo all'ind semaddr, se diventa >= 0 il processo viene messo nella coda ready */
 void Verhogen(int *semaddr);
 
-// effettua un'operazione di I/O
+/* 
+ * Esegue un operazione di I/O sul dispositivo indicato, in modo sincrono cmdAddr contiene l'ind del 
+ * comando e cmdValues è un array di puntatori ai valori del comando
+ */
 void DoIO(int cmdAddr, unsigned int *cmdValues);
 
-// restituisce il tempo di esecuzione del processo che l'ha chiamata fino a quel momento
+/* Ritorna il tempo di uso della CPU del proc corrente */
 void GetCPUTime();
 
-// blocca il processo invocante fino al prossimo tick del dispositivo
+/* Blocca il proc corrente sul semaforo dello pseudo-clock con una P */
 void WaitForClock();
 
-// ritorna un puntatore alla struttura di supporto del chiamante
+/* Ritorna un puntatore alla struttura di supporto del chiamante */
 void GetSupportData();
 
-// ritorna il pid del chiamante
+/* Ritorna il pid del chiamante o quello del padre */
 void GetProcessId(int parent);
 
-/* cerca i primi size figli con lo stesso NS del chiamante e li ritorna nell'array children
-*  e ritorna il numero di figli del processo */
+/* 
+ * cerca i primi size figli con lo stesso NS del chiamante e li ritorna nell'array children
+ *  e ritorna il numero di figli del processo 
+ */
 void GetChildren(int *children, int size);
 
 
-//confronta i namespaces, un campo alla volta
+/* Confronta i namespaces, un campo alla volta, da implementare */
 bool eqNS(pcb_t *a, pcb_t*b);
 
-// elimina un proc
+/* Termina un proc e la sua progenie */
 int kill(pcb_t *f_proc);
 
-// ritorna un ptr al processo di cui si ha il pid
+/* Restituisce un proc dato il pid */
 pcb_PTR findProcess(int pid);
 
-// ritorna 1 se il proc non è bloccato su un semaforo di un device
+/* Funzione ausiliaria per sapere se un proc è bloccato su un semaforo di un device o no*/
 int notDevice(int *semaddr);
 
-// aggiornamento del tempo di uso della CPU
+/* aggoirna il tempo usato dal proc corrente */
 void update_time();
+
+/* aggoirna il tempo usato da un proc */
 void update_time_proc(pcb_t * proc);
-// elimina il tempo usato nella gestione dell'eccezione da quello del proc
+
+/* diminuisce il tempo usato da un proc */
 void remove_time();
 
+/* Teminazione non bloccante di una syscall */
 void NonBlockingExceptEnd();
 
+/* Teminazione non bloccante di una syscall */
 void BlockingExceptEnd();

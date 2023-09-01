@@ -4,7 +4,7 @@ extern int debug_var;
 extern int debug_var1;
 extern int debug_char;
 
-// crea un nuovo processo come figlio del chiamante
+/* Crea un nuovo processo come figlio del chiamante */
 void CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
 {
     pcb_t *new_proc = allocPcb(); // inizializza new_proc, allocPcb la mette == NULL se vuota, quindi va direttamente nell'else?
@@ -48,7 +48,7 @@ void CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
     NonBlockingExceptEnd();
 }
 
-// termina il processo indicato da pid insieme ai suoi figli
+/* Termina il processo indicato da pid insieme ai suoi figli */
 void TerminateProcess(int pid)
 {
     pcb_t *f_proc;
@@ -56,7 +56,7 @@ void TerminateProcess(int pid)
     if (pid == 0) // pid == 0, bisogna terminare active_process (processo invocante), e i suoi figli
     {
         f_proc = active_process;
-        
+
         kill(f_proc);
 
         BlockingExceptEnd();
@@ -64,16 +64,15 @@ void TerminateProcess(int pid)
     else // stessa cosa dell'if ma con il processo del pid preso in input
     {
         f_proc = findProcess(pid);
-        
-        if(kill(f_proc))
+
+        if (kill(f_proc))
             BlockingExceptEnd();
         else
-            NonBlockingExceptEnd();     // in caso il processo corrente non sia nell'albero di quelli terminati gli si ritorna il controllo
+            NonBlockingExceptEnd(); // in caso il processo corrente non sia nell'albero di quelli terminati gli si ritorna il controllo
     }
-
 }
 
-// decrementa il semaforo all'ind semaddr, se diventa < 0 il processo viene bloccato e si chiama lo scheduler
+/* Decrementa il semaforo all'ind semaddr, se diventa < 0 il processo viene bloccato e si chiama lo scheduler */
 void Passeren(int *semaddr)
 {
 
@@ -102,7 +101,7 @@ void Passeren(int *semaddr)
     }
 }
 
-// incrementa il semaforo all'ind semaddr, se diventa >= 0 il processo viene messo nella coda ready
+/* Incrementa il semaforo all'ind semaddr, se diventa >= 0 il processo viene messo nella coda ready */
 void Verhogen(int *semaddr)
 {
 
@@ -131,10 +130,9 @@ void Verhogen(int *semaddr)
     }
 }
 
-/*
- * Esegue un operazione di I/O sul dispositivo indicato, in modo sincrono
- * cmdAddr contiene l'ind del comando e cmdValues è un array di puntatori ai valori
- * del comando
+/* 
+ * Esegue un operazione di I/O sul dispositivo indicato, in modo sincrono cmdAddr contiene l'ind del 
+ * comando e cmdValues è un array di puntatori ai valori del comando
  */
 void DoIO(int cmdAddr, unsigned int *cmdValues)
 {
@@ -254,6 +252,7 @@ void DoIO(int cmdAddr, unsigned int *cmdValues)
     BlockingExceptEnd();
 }
 
+/* Ritorna il tempo di uso della CPU del proc corrente */
 void GetCPUTime()
 {
     cpu_t time;
@@ -266,6 +265,7 @@ void GetCPUTime()
     NonBlockingExceptEnd();
 }
 
+/* Blocca il proc corrente sul semaforo dello pseudo-clock con una P */
 void WaitForClock()
 {
     // Passeren(&IT_sem);
@@ -287,7 +287,7 @@ void WaitForClock()
     BlockingExceptEnd();
 }
 
-// ritorna un puntatore alla struttura di supporto del chiamante
+/* Ritorna un puntatore alla struttura di supporto del chiamante */
 void GetSupportData()
 {
     // return active_process->p_supportStruct;
@@ -297,7 +297,7 @@ void GetSupportData()
     NonBlockingExceptEnd();
 }
 
-// ritorna il pid del chiamante
+/* Ritorna il pid del chiamante o quello del padre */
 void GetProcessId(int parent)
 {
     if (parent)
@@ -322,8 +322,10 @@ void GetProcessId(int parent)
     NonBlockingExceptEnd();
 }
 
-// cerca i primi size figli con lo stesso NS del chiamante e li ritorna nell'array children
-// e ritorna il numero di figli del processo
+/*
+ * Cerca i primi size figli con lo stesso NS del chiamante e li ritorna nell'array children
+ * e ritorna il numero di figli del processo
+ */
 void GetChildren(int *children, int size)
 {
     struct list_head *pos;
@@ -367,7 +369,8 @@ void GetChildren(int *children, int size)
     NonBlockingExceptEnd();
 }
 
-// confronta i namespaces, un campo alla volta, da implementare
+
+/* Confronta i namespaces, un campo alla volta, da implementare */
 bool eqNS(pcb_t *a, pcb_t *b)
 {
     for (int i = 0; i < NS_TYPE_MAX; i++)
@@ -381,15 +384,17 @@ bool eqNS(pcb_t *a, pcb_t *b)
     return true;
 }
 
+/* Termina un proc e la sua progenie */
 int kill(pcb_t *f_proc)
 {
     int term_active = 0;
 
-    if (f_proc == NULL) {
+    if (f_proc == NULL)
+    {
         debugE();
         PANIC();
     }
-    
+
     if (f_proc->p_pid == active_process->p_pid)
         term_active = 1;
 
@@ -405,7 +410,8 @@ int kill(pcb_t *f_proc)
             soft_blocked_count--;
         }
     }
-    else {
+    else
+    {
         outProcQ(&ready_queue, f_proc);
     }
 
@@ -423,52 +429,33 @@ int kill(pcb_t *f_proc)
     return term_active;
 }
 
-pcb_PTR findProcess(int pid)        // metodo sbagliato risultato giusto
+/* Restituisce un proc dato il pid */
+pcb_PTR findProcess(int pid)
 {
-
-    pcb_t *p, *first;
-
     // è nella ready queue
-    p = first = removeProcQ(&ready_queue);
-    if(p != NULL)
-        insertProcQ(&ready_queue, p);
-    else if (p->p_pid == pid)
+    struct list_head *pos;
+    list_for_each(pos, &ready_queue)
     {
-        return p;
-    }
-    while ((p = removeProcQ(&ready_queue)) != NULL)
-    {
-        insertProcQ(&ready_queue, p);
+        pcb_t *p = list_entry(pos, pcb_t, p_list);
         if (p->p_pid == pid)
         {
+            debug();
             return p;
         }
-        if (p == first)
-            break;
     }
-    
-    // è in un semaforo
+
+    // è in attesa su un semaforo
     for (int i = 0; i < MAXPROC; i++)
     {
         semd_t *semd = &semd_table[i];
         if (!emptyProcQ(&semd->s_procq))
         {
-            p = first = removeBlocked(semd->s_key);;
-            insertBlocked(semd->s_key, p);
-            if (p->p_pid == pid)
+            list_for_each(pos, &semd->s_procq)
             {
-                debug_var = p == active_process->p_parent;
-                debug_var1 = i; debug();
-                return p;
-            }
-            while (p != NULL)
-            {
-                p = removeBlocked(semd->s_key);
-                insertBlocked(semd->s_key, p);
-                if (p == first)
-                    break;
-                else if (p->p_pid == pid)
+                pcb_t *p = list_entry(pos, pcb_t, p_list);
+                if (p->p_pid == pid)
                 {
+                    debug1();
                     return p;
                 }
             }
@@ -479,6 +466,7 @@ pcb_PTR findProcess(int pid)        // metodo sbagliato risultato giusto
     return NULL;
 }
 
+/* Funzione ausiliaria per sapere se un proc è bloccato su un semaforo di un device o no*/
 int notDevice(int *semaddr)
 {
     for (int i = 0; i < 8; i++)
@@ -499,24 +487,31 @@ int notDevice(int *semaddr)
     return 1;
 }
 
-void update_time() {
+/* Aggoirna il tempo usato dal proc corrente */
+void update_time()
+{
     cpu_t time;
     STCK(time);
     active_process->p_time += (time - timer_start);
 }
 
-void update_time_proc(pcb_t * proc) {
+/* Aggoirna il tempo usato da un proc */
+void update_time_proc(pcb_t *proc)
+{
     cpu_t time;
     STCK(time);
     proc->p_time += (time - exc_timer_start);
 }
 
-void remove_time() {
+/* Diminuisce il tempo usato da un proc */
+void remove_time()
+{
     cpu_t time;
     STCK(time);
     active_process->p_time -= (time - exc_timer_start);
 }
 
+/* Teminazione non bloccante di una syscall */
 void NonBlockingExceptEnd()
 {
     state_t *state = (state_t *)BIOSDATAPAGE;
@@ -525,6 +520,7 @@ void NonBlockingExceptEnd()
     LDST(state);
 }
 
+/* Teminazione non bloccante di una syscall */
 void BlockingExceptEnd()
 {
     state_t *state = (state_t *)BIOSDATAPAGE;
