@@ -6,5 +6,8 @@ interrupt handler
 on_wait
 io_addr
 NTIT
+CPUtime
 
 Syscalls:
+semafori (binari)
+CPUtime 

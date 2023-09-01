@@ -242,22 +242,22 @@ unsigned int find_dev_num(unsigned int bitmap_ind)
     unsigned int num;
     unsigned int *bitmap = (unsigned int *)bitmap_ind;
 
-    if ((*bitmap & 128) == 128)
-        num = 7;
-    else if ((*bitmap & 64) == 64)
-        num = 6;
-    else if ((*bitmap & 32) == 32)
-        num = 5;
-    else if ((*bitmap & 16) == 16)
-        num = 4;
-    else if ((*bitmap & 8) == 8)
-        num = 3;
-    else if ((*bitmap & 4) == 4)
-        num = 2;
+    if ((*bitmap & 1) == 1)
+        num = 0;
     else if ((*bitmap & 2) == 2)
         num = 1;
-    else if ((*bitmap & 1) == 1)
-        num = 0;
+    else if ((*bitmap & 4) == 4)
+        num = 2;
+    else if ((*bitmap & 8) == 8)
+        num = 3;
+    else if ((*bitmap & 16) == 16)
+        num = 4;
+    else if ((*bitmap & 32) == 32)
+        num = 5;
+    else if ((*bitmap & 64) == 64)
+        num = 6;
+    else if ((*bitmap & 128) == 128)
+        num = 7;
 
     return num;
 }

@@ -1,8 +1,5 @@
 #include <syscalls.h>
 
-extern int debug_var;
-extern int debug_var1;
-extern int debug_char;
 
 /* Crea un nuovo processo come figlio del chiamante */
 void CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
@@ -19,8 +16,8 @@ void CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
         insertProcQ(&ready_queue, new_proc); // inseriamo in coda il processo
 
         insertChild(active_process, new_proc); // inseriamo new_proc come figlio di active_process
+        new_proc->p_time = 0;
         new_proc->p_semAdd = NULL;
-        new_proc->p_time = 0; // inizializzo il tempo a 0
 
         if (ns != NULL)
         {
@@ -35,12 +32,10 @@ void CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
         }
 
         state_t *state = (state_t *)BIOSDATAPAGE;
-        state->reg_v0 = 0; // non ha senso ma è richiesto
         state->reg_v0 = new_proc->p_pid;
     }
     else
     {
-        // return (-1);
         state_t *state = (state_t *)BIOSDATAPAGE;
         state->reg_v0 = -1;
     }
@@ -258,7 +253,6 @@ void GetCPUTime()
     cpu_t time;
     STCK(time);
 
-    // return active_process->p_time + (time - timer_start);
     state_t *state = (state_t *)BIOSDATAPAGE;
     state->reg_v0 = (int)(active_process->p_time + (time - timer_start));
 
@@ -268,7 +262,6 @@ void GetCPUTime()
 /* Blocca il proc corrente sul semaforo dello pseudo-clock con una P */
 void WaitForClock()
 {
-    // Passeren(&IT_sem);
     int *semaddr = &IT_sem;
     if (*semaddr <= 0)
     {
@@ -290,7 +283,6 @@ void WaitForClock()
 /* Ritorna un puntatore alla struttura di supporto del chiamante */
 void GetSupportData()
 {
-    // return active_process->p_supportStruct;
     state_t *state = (state_t *)BIOSDATAPAGE;
     state->reg_v0 = (int)active_process->p_supportStruct;
 
@@ -343,26 +335,6 @@ void GetChildren(int *children, int size)
         }
     }
 
-    // pcb_t *arr[MAXPROC];            // altro modo
-    // int i = 0;
-    // for(i=0; i<MAXPROC; i++) {
-    //     arr[i] = removeChild(active_process);
-    //     if(arr[i] == NULL) {
-    //         i--;
-    //         break;
-    //     }
-    // }
-    // for(int j=0; j<i; j++) {
-    //     if(eqNS(arr[j], active_process)) {
-    //         if(n < size)
-    //             children[n] = arr[j]->p_pid;
-    //         n++;
-    //     }
-    // }
-    // for(int j=0; j<i; j++) {
-    //     insertChild(active_process, arr[j]);
-    // }
-
     state_t *state = (state_t *)BIOSDATAPAGE;
     state->reg_v0 = n;
 
@@ -380,7 +352,6 @@ bool eqNS(pcb_t *a, pcb_t *b)
             return false;
         }
     }
-
     return true;
 }
 
@@ -391,7 +362,6 @@ int kill(pcb_t *f_proc)
 
     if (f_proc == NULL)
     {
-        debugE();
         PANIC();
     }
 
@@ -402,11 +372,10 @@ int kill(pcb_t *f_proc)
 
     if (headBlocked(f_proc->p_semAdd) != NULL)
     {
-        if (notDevice(f_proc->p_semAdd)) // !!!!! SOLO SE NON è DI UN DEVICE !!!!!
+        if (notDevice(f_proc->p_semAdd)) // se non è il sem di un device
         {
             if (outBlocked(f_proc) == NULL)
                 PANIC();
-            // (*f_proc->p_semAdd)++;
             soft_blocked_count--;
         }
     }
@@ -439,7 +408,6 @@ pcb_PTR findProcess(int pid)
         pcb_t *p = list_entry(pos, pcb_t, p_list);
         if (p->p_pid == pid)
         {
-            debug();
             return p;
         }
     }
@@ -455,7 +423,6 @@ pcb_PTR findProcess(int pid)
                 pcb_t *p = list_entry(pos, pcb_t, p_list);
                 if (p->p_pid == pid)
                 {
-                    debug1();
                     return p;
                 }
             }

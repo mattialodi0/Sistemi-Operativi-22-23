@@ -1,14 +1,3 @@
-extern void debug();
-extern void debug1();
-extern void debug2();
-extern void debug3();
-extern void debug4();
-extern void debug5();
-extern void debugE();
-extern int debug_var;
-extern int debug_var1;
-extern char debug_char;
-
 /* File: $Id: p2test.c,v 1.1 1998/01/20 09:28:08 morsiani Exp morsiani $ */
 
 /*********************************P2TEST.C*******************************

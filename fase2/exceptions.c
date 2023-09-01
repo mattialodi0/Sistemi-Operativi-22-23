@@ -71,13 +71,6 @@ void ProgramTrapExceptionHandler()
 /* Gestore delle syscall  */
 void syscallHandler(state_t state) 
 {
-    // controllo se si è in kernel mode, altrimenti Trap
-    if((state.status & 2) == 2) {
-        state_t *s = (state_t *)BIOSDATAPAGE;
-        s->cause = (PRIVINSTR << 2);
-        ProgramTrapExceptionHandler(); // lancia una program trap 
-    }
-
     // i parametri sono presi dai registri e castati
     unsigned int v0=0;
     int v1=0, v2=0, v3=0;
@@ -85,6 +78,13 @@ void syscallHandler(state_t state)
     v1 = state.reg_a1;
     v2 = state.reg_a2;
     v3 = state.reg_a3;
+
+    // controllo se si è in kernel mode, altrimenti Trap
+    if((state.status & 2) == 2 && v0 <= 10) {
+        state_t *s = (state_t *)BIOSDATAPAGE;
+        s->cause = (PRIVINSTR << 2);
+        ProgramTrapExceptionHandler(); // lancia una program trap 
+    }
 
     switch (v0)
     {
@@ -112,10 +112,10 @@ void syscallHandler(state_t state)
     case GETSUPPORTPTR:
         GetSupportData();
         break;
-    case 9:
+    case GETPROCESSID:
         GetProcessId(v1);
         break;
-    case 10:
+    case GETCHILDREN:
         GetChildren((int *)v1, v2);
         break;
     default:
