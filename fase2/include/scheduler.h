@@ -8,6 +8,7 @@ extern cpu_t timer_start;
 
 extern void debug();
 
+// variabile per sapere se il processore è in stato di WAIT
+int on_wait;
 
 void scheduler();
-

@@ -16,6 +16,8 @@ extern int sem_dev_terminal_r[8];
 extern int sem_dev_terminal_w[8];
 extern cpu_t exc_timer_start;
 
+extern semd_t semd_table[MAXPROC];
+
 
 #define DISK 0x10000054 ... 0x100000D3
 #define FLASH 0x100000D4 ... 0x10000153

@@ -56,15 +56,21 @@ void TerminateProcess(int pid)
     if (pid == 0) // pid == 0, bisogna terminare active_process (processo invocante), e i suoi figli
     {
         f_proc = active_process;
+        
+        kill(f_proc);
+
+        BlockingExceptEnd();
     }
     else // stessa cosa dell'if ma con il processo del pid preso in input
     {
         f_proc = findProcess(pid);
+        
+        if(kill(f_proc))
+            BlockingExceptEnd();
+        else
+            NonBlockingExceptEnd();     // in caso il processo corrente non sia nell'albero di quelli terminati gli si ritorna il controllo
     }
 
-    kill(f_proc);
-
-    BlockingExceptEnd();
 }
 
 // decrementa il semaforo all'ind semaddr, se diventa < 0 il processo viene bloccato e si chiama lo scheduler
@@ -417,7 +423,6 @@ int kill(pcb_t *f_proc)
     return term_active;
 }
 
-extern semd_t semd_table[MAXPROC];
 pcb_PTR findProcess(int pid)        // metodo sbagliato risultato giusto
 {
 

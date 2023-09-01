@@ -12,24 +12,6 @@
 
 #define timescale  (* ((cpu_t *) TIMESCALEADDR))
 
-/*
-//processi vivi
-int process_count;
-//processi bloccati
-int soft_blocked_count;
-//processi ready
-struct list_head ready_queue; 
-//puntatore al proc attivo
-pcb_t *active_process;
-//contatore di pid usato in exeptions.c
-int pid_count;
-
-//semaforo per lo pseudo clock
-int IT_sem;     // da verificare se vada inizializzato a 0
-
-*/
-
-
 //funzione usata per mettere un breakpoint
 void debug();
 void debug1();
