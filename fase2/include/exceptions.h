@@ -18,10 +18,10 @@ cpu_t exc_timer_start;
 /* Gestore delle eccezioni */
 void exceptionHandler();
 
-/* Standard Pass Up or Die operation con GENERALEXCEPT come index value */
+/* Standard Pass Up or Die con GENERALEXCEPT come index value */
 void TLBExceptionHandler();
 
-/* Standard Pass Up or Die operation con GENERALEXCEPT come index value */
+/* Standard Pass Up or Die con GENERALEXCEPT come index value */
 void ProgramTrapExceptionHandler();
 
 /* Gestore delle syscall */

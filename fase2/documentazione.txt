@@ -2,13 +2,13 @@ Progetto di Sistemi Operativi 22/23, fase 2
 
 Il progetto consiste nel realizzare il nucleo di un sistema operativo, che implementi l'inizializzazione del sistema,
     lo scheduling e la gestione delle eccezioni.
-Dopo l'inizializzazione in cui inizializza le variabili globali e le strutture dati, popola il passupvector e crea il primo processo
+Dopo l'inizializzazione in cui crea le variabili globali e le strutture dati, popola il passupvector, crea il primo processo e
     fa una chiamata allo Scheduler.
 Lo Scheduler, che gestisce l'avvicendamento dei processi, è Round-Robin con un timeslice di 5 ms e FIFO; se la coda dei processi ready
     è vuota sceglie l'azione appropriata tra HALT, WAIT e PANIC.
-Il gestore delle eccezioni viene chiamato per risolvere gli interrupt, eccezioni dovute a TLB e program trap e system call, quando queste si verificano.
+Il gestore delle eccezioni viene chiamato per risolvere gli interrupt, eccezioni dovute a TLB e a program trap e system call, quando queste si verificano.
     In particolare gli interrupt a seconda della loro causa, si dividono in PLT, IT e quelli per l'acknowledgement delle operazioni di I/O.
-    Le system call sono 10 predefinite e gestite direttamente dal nucleo, che possono essere chiamate solo in kernel-mode, e quelle che possono 
+    Le system call sono 10 predefinite e gestite direttamente dal nucleo, che possono essere chiamate solo in kernel-mode; mentre quelle che possono 
     essere chiamate in user-mode, la cui gestione è lasciata ai livelli superiori, sono trattate come program trap.
 
 Scelte Progettuali:
@@ -17,28 +17,28 @@ Scelte Progettuali:
 - interruptHandler: per trovare la linea dell'interrupt (e nel caso il numero del device) usa una serie di if e la funzione find_dev_num.
     Queste, valutando il registro cause e la bitmap dei device in attesa di un interrupt, dai valori bassi a quelli alti, 
     riflettono la priorità degli interrupt.
-- nonTimerInterruptTerm: per distinguere tra transmit e receive sui terminali usa un if valutando lo status delle due operazioni e 
+- nonTimerInterruptTerm: per distinguere tra transmit e receive sui terminali usa un if valutando lo status delle due operazioni;
     occupandosi prima della transmit riflette la priorità di questa sulla receive.
     A seguito della V setta il valore di ritorno, 0 se l'operazione è andata a buon fine e -1 altrimenti e salva lo status code nel campo io_addr; 
     per terminare l'operazione di I/O.
-- io_addr: è una variabile aggiunta alla struttura del pcb per salvar l'indirizzo del puntatore su cui ritornare i valori alla fine di una 
+- io_addr: è una variabile aggiunta alla struttura del pcb per salvare l'indirizzo del puntatore in cui ritornare i valori alla fine di una 
     operazione di I/O; permette quindi la comunicazione tra la funzione DoIO e nonTimerInterrupt/nonTimerInterruptTerm.
 - on_wait: è una variabile globale definita nello scheduler e usata per tenere traccia dei momenti in cui si è in stato di WAIT, 
     per decidere l'azione appropriata alla fine di un'eccezione (chiamata allo scheduler o LDST).
-- semafori: sono binari, quindi P e V sono bloccanti sono se il valore del semaforo diventa virtualmente minore di 0 o maggiore di 1, 
+- semafori: sono binari, quindi P e V sono bloccanti solo se il valore del semaforo diventa virtualmente minore di 0 o maggiore di 1, 
     in pratica il valore può essere solo 0 o 1 quindi se il valore è 0 e viene chiamata una P, questa è bloccante ma il valore rimane 0, 
     così come dopo la V che lo sbloccherà.
 - CPUtime: per monitorare il tempo di CPU usato dai processi si usano due variabili: timer_start e exc_timer_start, la prima è usata per calcolare 
-    il tempo totale, mentre la seconda serve nel caso avvenga un'eccezione a sottrarre il tempo dal processo corrente e ad aggiungerlo a quello 
+    il tempo totale, mentre la seconda serve nel caso avvenga un'eccezione, per sottrarre il tempo dal processo corrente e aggiungerlo a quello 
     responsabile dell'eccezione.
     Il tempo usato dall'interrupt dell'IT non viene aggiunto a nessun processo, quello usato da nonTimerInterrupt e nonTimerInterruptTerm, viene aggiunto 
     al processo che ha iniziato l'operazione di I/O, non a quello attivo quando avviene l'interrupt.
-    Il tempo usato dalle system call, invece e normalmente aggiunto al processo che le chiama, in quanto non è lui stesso ad usare la CPU,
-    ma il nucleo per effettuare un'operazione da lui richiesta.
-- TerminateProcess: è bloccante, tranne nel caso in cui il processo chiamante non venga terminato, cioè se il parametro è diverso da 0 e il processo
-    terminato non è un suo antenato.
+    Il tempo usato dalle system call, invece e normalmente aggiunto al processo che le chiama, in quanto anche se non è lui stesso ad usare la CPU,
+    è il nucleo a farlo, ma per effettuare un'operazione richiesta da questo.
+- TerminateProcess: non è sempre bloccante, infatti nel caso in cui il processo chiamante non venga terminato, cioè se il parametro è diverso da 0 
+    e il processo terminato non è un suo antenato, il controllo è restituito al processo corrente.
 - kill: è una funzione che termina un intero sottoalbero di processi, occupandosi di mantenere coerente il semaforo in cui questi possono essere
-    bloccati effettuando poi la chiamata ricorsiva sui figli e sistemando i valori delle variabili di controllo.
-- DoIO: per trovare la linea del dispositivo in questione fa uno switch sull'indirizzo passato come parametro e per trovare il numero
-    sottrae all'indirizzo quello base della linea, poi divide per la dimensione dei device register.
-    Con un ulteriore switch controlla che il bit opportuno della bitmap dei dispositivi installati sia acceso.
+    bloccati, effettuando poi la chiamata ricorsiva sui figli e sistemando i valori delle variabili di controllo.
+- DoIO: per trovare la linea del dispositivo in questione fa uno switch sull'indirizzo passato come parametro, poi per trovare il numero
+    sottrae all'indirizzo quello base della linea, e divide per la dimensione dei device register.
+    Con un ulteriore switch controlla che il dispositivo sia installato, verificando nella bitmap.

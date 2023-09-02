@@ -77,10 +77,10 @@ void interruptHandler()
 /* Mette il proc corrente da running a ready, perchè è scaduto il suo quanto di tempo*/
 void PLTInterrupt()
 {
-    // caricare un nuovo valore nel PLT
+    // carica 5 ms nel PLT
     setTIMER(5000);
 
-    // copiare lo stato del processore (all'inizio della BIOS data page) nel pcb del processo corrente
+    // copia lo stato del processore nel pcb del processo corrente
     active_process->p_s = *((state_t *)0x0FFFF000);
 
     insertProcQ(&ready_queue, active_process);
@@ -93,10 +93,11 @@ void PLTInterrupt()
 /* Sblocca tutti i proc fermi sul semaforo dello pseudo-clock con una V, ogni 100 ms */
 void ITInterrupt()
 {
-    LDIT(100000 / timescale); // carica 100 ms nell'interval timer
+    // carica 100 ms nell'interval timer
+    LDIT(100000 / timescale);
 
     pcb_t *waked_proc;
-    // sbloccare tutti i processi fermi al semaforo dello pseudo clock
+    // sblocca tutti i processi fermi al semaforo dello pseudo clock
     while (headBlocked(&IT_sem) != NULL)
     {
         waked_proc = removeBlocked(&IT_sem);
@@ -104,7 +105,7 @@ void ITInterrupt()
         soft_blocked_count--;
     }
 
-    // settare il semaforo a 0
+    // setta il semaforo a 0
     IT_sem = 0;
 
     remove_time();
@@ -112,11 +113,11 @@ void ITInterrupt()
     // LDST per tornare il controllo al processo corrente
     if (!on_wait)
     {
-        state_t *state = (state_t *)BIOSDATAPAGE; // costante definita in umps
+        state_t *state = (state_t *)BIOSDATAPAGE;
         LDST(state);
     }
-    else scheduler();
-
+    else
+        scheduler();
 }
 
 /* Sblocca il proc in attesa della fine dell'operazione di I/O che aveva iniziato */
@@ -163,7 +164,6 @@ void nonTimerInterrupt(unsigned int int_line_no, unsigned int dev_num)
             proc->p_s.reg_v0 = -1;
         *proc->io_addr = status_code & 0x000000FF;
 
-        // wakeup proc
         insertProcQ(&ready_queue, proc);
         soft_blocked_count--;
     }
@@ -191,11 +191,13 @@ void nonTimerInterruptTerm(unsigned int int_line_no, unsigned int dev_num)
     int *semaddr;
 
     // per distinguere read e write sul terminale
-    if((dev_reg->transm_status & 0x5) == 0x5) {
+    if ((dev_reg->transm_status & 0x5) == 0x5)
+    {
         semaddr = &sem_dev_terminal_w[dev_num];
     }
-    else {
-            semaddr = &sem_dev_terminal_r[dev_num];
+    else
+    {
+        semaddr = &sem_dev_terminal_r[dev_num];
     }
 
     // salva lo status code del device register
@@ -216,7 +218,6 @@ void nonTimerInterruptTerm(unsigned int int_line_no, unsigned int dev_num)
             proc->p_s.reg_v0 = -1;
         *proc->io_addr = status_code & 0x000000FF;
 
-        // wakeup proc
         insertProcQ(&ready_queue, proc);
         soft_blocked_count--;
     }

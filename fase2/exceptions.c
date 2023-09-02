@@ -32,7 +32,7 @@ void exceptionHandler()
     }
 }
 
-/* Standard Pass Up or Die operation con PGFAULTEXCEPT come index value: */
+/* Standard Pass Up or Die con PGFAULTEXCEPT come index value: */
 void TLBExceptionHandler()
 {
     if (active_process->p_supportStruct == NULL) {
@@ -40,17 +40,17 @@ void TLBExceptionHandler()
     }
     else
     {
-        // Copy the saved exception state from the BIOS Data Page to the correct sup_exceptState field of the Current Process.
+        // copia lo stato dalla BIOS Data Page al proc corrente
         state_t state = *(state_t *)BIOSDATAPAGE;
         active_process->p_supportStruct->sup_exceptState[PGFAULTEXCEPT] = state;
         
-        // Perform a LDCXT using the fields from the correct sup_exceptContext field of the Current Process.
+        // LDCXT con i campi di sup_exceptContext.
         context_t *context = &active_process->p_supportStruct->sup_exceptContext[PGFAULTEXCEPT];
         LDCXT(context->stackPtr, context->status, context->pc);
     }
 }
 
-/* Standard Pass Up or Die operation con GENERALEXCEPT come index value */ 
+/* Standard Pass Up or Die con GENERALEXCEPT come index value */ 
 void ProgramTrapExceptionHandler()
 {
     if (active_process->p_supportStruct == NULL){
@@ -58,11 +58,11 @@ void ProgramTrapExceptionHandler()
     }
     else
     {
-        // Copy the saved exception state from the BIOS Data Page to the correct sup_exceptState field of the Current Process.
+        // copia lo stato dalla BIOS Data Page al proc corrente
         state_t state = *(state_t *)BIOSDATAPAGE;
         active_process->p_supportStruct->sup_exceptState[GENERALEXCEPT] = state;
 
-        // Perform a LDCXT using the fields from the correct sup_exceptContext field of the Current Process.
+        // LDCXT con i campi di sup_exceptContext.
         context_t *context = &active_process->p_supportStruct->sup_exceptContext[GENERALEXCEPT];
         LDCXT(context->stackPtr, context->status, context->pc);
     }
@@ -118,6 +118,7 @@ void syscallHandler(state_t state)
         GetChildren((int *)v1, v2);
         break;
     default:
+        // per syscall con v0 > 10
         ProgramTrapExceptionHandler();
         break;
     }

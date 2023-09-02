@@ -6,13 +6,12 @@ void scheduler()
     on_wait = false;
     if (!emptyProcQ(&ready_queue))
     {
-        // remove proc from ready queue
         active_process = removeProcQ(&ready_queue);
-        // load 5 ms in PLT
+        // carica il PLT con 5 ms
         setTIMER(5000);
         // salva il valore corrente del timer
         STCK(timer_start);
-        // load state
+
         LDST((STATE_PTR)(&(active_process->p_s))); 
     }
     else
@@ -44,7 +43,7 @@ void scheduler()
     }
 }
 
-// questa è una magia, non preoccupatevi
+
 #include <stddef.h>
 void *memcpy(void *dest, const void *src, size_t n)
 {
