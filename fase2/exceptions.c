@@ -81,8 +81,7 @@ void syscallHandler(state_t state)
 
     // controllo se si è in kernel mode, altrimenti Trap
     if((state.status & 2) == 2 && v0 <= 10) {
-        state_t *s = (state_t *)BIOSDATAPAGE;
-        s->cause = (PRIVINSTR << 2);
+        state.cause = (PRIVINSTR << 2);
         ProgramTrapExceptionHandler(); // lancia una program trap 
     }
 

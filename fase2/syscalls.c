@@ -70,7 +70,6 @@ void TerminateProcess(int pid)
 /* Decrementa il semaforo all'ind semaddr, se diventa < 0 il processo viene bloccato e si chiama lo scheduler */
 void Passeren(int *semaddr)
 {
-
     if (*semaddr == 0) // blocca il proc
     {
         soft_blocked_count++;
@@ -159,13 +158,13 @@ void DoIO(int cmdAddr, unsigned int *cmdValues)
     case TERM:
         line = 4;
         no = (cmdAddr - 0x10000254) / 0x10;
-        if (cmdAddr == (0x10000254 + 0x10 * no))
-        {
-            semaddr = &sem_dev_terminal_r[no];
-        }
-        else if (cmdAddr == (0x10000254 + 0x10 * no) + 0x8)
+        if (cmdAddr == (0x10000254 + 0x10 * no) + 0x8)
         {
             semaddr = &sem_dev_terminal_w[no];
+        }
+        else if (cmdAddr == (0x10000254 + 0x10 * no))
+        {
+            semaddr = &sem_dev_terminal_r[no];
         }
         else
             PANIC();
