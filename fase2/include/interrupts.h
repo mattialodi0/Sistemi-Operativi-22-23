@@ -11,7 +11,6 @@ extern pcb_t *active_process;
 extern int IT_sem;
 extern cpu_t timer_start;
 extern cpu_t exc_timer_start;
-extern int on_wait;
 
 
 /* Gestore degli interrupt */
