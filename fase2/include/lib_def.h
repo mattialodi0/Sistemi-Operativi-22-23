@@ -12,14 +12,4 @@
 
 #define timescale  (* ((cpu_t *) TIMESCALEADDR))
 
-//funzione usata per mettere un breakpoint
-void debug();
-void debug1();
-void debug2();
-void debug3();
-void debug4();
-void debugE();
-void debugInt();
-void debugX();
-
 #endif
