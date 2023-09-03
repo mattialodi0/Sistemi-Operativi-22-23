@@ -26,6 +26,12 @@ cpu_t timer_start;
 // semaforo per lo pseudo clock
 int IT_sem;
 
+// per misurare la durata delle eccezioni
+cpu_t exc_timer_start;
+
+// variabile per sapere se il processore è in stato di WAIT
+int on_wait;
+
 // array di semafori, uno per dispositivo
 int sem_dev_disk[8];
 int sem_dev_flash[8];

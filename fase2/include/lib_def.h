@@ -12,4 +12,7 @@
 
 #define timescale  (* ((cpu_t *) TIMESCALEADDR))
 
+// variabile per sapere se il processore è in stato di WAIT
+int on_wait;
+
 #endif

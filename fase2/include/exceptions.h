@@ -11,9 +11,8 @@
 
 extern pcb_t *active_process;   
 extern cpu_t timer_start;
+extern cpu_t exc_timer_start;
 
-// per misurare la durata delle eccezioni
-cpu_t exc_timer_start;
 
 /* Gestore delle eccezioni */
 void exceptionHandler();
