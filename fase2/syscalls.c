@@ -4,7 +4,7 @@
 /* Crea un nuovo processo come figlio del chiamante */
 void CreateProcess(state_t *statep, support_t *supportp, nsd_t *ns)
 {
-    pcb_t *new_proc = allocPcb(); // inizializza new_proc, allocPcb la mette == NULL se vuota, quindi va direttamente nell'else?
+    pcb_t *new_proc = allocPcb();
     if (new_proc != NULL)
     {
         INIT_LIST_HEAD(&new_proc->p_child);
@@ -213,7 +213,7 @@ void DoIO(int cmdAddr, unsigned int *cmdValues)
         break;
     }
 
-    // inserimento degli operandi nel devce register
+    // inserimento degli operandi nel device register
     if (line == 4)
     {
         int *p = (int *)cmdAddr;
@@ -453,7 +453,7 @@ int notDevice(int *semaddr)
     return 1;
 }
 
-/* Aggoirna il tempo usato dal proc corrente */
+/* Aggiorna il tempo usato dal proc corrente */
 void update_time()
 {
     cpu_t time;
@@ -461,7 +461,7 @@ void update_time()
     active_process->p_time += (time - timer_start);
 }
 
-/* Aggoirna il tempo usato da un proc */
+/* Aggiorna il tempo usato da un proc */
 void update_time_proc(pcb_t *proc)
 {
     cpu_t time;
@@ -477,7 +477,7 @@ void remove_time()
     active_process->p_time -= (time - exc_timer_start);
 }
 
-/* Teminazione non bloccante di una syscall */
+/* Terminazione non bloccante di una syscall */
 void NonBlockingExceptEnd()
 {
     state_t *state = (state_t *)BIOSDATAPAGE;
@@ -486,7 +486,7 @@ void NonBlockingExceptEnd()
     LDST(state);
 }
 
-/* Teminazione non bloccante di una syscall */
+/* Terminazione bloccante di una syscall */
 void BlockingExceptEnd()
 {
     state_t *state = (state_t *)BIOSDATAPAGE;

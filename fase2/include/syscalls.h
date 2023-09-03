@@ -83,8 +83,8 @@ void update_time_proc(pcb_t * proc);
 /* diminuisce il tempo usato da un proc */
 void remove_time();
 
-/* Teminazione non bloccante di una syscall */
+/* Terminazione non bloccante di una syscall */
 void NonBlockingExceptEnd();
 
-/* Teminazione non bloccante di una syscall */
+/* Terminazione bloccante di una syscall */
 void BlockingExceptEnd();
